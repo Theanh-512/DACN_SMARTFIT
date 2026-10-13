@@ -1,59 +1,64 @@
-# StudioWeb
+# Fashion AI E-Commerce Monorepo
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.1.
+Nền tảng thương mại điện tử thời trang tích hợp công nghệ AI tiên tiến:
+- **Frontend**: Angular 20 (Standalone Components, Signals, Hybrid SSR).
+- **Backend Core**: ASP.NET Core 9 Web API (Clean Architecture, EF Core, SQL Server 2022).
+- **AI Microservice**: Python FastAPI (PyTorch, IDM-VTON Virtual Try-On, SigLIP + FAISS Visual Search).
+- **Hạ tầng**: Docker Compose (SQL Server, Redis, MinIO S3).
 
-## Development server
+---
 
-To start a local development server, run:
+## Cấu Trúc Monorepo
 
-```bash
-ng serve
+```text
+fashion-ai-ecommerce/
+├── apps/
+│   ├── web-angular/         # Ứng dụng Frontend Angular 20
+│   └── api-dotnet/          # Backend Web API ASP.NET Core 9 (Clean Architecture)
+├── services/
+│   └── ai-service/          # Microservice AI FastAPI (IDM-VTON & SigLIP + FAISS)
+├── infra/                   # Docker compose & cấu hình hạ tầng
+├── docs/                    # Tài liệu kiến trúc, API contracts, Database, AI metrics
+├── scripts/                 # PowerShell scripts tự động hóa build & test
+├── .env.example             # Biến môi trường mẫu
+└── ARCHITECTURE.md          # Chi tiết thiết kế kiến trúc toàn hệ thống
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## Hướng Dẫn Khởi Chạy Nhanh
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+### 1. Khởi chạy hạ tầng dữ liệu
+```powershell
+docker compose -f infra/docker-compose.yml up -d
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
+### 2. Khởi chạy Backend ASP.NET Core
+```powershell
+dotnet run --project apps/api-dotnet/src/FashionAI.Api
 ```
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
+### 3. Khởi chạy AI Service FastAPI
+```powershell
+python -m venv services/ai-service/.venv
+services/ai-service/.venv/Scripts/Activate.ps1
+pip install -r services/ai-service/requirements.txt
+uvicorn app.main:app --app-dir services/ai-service --host 0.0.0.0 --port 8000 --reload
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+### 4. Khởi chạy Frontend Angular
+```powershell
+npm --prefix apps/web-angular start
 ```
 
-## Running end-to-end tests
+---
 
-For end-to-end (e2e) testing, run:
+## Lệnh Build & Test Toàn Hệ Thống
 
-```bash
-ng e2e
+```powershell
+# Chạy toàn bộ build
+./scripts/build-all.ps1
+
+# Chạy toàn bộ unit tests
+./scripts/test-all.ps1
 ```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
