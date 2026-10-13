@@ -1,36 +1,239 @@
-<section class="catalog-section">
-  <div class="catalog-container">
-    <app-ui-section-header
-      badge="Bộ Sưu Tập Mới 2026"
-      title="Tất Cả Sản Phẩm Thời Trang"
-      subtitle="Thử đồ tức thì với công nghệ AI Virtual Try-On trước khi quyết định đặt hàng."
-    />
-
-    <div class="product-grid">
-      @for (item of products(); track item.id) {
-        <app-ui-content-card
-          [title]="item.name"
-          [subtitle]="item.description"
-          [badge]="item.categoryName"
-          icon="👗"
-        >
-          <div class="price-box">
-            <span class="price">{{ item.basePrice | number }}₫</span>
-            @if (item.originalPrice) {
-              <span class="old-price">{{ item.originalPrice | number }}₫</span>
-            }
-          </div>
-
-          <div class="product-actions">
-            <a [routerLink]="['/virtual-try-on']" [queryParams]="{ productId: item.id }">
-              <app-ui-button size="sm" variant="primary">✨ Thử Đồ Ngay</app-ui-button>
-            </a>
-            <a routerLink="/cart">
-              <app-ui-button size="sm" variant="outline">Thêm vào giỏ</app-ui-button>
-            </a>
-          </div>
-        </app-ui-content-card>
-      }
-    </div>
+<!-- Toast Notification -->
+@if (addedMessage()) {
+  <div class="toast-notification fade-in">
+    <span>✓ {{ addedMessage() }}</span>
+    <a routerLink="/cart" class="toast-link">Xem giỏ hàng →</a>
   </div>
-</section>
+}
+
+<div class="catalog-page container">
+  <!-- Breadcrumb & Header -->
+  <div class="catalog-top-bar">
+    <div class="breadcrumbs">
+      <a routerLink="/">Trang chủ</a>
+      <span class="sep">/</span>
+      <span>Bộ sưu tập thời trang</span>
+    </div>
+    <h1 class="page-title">TẤT CẢ SẢN PHẨM</h1>
+  </div>
+
+  <!-- Layout: Sidebar Filters + Main Product Section -->
+  <div class="catalog-layout">
+    <!-- Desktop Sidebar Filters -->
+    <aside class="filter-sidebar" [class.mobile-open]="isMobileFilterOpen()">
+      <div class="sidebar-header">
+        <h3 class="sidebar-title">BỘ LỌC TÌM KIẾM</h3>
+        <button class="btn-reset" (click)="resetFilters()">Đặt lại</button>
+        <button class="mobile-close-btn" (click)="toggleMobileFilter()">✕</button>
+      </div>
+
+      <!-- AI Features Quick Toggle -->
+      <div class="filter-group ai-filter-box">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="onlyAiSupported()"
+            (change)="onlyAiSupported.set(!onlyAiSupported())"
+          />
+          <span class="custom-check"></span>
+          <span class="label-text">✨ Chỉ hiện đồ hỗ trợ Thử AI</span>
+        </label>
+      </div>
+
+      <!-- Gender Filter -->
+      <div class="filter-group">
+        <h4 class="group-title">GIỚI TÍNH</h4>
+        <div class="filter-options">
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedGender() === 'all'"
+            (click)="selectedGender.set('all')"
+          >
+            Tất cả
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedGender() === 'women'"
+            (click)="selectedGender.set('women')"
+          >
+            Nữ
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedGender() === 'men'"
+            (click)="selectedGender.set('men')"
+          >
+            Nam
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="filter-group">
+        <h4 class="group-title">DANH MỤC</h4>
+        <div class="category-list">
+          <button
+            type="button"
+            class="cat-link"
+            [class.active]="selectedCategory() === 'all'"
+            (click)="selectedCategory.set('all')"
+          >
+            Tất cả danh mục
+          </button>
+          @for (cat of categories(); track cat.id) {
+            <button
+              type="button"
+              class="cat-link"
+              [class.active]="selectedCategory() === cat.id"
+              (click)="selectedCategory.set(cat.id)"
+            >
+              {{ cat.name }} ({{ cat.itemCount }})
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Size Filter -->
+      <div class="filter-group">
+        <h4 class="group-title">KÍCH CỠ</h4>
+        <div class="size-grid">
+          <button
+            type="button"
+            class="size-chip"
+            [class.active]="selectedSize() === 'all'"
+            (click)="selectedSize.set('all')"
+          >
+            Tất cả
+          </button>
+          @for (s of availableSizes; track s) {
+            <button
+              type="button"
+              class="size-chip"
+              [class.active]="selectedSize() === s"
+              (click)="selectedSize.set(s)"
+            >
+              {{ s }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Color Filter -->
+      <div class="filter-group">
+        <h4 class="group-title">MÀU SẮC</h4>
+        <div class="color-chips">
+          <button
+            type="button"
+            class="color-btn all-color"
+            [class.active]="selectedColor() === 'all'"
+            (click)="selectedColor.set('all')"
+            title="Tất cả màu"
+          >
+            All
+          </button>
+          @for (c of availableColors; track c.name) {
+            <button
+              type="button"
+              class="color-btn"
+              [class.active]="selectedColor() === c.name"
+              [style.background-color]="c.hex"
+              [title]="c.name"
+              (click)="selectedColor.set(c.name)"
+            ></button>
+          }
+        </div>
+      </div>
+
+      <!-- Price Range Filter -->
+      <div class="filter-group">
+        <h4 class="group-title">KHOẢNG GIÁ</h4>
+        <div class="radio-options">
+          <label class="radio-label">
+            <input
+              type="radio"
+              name="price"
+              value="all"
+              [checked]="selectedPriceRange() === 'all'"
+              (change)="selectedPriceRange.set('all')"
+            />
+            <span>Tất cả mức giá</span>
+          </label>
+          <label class="radio-label">
+            <input
+              type="radio"
+              name="price"
+              value="under500"
+              [checked]="selectedPriceRange() === 'under500'"
+              (change)="selectedPriceRange.set('under500')"
+            />
+            <span>Dưới 500.000₫</span>
+          </label>
+          <label class="radio-label">
+            <input
+              type="radio"
+              name="price"
+              value="500to1000"
+              [checked]="selectedPriceRange() === '500to1000'"
+              (change)="selectedPriceRange.set('500to1000')"
+            />
+            <span>500.000₫ - 1.000.000₫</span>
+          </label>
+          <label class="radio-label">
+            <input
+              type="radio"
+              name="price"
+              value="above1000"
+              [checked]="selectedPriceRange() === 'above1000'"
+              (change)="selectedPriceRange.set('above1000')"
+            />
+            <span>Trên 1.000.000₫</span>
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="catalog-content">
+      <!-- Toolbar: Count + Mobile Filter Trigger + Sorter -->
+      <div class="catalog-toolbar">
+        <button type="button" class="mobile-filter-btn" (click)="toggleMobileFilter()">
+          ⚙️ Bộ lọc & Tìm kiếm
+        </button>
+
+        <span class="product-count">
+          Hiển thị <strong>{{ filteredProducts().length }}</strong> sản phẩm
+        </span>
+
+        <div class="sort-selector">
+          <label for="sortSelect">Sắp xếp:</label>
+          <select
+            id="sortSelect"
+            [value]="sortBy()"
+            (change)="sortBy.set($any($event.target).value)"
+            class="sort-dropdown"
+          >
+            <option value="newest">Mới nhất</option>
+            <option value="price-asc">Giá: Thấp đến cao</option>
+            <option value="price-desc">Giá: Cao đến thấp</option>
+            <option value="name-asc">Tên: A - Z</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Product Grid -->
+      <app-product-grid
+        [products]="filteredProducts()"
+        [columns]="3"
+        (tryOnClicked)="onTryOn($event)"
+        (addToCartClicked)="onAddToCart($event)"
+      />
+    </main>
+  </div>
+</div>
+
+@if (isMobileFilterOpen()) {
+  <div class="mobile-filter-backdrop" (click)="toggleMobileFilter()"></div>
+}

@@ -1,13 +1,146 @@
-<app-home-hero />
-<app-home-feature-grid />
+<!-- Toast Notification -->
+@if (addedMessage()) {
+  <div class="toast-notification fade-in">
+    <span>✓ {{ addedMessage() }}</span>
+    <a routerLink="/cart" class="toast-link">Xem giỏ hàng →</a>
+  </div>
+}
 
-<section class="banner-section">
-  <div class="banner-container">
-    <app-ui-conversion-banner
-      title="Trải Nghiệm Thử Đồ Ảo Cùng FashionAI Ngay Hôm Nay"
-      description="Tải ảnh của bạn lên để xem trang phục vừa vặn hoàn hảo trước khi quyết định mua sắm trực tuyến."
-      ctaText="Thử Đồ Ngay"
-      (ctaClicked)="handleCtaClick()"
-    />
+<!-- 1. Hero Editorial Section -->
+<section class="hero-section">
+  <div class="hero-inner">
+    <div class="hero-media">
+      <img
+        src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1600&q=85"
+        alt="Fashion AI LifeWear 2026 Collection"
+        class="hero-img"
+      />
+      <div class="hero-overlay"></div>
+    </div>
+
+    <div class="hero-content container">
+      <div class="hero-badge">BỘ SƯU TẬP THU ĐÔNG 2026 • LIFEWEAR x AI</div>
+      <h1 class="hero-title">
+        Thời Trang Tối Giản.<br />
+        Vừa Vặn Tuyệt Đối Cùng AI.
+      </h1>
+      <p class="hero-subtitle">
+        Trải nghiệm phòng thử đồ ảo <strong>IDM-VTON</strong> chân thực ngay trên ảnh của bạn và tìm trang phục yêu thích tức thì qua <strong>SigLIP Search</strong>.
+      </p>
+      <div class="hero-actions">
+        <a routerLink="/virtual-try-on" class="btn-ai-tryon">
+          ✨ Thử Đồ Ảo Ngay
+        </a>
+        <a routerLink="/catalog" class="btn-uniqlo-outline hero-btn-light">
+          Khám Phá Bộ Sưu Tập
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Category Shortcuts Grid -->
+<section class="section-categories container">
+  <div class="section-header-clean">
+    <h2 class="section-title">DANH MỤC THỜI TRANG</h2>
+    <a routerLink="/catalog" class="view-all-link">Xem tất cả →</a>
+  </div>
+
+  <div class="category-grid">
+    @for (cat of categories(); track cat.id) {
+      <a [routerLink]="['/catalog']" [queryParams]="{ category: cat.id }" class="category-card">
+        <div class="cat-img-wrapper">
+          <img [src]="cat.imageUrl" [alt]="cat.name" class="cat-img" loading="lazy" />
+        </div>
+        <div class="cat-info">
+          <h3 class="cat-name">{{ cat.name }}</h3>
+          <span class="cat-count">{{ cat.itemCount }} sản phẩm</span>
+        </div>
+      </a>
+    }
+  </div>
+</section>
+
+<!-- 3. AI Innovations Spotlight Banner -->
+<section class="section-ai-spotlight container">
+  <div class="ai-spotlight-card">
+    <div class="spotlight-content">
+      <div class="badge-ai">CÔNG NGHỆ ĐỘT PHÁ</div>
+      <h2 class="spotlight-title">Mua Sắm Không Còn Nỗi Lo Chọn Sai Size & Dáng</h2>
+      <p class="spotlight-desc">
+        Hệ thống AI tiên tiến tích hợp mô hình khuếch tán <strong>IDM-VTON</strong> giúp bạn xem trước trang phục được ướm chính xác trên vóc dáng cơ thể. Kết hợp cùng <strong>SigLIP & FAISS</strong> tìm kiếm sản phẩm qua ảnh trong nháy mắt.
+      </p>
+      <div class="spotlight-buttons">
+        <a routerLink="/virtual-try-on" class="btn-uniqlo-primary">
+          ✨ Trải Nghiệm Virtual Try-On
+        </a>
+        <a routerLink="/visual-search" class="btn-uniqlo-outline">
+          📷 Thử Tìm Bằng Ảnh
+        </a>
+      </div>
+    </div>
+    <div class="spotlight-visual">
+      <div class="visual-badge">Mô phỏng tức thì 3-5s</div>
+      <img
+        src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=800&q=80"
+        alt="Virtual Try-On Demo"
+        class="visual-img"
+        loading="lazy"
+      />
+    </div>
+  </div>
+</section>
+
+<!-- 4. Tabbed Product Showcase -->
+<section class="section-products container">
+  <div class="products-header">
+    <div class="tab-buttons">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'featured'"
+        (click)="setTab('featured')"
+      >
+        SẢN PHẨM NỔI BẬT
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'new'"
+        (click)="setTab('new')"
+      >
+        HÀNG MỚI VỀ
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'sale'"
+        (click)="setTab('sale')"
+      >
+        ƯU ĐÃI GIỚI HẠN
+      </button>
+    </div>
+
+    <a routerLink="/catalog" class="catalog-link">
+      Tất cả sản phẩm ({{ allProducts().length }}) →
+    </a>
+  </div>
+
+  <app-product-grid
+    [products]="displayedProducts()"
+    [columns]="4"
+    (tryOnClicked)="onTryOn($event)"
+    (addToCartClicked)="onAddToCart($event)"
+  />
+</section>
+
+<!-- 5. Minimalist Brand Philosophy (LifeWear) -->
+<section class="section-philosophy container">
+  <div class="philosophy-box">
+    <div class="philo-label">TRIẾT LÝ THIẾT KẾ</div>
+    <h3 class="philo-heading">Thời Trang Tạo Ra Cho Cuộc Sống Thường Nhật</h3>
+    <p class="philo-text">
+      Chúng tôi tin rằng sự tối giản là đỉnh cao của sự tinh tế. Từng đường may, chất liệu vải và gam màu trung tính được chăm chút kỹ lưỡng để bạn luôn cảm thấy thoải mái, tự tin trong mọi khoảnh khắc. Kết hợp cùng AI để cá nhân hóa việc mua sắm của bạn.
+    </p>
   </div>
 </section>

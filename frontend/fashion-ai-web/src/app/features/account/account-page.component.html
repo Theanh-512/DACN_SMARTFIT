@@ -1,0 +1,261 @@
+<div class="account-page container">
+  <div class="breadcrumbs">
+    <a routerLink="/">Trang chủ</a>
+    <span class="sep">/</span>
+    <span>Tài khoản của tôi</span>
+  </div>
+
+  @if (!isLoggedIn()) {
+    <!-- Login & Register Modal / Card -->
+    <div class="auth-card fade-in">
+      <div class="auth-tabs">
+        <button
+          type="button"
+          class="auth-tab-btn"
+          [class.active]="authTab() === 'login'"
+          (click)="authTab.set('login')"
+        >
+          ĐĂNG NHẬP
+        </button>
+        <button
+          type="button"
+          class="auth-tab-btn"
+          [class.active]="authTab() === 'register'"
+          (click)="authTab.set('register')"
+        >
+          TẠO TÀI KHOẢN MỚI
+        </button>
+      </div>
+
+      @if (authTab() === 'login') {
+        <form class="auth-form" (ngSubmit)="handleLogin()">
+          <h2 class="form-title">Đăng Nhập Thành Viên</h2>
+          <p class="form-sub">Đăng nhập để xem lịch sử mua sắm và lưu kết quả thử đồ ảo AI.</p>
+
+          <div class="form-group">
+            <label>Địa chỉ Email</label>
+            <input type="email" [(ngModel)]="loginEmail" name="email" required />
+          </div>
+
+          <div class="form-group">
+            <label>Mật khẩu</label>
+            <input type="password" [(ngModel)]="loginPassword" name="password" required />
+          </div>
+
+          <button type="submit" class="btn-uniqlo-primary auth-submit-btn">
+            ĐĂNG NHẬP NGAY
+          </button>
+        </form>
+      } @else {
+        <form class="auth-form" (ngSubmit)="handleLogin()">
+          <h2 class="form-title">Đăng Ký Thành Viên</h2>
+          <p class="form-sub">Nhận ngay voucher giảm 10% cho đơn hàng đầu tiên.</p>
+
+          <div class="form-group">
+            <label>Họ và tên</label>
+            <input type="text" [(ngModel)]="regFullName" name="regName" placeholder="Nguyễn Văn A" required />
+          </div>
+
+          <div class="form-group">
+            <label>Địa chỉ Email</label>
+            <input type="email" [(ngModel)]="regEmail" name="regEmail" placeholder="name@domain.com" required />
+          </div>
+
+          <div class="form-group">
+            <label>Mật khẩu (tối thiểu 6 ký tự)</label>
+            <input type="password" [(ngModel)]="regPassword" name="regPassword" placeholder="••••••••" required />
+          </div>
+
+          <button type="submit" class="btn-uniqlo-primary auth-submit-btn">
+            TẠO TÀI KHOẢN
+          </button>
+        </form>
+      }
+    </div>
+  } @else {
+    <!-- Logged In User Dashboard -->
+    <div class="dashboard-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="dashboard-sidebar">
+        <div class="user-brief">
+          <div class="avatar-circle">👤</div>
+          <div class="user-meta">
+            <strong class="user-name">{{ userProfile().fullName }}</strong>
+            <span class="user-email">{{ userProfile().email }}</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-menu">
+          <button
+            type="button"
+            class="menu-btn"
+            [class.active]="accountActiveTab() === 'profile'"
+            (click)="accountActiveTab.set('profile')"
+          >
+            📋 Thông tin cá nhân & Số đo
+          </button>
+          <button
+            type="button"
+            class="menu-btn"
+            [class.active]="accountActiveTab() === 'orders'"
+            (click)="accountActiveTab.set('orders')"
+          >
+            📦 Lịch sử đơn hàng ({{ orders().length }})
+          </button>
+          <button
+            type="button"
+            class="menu-btn"
+            [class.active]="accountActiveTab() === 'ai-history'"
+            (click)="accountActiveTab.set('ai-history')"
+          >
+            ✨ Lịch sử thử đồ ảo (AI)
+          </button>
+          <button type="button" class="menu-btn logout-btn" (click)="handleLogout()">
+            🚪 Đăng xuất
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Dashboard Main View -->
+      <main class="dashboard-content">
+        @if (profileMessage()) {
+          <div class="alert-success fade-in">
+            ✓ {{ profileMessage() }}
+          </div>
+        }
+
+        <!-- Tab 1: Profile & Measurements -->
+        @if (accountActiveTab() === 'profile') {
+          <div class="panel-card">
+            <h2 class="panel-title">THÔNG TIN CÁ NHÂN & SỐ ĐO CƠ THỂ</h2>
+            <p class="panel-sub">
+              Dữ liệu số đo giúp mô hình AI <strong>IDM-VTON</strong> gợi ý size chuẩn xác và mô phỏng trang phục vừa vặn nhất.
+            </p>
+
+            <form class="profile-form" (ngSubmit)="saveProfile()">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Họ và tên</label>
+                  <input type="text" [(ngModel)]="userProfile().fullName" name="pName" />
+                </div>
+                <div class="form-group">
+                  <label>Số điện thoại</label>
+                  <input type="tel" [(ngModel)]="userProfile().phone" name="pPhone" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Địa chỉ nhận hàng mặc định</label>
+                <input type="text" [(ngModel)]="userProfile().address" name="pAddress" />
+              </div>
+
+              <div class="measurements-section">
+                <h3 class="meas-heading">📏 Số Đo Vóc Dáng Để Thử Đồ Ảo (AI)</h3>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Chiều cao (cm)</label>
+                    <input type="number" [(ngModel)]="userProfile().heightCm" name="pHeight" />
+                  </div>
+                  <div class="form-group">
+                    <label>Cân nặng (kg)</label>
+                    <input type="number" [(ngModel)]="userProfile().weightKg" name="pWeight" />
+                  </div>
+                  <div class="form-group">
+                    <label>Size trang phục ưa thích</label>
+                    <select [(ngModel)]="userProfile().preferredSize" name="pSize">
+                      <option value="S">Size S</option>
+                      <option value="M">Size M</option>
+                      <option value="L">Size L</option>
+                      <option value="XL">Size XL</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-uniqlo-primary save-btn">
+                LƯU THAY ĐỔI
+              </button>
+            </form>
+          </div>
+        }
+
+        <!-- Tab 2: Orders History -->
+        @if (accountActiveTab() === 'orders') {
+          <div class="panel-card">
+            <h2 class="panel-title">LỊCH SỬ ĐƠN HÀNG</h2>
+            <div class="orders-table-wrapper">
+              <table class="orders-table">
+                <thead>
+                  <tr>
+                    <th>Mã Đơn</th>
+                    <th>Ngày Đặt</th>
+                    <th>Số Lượng</th>
+                    <th>Tổng Tiền</th>
+                    <th>Trạng Thái</th>
+                    <th>Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (ord of orders(); track ord.id) {
+                    <tr>
+                      <td><strong>{{ ord.orderCode }}</strong></td>
+                      <td>{{ ord.date }}</td>
+                      <td>{{ ord.itemsCount }} sản phẩm</td>
+                      <td><strong>{{ ord.total | number }}₫</strong></td>
+                      <td>
+                        <span class="status-tag" [class.delivering]="ord.status === 'Đang giao hàng'">
+                          {{ ord.status }}
+                        </span>
+                      </td>
+                      <td>
+                        <button type="button" class="btn-detail-link" (click)="viewOrderDetail(ord.orderCode)">
+                          Chi tiết
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        <!-- Tab 3: AI Try-On History -->
+        @if (accountActiveTab() === 'ai-history') {
+          <div class="panel-card">
+            <h2 class="panel-title">LỊCH SỬ THỬ ĐỒ ẢO CỦA BẠN (IDM-VTON)</h2>
+            <p class="panel-sub">Lưu trữ các phiên mô phỏng trang phục gần nhất của bạn.</p>
+
+            <div class="ai-history-grid">
+              <div class="ai-hist-item">
+                <img
+                  src="https://images.unsplash.com/photo-1584273143981-41c073dfe8f8?auto=format&fit=crop&w=400&q=80"
+                  alt="Áo Blazer Linen"
+                  class="hist-img"
+                />
+                <div class="hist-info">
+                  <strong>Áo Blazer Linen Cổ Điển</strong>
+                  <span>Mô phỏng ngày 12/10/2026</span>
+                  <a routerLink="/virtual-try-on" class="hist-action">Thử lại mẫu này →</a>
+                </div>
+              </div>
+
+              <div class="ai-hist-item">
+                <img
+                  src="https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=400&q=80"
+                  alt="Đầm Maxi Lụa"
+                  class="hist-img"
+                />
+                <div class="hist-info">
+                  <strong>Đầm Maxi Lụa Cổ Chữ V</strong>
+                  <span>Mô phỏng ngày 08/10/2026</span>
+                  <a routerLink="/virtual-try-on" class="hist-action">Thử lại mẫu này →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </main>
+    </div>
+  }
+</div>

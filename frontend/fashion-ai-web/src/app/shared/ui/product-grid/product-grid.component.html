@@ -1,0 +1,28 @@
+@if (loading()) {
+  <div class="product-grid" [class.col-3]="columns() === 3" [class.col-4]="columns() === 4">
+    @for (item of skeletonPlaceholders; track item) {
+      <div class="skeleton-card">
+        <div class="skeleton-image"></div>
+        <div class="skeleton-line line-short"></div>
+        <div class="skeleton-line line-title"></div>
+        <div class="skeleton-line line-price"></div>
+      </div>
+    }
+  </div>
+} @else if (products().length === 0) {
+  <div class="empty-container">
+    <div class="empty-icon">🏷️</div>
+    <h4 class="empty-title">{{ emptyMessage() }}</h4>
+    <p class="empty-desc">Vui lòng thử chọn bộ lọc khác hoặc kiểm tra lại từ khóa tìm kiếm.</p>
+  </div>
+} @else {
+  <div class="product-grid" [class.col-3]="columns() === 3" [class.col-4]="columns() === 4">
+    @for (product of products(); track product.id) {
+      <app-product-card
+        [product]="product"
+        (tryOnClicked)="tryOnClicked.emit($event)"
+        (addToCartClicked)="addToCartClicked.emit($event)"
+      />
+    }
+  </div>
+}

@@ -4,5 +4,9 @@ export const CATALOG_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () => import('./pages/catalog-page.component').then(m => m.CatalogPageComponent)
+  },
+  {
+    path: ':slug',
+    loadComponent: () => import('./pages/product-detail/product-detail-page.component').then(m => m.ProductDetailPageComponent)
   }
 ];

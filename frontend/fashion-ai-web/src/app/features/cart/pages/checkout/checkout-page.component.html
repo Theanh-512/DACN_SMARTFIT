@@ -1,0 +1,301 @@
+<div class="checkout-page container">
+  <!-- Top Breadcrumb -->
+  <div class="breadcrumbs">
+    <a routerLink="/">Trang chủ</a>
+    <span class="sep">/</span>
+    <a routerLink="/cart">Giỏ hàng</a>
+    <span class="sep">/</span>
+    <span>Thanh toán</span>
+  </div>
+
+  @if (orderSuccessCode()) {
+    <!-- Order Placement Success View -->
+    <div class="order-success-card fade-in">
+      <div class="success-icon">🎉</div>
+      <h1 class="success-title">ĐẶT HÀNG THÀNH CÔNG!</h1>
+      <p class="success-desc">
+        Cảm ơn bạn đã mua sắm tại <strong>Fashion AI Studio</strong>. Đơn hàng của bạn đã được ghi nhận và đang được đội ngũ chuẩn bị đóng gói.
+      </p>
+
+      <div class="order-info-box">
+        <div class="info-line">
+          <span>Mã đơn hàng:</span>
+          <strong class="code">{{ orderSuccessCode() }}</strong>
+        </div>
+        <div class="info-line">
+          <span>Người nhận:</span>
+          <strong>{{ formData.fullName }} ({{ formData.phone }})</strong>
+        </div>
+        <div class="info-line">
+          <span>Địa chỉ nhận hàng:</span>
+          <span>{{ formData.address }}, {{ formData.city }}</span>
+        </div>
+        <div class="info-line">
+          <span>Phương thức thanh toán:</span>
+          <span class="badge-pay">{{ paymentMethod().toUpperCase() }}</span>
+        </div>
+      </div>
+
+      <div class="success-actions">
+        <a routerLink="/catalog" class="btn-uniqlo-primary">
+          Tiếp Tục Mua Sắm
+        </a>
+        <a routerLink="/account" class="btn-uniqlo-outline">
+          Xem Lịch Sử Đơn Hàng
+        </a>
+      </div>
+    </div>
+  } @else {
+    <!-- Main Checkout Form & Summary Grid -->
+    <h1 class="page-title">THANH TOÁN ĐƠN HÀNG</h1>
+
+    <div class="checkout-grid">
+      <!-- Left: Form Steps -->
+      <div class="form-column">
+        <!-- Step 1: Shipping Address -->
+        <section class="checkout-step-card">
+          <div class="step-header">
+            <span class="step-num">1</span>
+            <h2 class="step-title">THÔNG TIN GIAO HÀNG</h2>
+          </div>
+
+          <div class="form-fields">
+            <div class="field-row">
+              <div class="form-group">
+                <label>Họ và tên người nhận <span class="req">*</span></label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.fullName"
+                  name="fullName"
+                  placeholder="Nguyễn Văn A"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Số điện thoại <span class="req">*</span></label>
+                <input
+                  type="tel"
+                  [(ngModel)]="formData.phone"
+                  name="phone"
+                  placeholder="0912 345 678"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Địa chỉ Email (để nhận hóa đơn & mã vận đơn)</label>
+              <input
+                type="email"
+                [(ngModel)]="formData.email"
+                name="email"
+                placeholder="example@gmail.com"
+              />
+            </div>
+
+            <div class="field-row">
+              <div class="form-group flex-2">
+                <label>Địa chỉ cụ thể (Số nhà, tên đường, phường/xã) <span class="req">*</span></label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.address"
+                  name="address"
+                  placeholder="123 Đường Lê Lợi, Phường Bến Nghé"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Tỉnh / Thành phố <span class="req">*</span></label>
+                <select [(ngModel)]="formData.city" name="city">
+                  <option value="Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                  <option value="Hà Nội">Hà Nội</option>
+                  <option value="Đà Nẵng">Đà Nẵng</option>
+                  <option value="Cần Thơ">Cần Thơ</option>
+                  <option value="Hải Phòng">Hải Phòng</option>
+                  <option value="Khác">Tỉnh thành khác</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Ghi chú đơn hàng (không bắt buộc)</label>
+              <textarea
+                [(ngModel)]="formData.notes"
+                name="notes"
+                placeholder="Ghi chú về thời gian giao hàng, chỉ dẫn giao..."
+                rows="2"
+              ></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 2: Delivery Method -->
+        <section class="checkout-step-card">
+          <div class="step-header">
+            <span class="step-num">2</span>
+            <h2 class="step-title">PHƯƠNG THỨC VẬN CHUYỂN</h2>
+          </div>
+
+          <div class="delivery-options">
+            <label
+              class="option-card"
+              [class.selected]="shippingMethod() === 'standard'"
+            >
+              <input
+                type="radio"
+                name="shipping"
+                value="standard"
+                [checked]="shippingMethod() === 'standard'"
+                (change)="shippingMethod.set('standard')"
+              />
+              <div class="option-info">
+                <strong>Giao hàng tiêu chuẩn (2 - 3 ngày)</strong>
+                <span>Miễn phí cho đơn từ 499k (hoặc 30.000₫)</span>
+              </div>
+              <div class="option-price">
+                {{ cartService.shippingFee() === 0 ? 'MIỄN PHÍ' : '30.000₫' }}
+              </div>
+            </label>
+
+            <label
+              class="option-card"
+              [class.selected]="shippingMethod() === 'express'"
+            >
+              <input
+                type="radio"
+                name="shipping"
+                value="express"
+                [checked]="shippingMethod() === 'express'"
+                (change)="shippingMethod.set('express')"
+              />
+              <div class="option-info">
+                <strong>Giao hỏa tốc 24H (Nội thành)</strong>
+                <span>Nhận hàng ngay trong ngày hoặc sáng hôm sau</span>
+              </div>
+              <div class="option-price">50.000₫</div>
+            </label>
+          </div>
+        </section>
+
+        <!-- Step 3: Payment Method -->
+        <section class="checkout-step-card">
+          <div class="step-header">
+            <span class="step-num">3</span>
+            <h2 class="step-title">PHƯƠNG THỨC THANH TOÁN</h2>
+          </div>
+
+          <div class="payment-options">
+            <label class="option-card" [class.selected]="paymentMethod() === 'cod'">
+              <input
+                type="radio"
+                name="payment"
+                value="cod"
+                [checked]="paymentMethod() === 'cod'"
+                (change)="paymentMethod.set('cod')"
+              />
+              <div class="option-info">
+                <strong>💵 Thanh toán khi nhận hàng (COD)</strong>
+                <span>Kiểm tra hàng trước khi thanh toán tiền mặt cho shipper</span>
+              </div>
+            </label>
+
+            <label class="option-card" [class.selected]="paymentMethod() === 'momo'">
+              <input
+                type="radio"
+                name="payment"
+                value="momo"
+                [checked]="paymentMethod() === 'momo'"
+                (change)="paymentMethod.set('momo')"
+              />
+              <div class="option-info">
+                <strong>📱 Ví điện tử MoMo</strong>
+                <span>Quét mã QR thanh toán tức thì qua ứng dụng MoMo</span>
+              </div>
+            </label>
+
+            <label class="option-card" [class.selected]="paymentMethod() === 'vnpay'">
+              <input
+                type="radio"
+                name="payment"
+                value="vnpay"
+                [checked]="paymentMethod() === 'vnpay'"
+                (change)="paymentMethod.set('vnpay')"
+              />
+              <div class="option-info">
+                <strong>🏦 Cổng VNPAY-QR</strong>
+                <span>Hỗ trợ hơn 30 ngân hàng số tại Việt Nam</span>
+              </div>
+            </label>
+
+            <label class="option-card" [class.selected]="paymentMethod() === 'card'">
+              <input
+                type="radio"
+                name="payment"
+                value="card"
+                [checked]="paymentMethod() === 'card'"
+                (change)="paymentMethod.set('card')"
+              />
+              <div class="option-info">
+                <strong>💳 Thẻ Quốc Tế (Visa / Mastercard / JCB)</strong>
+                <span>Thanh toán an toàn bảo mật qua cổng kết nối quốc tế</span>
+              </div>
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right: Order Summary Preview -->
+      <aside class="summary-column">
+        <div class="order-review-card">
+          <h3 class="review-title">ĐƠN HÀNG CỦA BẠN ({{ cartService.count() }})</h3>
+
+          <div class="mini-items-list">
+            @for (item of cartService.items(); track item.id) {
+              <div class="mini-item">
+                <img [src]="item.thumbnailUrl" [alt]="item.productName" class="mini-img" />
+                <div class="mini-info">
+                  <div class="mini-name">{{ item.productName }}</div>
+                  <div class="mini-variant">{{ item.color }} / {{ item.size }} × {{ item.quantity }}</div>
+                </div>
+                <div class="mini-price">{{ item.price * item.quantity | number }}₫</div>
+              </div>
+            }
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="review-totals">
+            <div class="t-row">
+              <span>Tạm tính</span>
+              <span>{{ cartService.subtotal() | number }}₫</span>
+            </div>
+            <div class="t-row">
+              <span>Phí vận chuyển</span>
+              <span>{{ shippingCost === 0 ? 'MIỄN PHÍ' : (shippingCost | number) + '₫' }}</span>
+            </div>
+            <div class="divider"></div>
+            <div class="t-row total-t-row">
+              <span>TỔNG THANH TOÁN</span>
+              <span class="grand-amount">{{ grandTotal | number }}₫</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn-uniqlo-primary submit-order-btn"
+            [disabled]="isSubmitting()"
+            (click)="submitOrder()"
+          >
+            {{ isSubmitting() ? 'ĐANG XỬ LÝ ĐƠN HÀNG...' : 'XÁC NHẬN ĐẶT HÀNG' }}
+          </button>
+
+          <p class="terms-note">
+            Bằng việc nhấn đặt hàng, bạn đồng ý với các <a routerLink="/content/about">Điều khoản mua sắm</a> và <a routerLink="/content/faq">Chính sách bảo mật</a> của Fashion AI Studio.
+          </p>
+        </div>
+      </aside>
+    </div>
+  }
+</div>

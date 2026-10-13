@@ -1,0 +1,272 @@
+<div class="admin-page container">
+  <!-- Top Admin Bar -->
+  <div class="admin-top-bar">
+    <div>
+      <div class="admin-badge">BACKOFFICE MANAGEMENT</div>
+      <h1 class="page-title">HỆ THỐNG QUẢN TRỊ FASHION AI</h1>
+    </div>
+    <div class="top-actions">
+      <a routerLink="/" class="btn-uniqlo-outline">← Về Cửa Hàng</a>
+    </div>
+  </div>
+
+  @if (adminMessage()) {
+    <div class="alert-success fade-in">
+      ✓ {{ adminMessage() }}
+    </div>
+  }
+
+  <!-- Admin Main Navigation Tabs -->
+  <div class="admin-nav-tabs">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'products'"
+      (click)="activeTab.set('products')"
+    >
+      👗 Quản Lý Sản Phẩm ({{ products().length }})
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'categories'"
+      (click)="activeTab.set('categories')"
+    >
+      📁 Danh Mục Hàng Hóa ({{ categories().length }})
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'inventory'"
+      (click)="activeTab.set('inventory')"
+    >
+      📊 Quản Lý Tồn Kho
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'orders'"
+      (click)="activeTab.set('orders')"
+    >
+      📦 Quản Lý Đơn Hàng ({{ orders().length }})
+    </button>
+  </div>
+
+  <!-- Content 1: Products Table -->
+  @if (activeTab() === 'products') {
+    <div class="admin-card">
+      <div class="card-toolbar">
+        <h3>Danh Sách Sản Phẩm Trong Kho</h3>
+        <button type="button" class="btn-uniqlo-primary" (click)="isAddProductOpen.set(true)">
+          + Thêm Sản Phẩm Mới
+        </button>
+      </div>
+
+      <!-- Add Product Modal / Box -->
+      @if (isAddProductOpen()) {
+        <div class="add-product-box fade-in">
+          <h4>Thêm Sản Phẩm Mới Vào Hệ Thống</h4>
+          <div class="add-form-row">
+            <input
+              type="text"
+              placeholder="Tên sản phẩm..."
+              [(ngModel)]="newProductName"
+              class="add-input"
+            />
+            <input
+              type="number"
+              placeholder="Giá bán (₫)"
+              [(ngModel)]="newProductPrice"
+              class="add-input"
+            />
+            <select [(ngModel)]="newProductCategory" class="add-select">
+              @for (c of categories(); track c.id) {
+                <option [value]="c.id">{{ c.name }}</option>
+              }
+            </select>
+            <button type="button" class="btn-uniqlo-primary" (click)="saveNewProduct()">
+              Lưu Sản Phẩm
+            </button>
+            <button type="button" class="btn-uniqlo-outline" (click)="isAddProductOpen.set(false)">
+              Hủy
+            </button>
+          </div>
+        </div>
+      }
+
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Ảnh</th>
+              <th>Tên Sản Phẩm</th>
+              <th>Danh Mục</th>
+              <th>Giá Bán</th>
+              <th>Tồn Kho</th>
+              <th>AI Try-On</th>
+              <th>Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of products(); track p.id) {
+              <tr>
+                <td>
+                  <img [src]="p.thumbnailUrl" [alt]="p.name" class="table-img" />
+                </td>
+                <td>
+                  <strong>{{ p.name }}</strong>
+                  <div class="table-sub">{{ p.slug }}</div>
+                </td>
+                <td>{{ p.categoryName }}</td>
+                <td><strong>{{ p.basePrice | number }}₫</strong></td>
+                <td>
+                  <span class="badge-stock" [class.out]="!p.inStock">
+                    {{ p.inStock ? 'Còn hàng' : 'Hết hàng' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge-ai-flag">✓ Sẵn sàng</span>
+                </td>
+                <td>
+                  <button type="button" class="btn-del" (click)="deleteProduct(p.id)">
+                    Xóa
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Content 2: Categories -->
+  @if (activeTab() === 'categories') {
+    <div class="admin-card">
+      <div class="card-toolbar">
+        <h3>Quản Lý Danh Mục Ngành Hàng</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Ảnh Danh Mục</th>
+              <th>Tên Danh Mục</th>
+              <th>Giới Tính / Phân Khúc</th>
+              <th>Số Lượng Mặt Hàng</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cat of categories(); track cat.id) {
+              <tr>
+                <td>
+                  <img [src]="cat.imageUrl" [alt]="cat.name" class="table-img" />
+                </td>
+                <td><strong>{{ cat.name }}</strong></td>
+                <td>
+                  <span class="gender-pill">{{ cat.gender.toUpperCase() }}</span>
+                </td>
+                <td>{{ cat.itemCount }} sản phẩm</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Content 3: Inventory -->
+  @if (activeTab() === 'inventory') {
+    <div class="admin-card">
+      <div class="card-toolbar">
+        <h3>Báo Cáo Tồn Kho Theo Biến Thể Size & Màu</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Sản Phẩm</th>
+              <th>SKU</th>
+              <th>Màu Sắc</th>
+              <th>Size</th>
+              <th>Số Lượng Tồn Kho</th>
+              <th>Cảnh Báo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of products(); track p.id) {
+              @for (v of p.variants; track v.id) {
+                <tr>
+                  <td>{{ p.name }}</td>
+                  <td><code>{{ v.sku }}</code></td>
+                  <td>{{ v.color }}</td>
+                  <td><strong>{{ v.size }}</strong></td>
+                  <td>{{ v.stockQuantity }} cái</td>
+                  <td>
+                    @if (v.stockQuantity < 15) {
+                      <span class="warn-low">⚠️ Sắp hết hàng</span>
+                    } @else {
+                      <span class="ok-stock">✓ Ổn định</span>
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Content 4: Orders -->
+  @if (activeTab() === 'orders') {
+    <div class="admin-card">
+      <div class="card-toolbar">
+        <h3>Quản Lý Đơn Hàng Khách Hàng</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Mã Đơn</th>
+              <th>Khách Hàng</th>
+              <th>Ngày Đặt</th>
+              <th>Tổng Tiền</th>
+              <th>Hình Thức</th>
+              <th>Trạng Thái</th>
+              <th>Cập Nhật</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ord of orders(); track ord.id) {
+              <tr>
+                <td><strong>{{ ord.orderCode }}</strong></td>
+                <td>{{ ord.customerName }}</td>
+                <td>{{ ord.date }}</td>
+                <td><strong>{{ ord.total | number }}₫</strong></td>
+                <td><span class="pay-chip">{{ ord.payment }}</span></td>
+                <td>
+                  <span class="status-chip" [class.done]="ord.status === 'Đã giao'">
+                    {{ ord.status }}
+                  </span>
+                </td>
+                <td>
+                  <select
+                    [value]="ord.status"
+                    (change)="updateOrderStatus(ord.id, $any($event.target).value)"
+                    class="status-select"
+                  >
+                    <option value="Đang chuẩn bị">Đang chuẩn bị</option>
+                    <option value="Đang giao hàng">Đang giao hàng</option>
+                    <option value="Đã giao">Đã giao</option>
+                    <option value="Đã hủy">Đã hủy</option>
+                  </select>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

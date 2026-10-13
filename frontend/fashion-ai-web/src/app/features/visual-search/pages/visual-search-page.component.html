@@ -1,52 +1,121 @@
-<section class="search-section">
-  <div class="search-container">
-    <app-ui-section-header
-      badge="SigLIP & FAISS Search"
-      title="Tìm Kiếm Sản Phẩm Bằng Hình Ảnh"
-      subtitle="Chụp ảnh một bộ đồ bạn thấy ngoài đời hoặc tải ảnh mẫu từ Pinterest/Instagram để tìm sản phẩm tương tự trong kho."
-    />
+<div class="visual-search-page container">
+  <!-- Top Header -->
+  <div class="vs-header">
+    <div class="badge-ai">SIGLIP EMBEDDINGS + FAISS VECTOR INDEX</div>
+    <h1 class="page-title">TÌM KIẾM BẰNG HÌNH ẢNH (VISUAL SEARCH)</h1>
+    <p class="page-desc">
+      Tải ảnh trang phục bạn bắt gặp trên mạng xã hội hoặc ảnh chụp thực tế, AI sẽ trích xuất phong cách và đối soát các sản phẩm tương đồng nhất trong kho.
+    </p>
+  </div>
 
-    <div class="search-box">
-      <div class="upload-zone">
-        @if (previewUrl()) {
-          <img [src]="previewUrl()" alt="Ảnh tìm kiếm" class="query-preview" />
-        } @else {
-          <div class="prompt">
-            <span class="icon">📷</span>
-            <span>Tải lên hoặc kéo thả ảnh trang phục cần tìm</span>
-          </div>
+  <!-- Search Studio Area -->
+  <div class="search-studio-card">
+    <!-- Left: Upload or Samples -->
+    <div class="upload-col">
+      <h3 class="col-title">1. TẢI ẢNH MẪU HOẶC CHỌN ẢNH CÓ SẴN</h3>
+
+      <div class="samples-row">
+        @for (s of sampleQueryImages; track s.url) {
+          <button
+            type="button"
+            class="sample-pill-btn"
+            [class.active]="queryImageUrl() === s.url"
+            (click)="selectSample(s.url)"
+          >
+            <img [src]="s.url" [alt]="s.title" class="sample-thumb" />
+            <span>{{ s.title }}</span>
+          </button>
         }
-        <input type="file" accept="image/*" (change)="onImageSelected($event)" class="file-input" />
+      </div>
+
+      <div class="drop-zone">
+        <input
+          type="file"
+          id="queryImageFile"
+          accept="image/*"
+          (change)="onFileChange($event)"
+          class="file-input"
+        />
+        <label for="queryImageFile" class="drop-label">
+          <span class="icon">📷</span>
+          <strong>Tải ảnh từ thiết bị của bạn</strong>
+          <span>(Kéo thả tệp hoặc nhấp để chọn ảnh JPG, PNG)</span>
+        </label>
       </div>
     </div>
 
-    <!-- Search Results -->
-    @if (isSearching()) {
-      <div class="loading-box">
-        <div class="spinner"></div>
-        <p>SigLIP đang trích xuất vector embedding và truy vấn FAISS index...</p>
+    <!-- Right: Query Preview & Status -->
+    <div class="preview-col">
+      <h3 class="col-title">2. HÌNH ẢNH TRÍCH XUẤT ĐẶC TRƯNG</h3>
+
+      <div class="query-preview-box">
+        @if (queryImageUrl(); as img) {
+          <img [src]="img" alt="Query Search Image" class="query-img" />
+          <div class="vector-scan-overlay" [class.scanning]="isSearching()"></div>
+          <div class="vector-badge">SigLIP Base-Patch16 (768-dim)</div>
+        }
       </div>
-    } @else if (searchResults().length > 0) {
-      <div class="results-area">
-        <h3>Tìm thấy {{ searchResults().length }} sản phẩm tương tự:</h3>
-        <div class="results-grid">
-          @for (item of searchResults(); track item.productId) {
-            <app-ui-content-card
-              [title]="item.name"
-              [subtitle]="'Độ tương đồng: ' + (item.similarityScore * 100 | number:'1.1-1') + '%'"
-              badge="Top Match"
-              icon="🔍"
-            >
-              <div class="price">{{ item.price | number }}₫</div>
-              <div class="actions">
-                <a [routerLink]="['/virtual-try-on']" [queryParams]="{ productId: item.productId }">
-                  <app-ui-button size="sm" variant="primary">✨ Thử Đồ Ngay</app-ui-button>
+
+      <button
+        type="button"
+        class="btn-uniqlo-primary re-search-btn"
+        [disabled]="isSearching()"
+        (click)="runSearch()"
+      >
+        {{ isSearching() ? '⏳ ĐANG ĐỐI SOÁT FAISS...' : '🔍 TÌM KIẾM SẢN PHẨM TƯƠNG TỰ' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Matching Results Grid -->
+  <div class="results-section">
+    <div class="results-header">
+      <h2 class="res-title">
+        KẾT QUẢ TÌM KIẾM TƯƠNG ĐỒNG
+        @if (!isSearching() && searchResults().length > 0) {
+          <span class="timing-tag">(Tìm thấy {{ searchResults().length }} sản phẩm trong {{ searchTimeMs() }}ms)</span>
+        }
+      </h2>
+    </div>
+
+    @if (isSearching()) {
+      <div class="searching-skeleton">
+        <div class="searching-spinner"></div>
+        <p>Đang chiếu vector hình ảnh qua không gian nhúng SigLIP và truy vấn FAISS index...</p>
+      </div>
+    } @else {
+      <div class="matched-cards-grid">
+        @for (item of searchResults(); track item.product.id) {
+          <div class="match-card">
+            <div class="match-badge">
+              🎯 {{ (item.similarityScore * 100) | number:'1.1-1' }}% Khớp
+            </div>
+            <a [routerLink]="['/catalog', item.product.slug]">
+              <img [src]="item.product.thumbnailUrl" [alt]="item.product.name" class="card-img" />
+            </a>
+            <div class="card-meta">
+              <span class="cat">{{ item.product.categoryName }}</span>
+              <h4 class="name">
+                <a [routerLink]="['/catalog', item.product.slug]">{{ item.product.name }}</a>
+              </h4>
+              <div class="price">{{ item.product.basePrice | number }}₫</div>
+
+              <div class="card-actions">
+                <a
+                  [routerLink]="['/virtual-try-on']"
+                  [queryParams]="{ productId: item.product.id }"
+                  class="btn-tryon-mini"
+                >
+                  ✨ Thử Đồ
                 </a>
+                <button type="button" class="btn-cart-mini" (click)="onAddToCart(item.product)">
+                  + Giỏ Hàng
+                </button>
               </div>
-            </app-ui-content-card>
-          }
-        </div>
+            </div>
+          </div>
+        }
       </div>
     }
   </div>
-</section>
+</div>

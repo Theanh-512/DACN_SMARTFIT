@@ -1,58 +1,166 @@
-<section class="cart-section">
-  <div class="cart-container">
-    <app-ui-section-header
-      badge="Giỏ Hàng Của Bạn"
-      title="Túi Đồ Mua Sắm"
-      subtitle="Kiểm tra lại sản phẩm, kích thước và số lượng trước khi tiến hành thanh toán."
-    />
+<div class="cart-page container">
+  <!-- Top Breadcrumbs -->
+  <div class="cart-top-bar">
+    <div class="breadcrumbs">
+      <a routerLink="/">Trang chủ</a>
+      <span class="sep">/</span>
+      <span>Giỏ hàng</span>
+    </div>
+    <h1 class="page-title">
+      GIỎ HÀNG CỦA BẠN
+      @if (cartService.count() > 0) {
+        <span class="count-badge">({{ cartService.count() }} sản phẩm)</span>
+      }
+    </h1>
+  </div>
 
-    @if (cartItems().length === 0) {
-      <div class="empty-cart">
-        <span class="empty-icon">🛒</span>
-        <h3>Giỏ hàng đang trống</h3>
-        <p>Hãy khám phá các mẫu thời trang mới nhất và thử đồ ảo ngay.</p>
-        <a routerLink="/catalog">
-          <app-ui-button size="md">Xem Sản Phẩm</app-ui-button>
+  @if (cartService.items().length === 0) {
+    <!-- Empty State -->
+    <div class="empty-cart-card">
+      <div class="empty-icon">🛍️</div>
+      <h2 class="empty-title">Giỏ hàng của bạn đang trống</h2>
+      <p class="empty-desc">
+        Hãy khám phá các mẫu thời trang mới nhất hoặc trải nghiệm phòng thử đồ ảo AI để tìm trang phục ưng ý.
+      </p>
+      <div class="empty-actions">
+        <a routerLink="/catalog" class="btn-uniqlo-primary">
+          Khám Phá Bộ Sưu Tập
+        </a>
+        <a routerLink="/virtual-try-on" class="btn-ai-tryon">
+          ✨ Thử Đồ Ảo AI
         </a>
       </div>
-    } @else {
-      <div class="cart-layout">
-        <div class="cart-items">
-          @for (item of cartItems(); track item.id) {
-            <div class="cart-item-card">
-              <div class="item-img-placeholder">👗</div>
-              <div class="item-details">
-                <h4>{{ item.productName }}</h4>
-                <p class="variant">Size: {{ item.size }} | Màu: {{ item.color }}</p>
+    </div>
+  } @else {
+    <!-- Cart Layout: Items Table + Summary Panel -->
+    <div class="cart-layout">
+      <!-- Left Column: Items List -->
+      <div class="items-column">
+        <!-- Free Shipping Progress -->
+        <div class="shipping-notice">
+          @if (cartService.subtotal() >= 499000) {
+            <span class="free-ship-tag">✓ Đạt chuẩn miễn phí giao hàng toàn quốc!</span>
+          } @else {
+            <span>
+              Mua thêm <strong>{{ 499000 - cartService.subtotal() | number }}₫</strong> để được <strong>MIỄN PHÍ VẬN CHUYỂN</strong>
+            </span>
+          }
+        </div>
+
+        <div class="items-list">
+          @for (item of cartService.items(); track item.id) {
+            <div class="cart-item-row">
+              <div class="item-img-box">
+                <img [src]="item.thumbnailUrl" [alt]="item.productName" class="item-img" />
+              </div>
+
+              <div class="item-info">
+                <h3 class="item-name">{{ item.productName }}</h3>
+                <div class="item-variants">
+                  <span>Màu sắc: <strong>{{ item.color }}</strong></span>
+                  <span class="dot">•</span>
+                  <span>Kích cỡ: <strong>{{ item.size }}</strong></span>
+                </div>
                 <div class="item-price">{{ item.price | number }}₫</div>
               </div>
-              <div class="qty-control">
-                <button (click)="updateQuantity(item, -1)">-</button>
-                <span>{{ item.quantity }}</span>
-                <button (click)="updateQuantity(item, 1)">+</button>
+
+              <div class="item-quantity">
+                <div class="stepper">
+                  <button type="button" (click)="cartService.updateQuantity(item.id, item.quantity - 1)">-</button>
+                  <span class="qty-num">{{ item.quantity }}</span>
+                  <button type="button" (click)="cartService.updateQuantity(item.id, item.quantity + 1)">+</button>
+                </div>
               </div>
-              <button class="btn-remove" (click)="removeItem(item)" title="Xóa">✕</button>
+
+              <div class="item-total">
+                <span class="total-price">{{ item.price * item.quantity | number }}₫</span>
+                <button type="button" class="btn-remove" (click)="cartService.removeItem(item.id)" title="Xóa khỏi giỏ">
+                  ✕ Xóa
+                </button>
+              </div>
             </div>
           }
         </div>
 
-        <div class="cart-summary">
-          <h3>Tổng Đơn Hàng</h3>
-          <div class="summary-row">
-            <span>Tạm tính</span>
-            <span>{{ subtotal | number }}₫</span>
-          </div>
-          <div class="summary-row">
-            <span>Phí giao hàng</span>
-            <span class="free">Miễn phí</span>
-          </div>
-          <div class="summary-total">
-            <span>Tổng cộng</span>
-            <span class="total-price">{{ subtotal | number }}₫</span>
-          </div>
-          <app-ui-button size="lg" variant="primary">Tiến Hành Thanh Toán</app-ui-button>
+        <div class="cart-extra-actions">
+          <a routerLink="/catalog" class="continue-link">← Tiếp tục mua sắm</a>
+          <button type="button" class="clear-cart-btn" (click)="cartService.clearCart()">
+            Xóa toàn bộ giỏ hàng
+          </button>
         </div>
       </div>
-    }
-  </div>
-</section>
+
+      <!-- Right Column: Order Summary Box -->
+      <div class="summary-column">
+        <div class="summary-card">
+          <h3 class="summary-title">TÓM TẮT ĐƠN HÀNG</h3>
+
+          <!-- Promo Code Box -->
+          <div class="promo-box">
+            <div class="promo-input-row">
+              <input
+                type="text"
+                placeholder="Mã ưu đãi (VD: FASHIONAI10)"
+                [ngModel]="promoCode()"
+                (ngModelChange)="promoCode.set($event)"
+                class="promo-input"
+              />
+              <button type="button" class="promo-apply-btn" (click)="applyPromo()">
+                Áp Dụng
+              </button>
+            </div>
+            @if (promoMessage()) {
+              <div class="promo-msg" [class.success]="discountRate() > 0">
+                {{ promoMessage() }}
+              </div>
+            }
+          </div>
+
+          <div class="summary-lines">
+            <div class="line-row">
+              <span>Tạm tính ({{ cartService.count() }} món)</span>
+              <span>{{ cartService.subtotal() | number }}₫</span>
+            </div>
+
+            <div class="line-row">
+              <span>Phí vận chuyển</span>
+              <span>
+                @if (cartService.shippingFee() === 0) {
+                  <strong class="free-text">MIỄN PHÍ</strong>
+                } @else {
+                  {{ cartService.shippingFee() | number }}₫
+                }
+              </span>
+            </div>
+
+            @if (discountAmount > 0) {
+              <div class="line-row discount-row">
+                <span>Giảm giá khuyến mãi (10%)</span>
+                <span>-{{ discountAmount | number }}₫</span>
+              </div>
+            }
+
+            <div class="divider"></div>
+
+            <div class="line-row total-row">
+              <span>TỔNG CỘNG</span>
+              <span class="total-amount">{{ finalTotal | number }}₫</span>
+            </div>
+            <div class="vat-note">(Đã bao gồm thuế GTGT nếu có)</div>
+          </div>
+
+          <!-- Checkout CTA -->
+          <button type="button" class="btn-uniqlo-primary checkout-btn" (click)="proceedToCheckout()">
+            TIẾN HÀNH ĐẶT HÀNG →
+          </button>
+
+          <!-- Security note -->
+          <div class="security-badges">
+            <div class="sec-item">🔒 Thanh toán bảo mật SSL 256-bit</div>
+            <div class="sec-item">✨ Hỗ trợ đổi trả trong 7 ngày miễn phí</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

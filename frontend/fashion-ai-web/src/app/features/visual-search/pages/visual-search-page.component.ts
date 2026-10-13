@@ -1,65 +1,104 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { SectionHeaderComponent } from '../../../shared/ui/section-header/section-header.component';
-import { ButtonComponent } from '../../../shared/ui/button/button.component';
-import { ContentCardComponent } from '../../../shared/ui/content-card/content-card.component';
+import { Router, RouterLink } from '@angular/router';
 import { SeoService } from '../../../core/services/seo.service';
-import { VisualSearchMatch } from '../models/visual-search.model';
+import { CartService } from '../../../core/services/cart.service';
+import { MOCK_PRODUCTS } from '../../../core/data/mock-products';
+import { Product } from '../../catalog/models/product.model';
+
+export interface VisualSearchResultItem {
+  product: Product;
+  similarityScore: number; // e.g. 0.965
+}
 
 @Component({
   selector: 'app-visual-search-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, SectionHeaderComponent, ButtonComponent, ContentCardComponent],
+  imports: [CommonModule, RouterLink],
   templateUrl: './visual-search-page.component.html',
   styleUrls: ['./visual-search-page.component.scss']
 })
 export class VisualSearchPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
+  private readonly router = inject(Router);
+  readonly cartService = inject(CartService);
 
-  previewUrl = signal<string | null>(null);
-  isSearching = signal(false);
-  searchResults = signal<VisualSearchMatch[]>([]);
+  // Sample Query Images for 1-click testing
+  readonly sampleQueryImages = [
+    {
+      title: 'Áo Blazer Công Sở',
+      url: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      title: 'Áo Thun Trắng Basic',
+      url: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=600&q=80'
+    },
+    {
+      title: 'Đầm Liền Dạ Hội',
+      url: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=600&q=80'
+    }
+  ];
+
+  queryImageUrl = signal<string | null>(this.sampleQueryImages[0].url);
+  isSearching = signal<boolean>(false);
+  searchResults = signal<VisualSearchResultItem[]>([]);
+  searchTimeMs = signal<number>(142);
+
+  get matchedProducts(): Product[] {
+    return this.searchResults().map(r => r.product);
+  }
 
   ngOnInit(): void {
     this.seo.updateSeo({
-      title: 'Tìm Kiếm Bằng Hình Ảnh (SigLIP + FAISS) | FashionAI Studio',
-      description: 'Chụp hoặc tải ảnh mẫu trang phục bạn yêu thích, AI sẽ tìm kiếm các sản phẩm tương đồng tức thì.',
-      keywords: 'Tìm kiếm bằng ảnh, Visual search, SigLIP, FAISS, AI fashion'
+      title: 'Tìm Kiếm Bằng Hình Ảnh (SigLIP + FAISS) | Fashion AI Studio',
+      description: 'Chụp hoặc tải ảnh trang phục bạn yêu thích, hệ thống SigLIP vector embedding tìm kiếm trang phục tương tự trong kho tức thì.',
+      keywords: 'Tìm kiếm bằng ảnh, SigLIP, FAISS, Visual search, AI fashion'
     });
+
+    // Run initial search with sample image
+    this.runSearch();
   }
 
-  onImageSelected(event: Event): void {
+  onFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      this.previewUrl.set(URL.createObjectURL(file));
-      this.performSearch();
+      this.queryImageUrl.set(URL.createObjectURL(file));
+      this.runSearch();
     }
   }
 
-  performSearch(): void {
+  selectSample(url: string): void {
+    this.queryImageUrl.set(url);
+    this.runSearch();
+  }
+
+  runSearch(): void {
+    if (!this.queryImageUrl()) return;
+
     this.isSearching.set(true);
 
-    // Simulate SigLIP vector embedding + FAISS index search
+    // Simulate SigLIP multimodal embeddings + FAISS cosine similarity search
     setTimeout(() => {
       this.isSearching.set(false);
+      this.searchTimeMs.set(Math.floor(120 + Math.random() * 80));
+
       this.searchResults.set([
-        {
-          productId: 'p-1',
-          name: 'Áo Blazer Oversize Thanh Lịch',
-          price: 850000,
-          thumbnailUrl: '',
-          similarityScore: 0.942
-        },
-        {
-          productId: 'p-3',
-          name: 'Áo Sơ Mi Lụa Cổ V Minimalist',
-          price: 480000,
-          thumbnailUrl: '',
-          similarityScore: 0.887
-        }
+        { product: MOCK_PRODUCTS[0], similarityScore: 0.968 },
+        { product: MOCK_PRODUCTS[7], similarityScore: 0.892 },
+        { product: MOCK_PRODUCTS[5], similarityScore: 0.845 },
+        { product: MOCK_PRODUCTS[2], similarityScore: 0.781 }
       ]);
-    }, 1500);
+    }, 1200);
+  }
+
+  onTryOn(product: Product): void {
+    this.router.navigate(['/virtual-try-on'], {
+      queryParams: { productId: product.id }
+    });
+  }
+
+  onAddToCart(product: Product): void {
+    this.cartService.addItem(product);
   }
 }

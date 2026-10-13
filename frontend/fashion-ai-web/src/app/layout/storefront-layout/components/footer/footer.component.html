@@ -1,36 +1,116 @@
 <footer class="site-footer">
-  <div class="footer-container">
-    <div class="brand-box">
-      <div class="logo">
-        <span class="logo-accent">Fashion</span>AI Studio
+  <!-- Brand Trust Badges Strip -->
+  <div class="trust-strip">
+    <div class="container trust-container">
+      <div class="trust-item">
+        <span class="trust-icon">✨</span>
+        <div class="trust-text">
+          <strong>Thử Đồ Ảo AI Chuẩn Xác</strong>
+          <span>Công nghệ IDM-VTON giữ nguyên phom dáng</span>
+        </div>
       </div>
-      <p class="desc">
-        Nền tảng thương mại điện tử thời trang tích hợp công nghệ thử đồ ảo (IDM-VTON) và tìm kiếm trực quan bằng hình ảnh (SigLIP + FAISS).
-      </p>
-    </div>
-
-    <div class="nav-columns">
-      <div class="col">
-        <h4>Mua Sắm</h4>
-        <a routerLink="/catalog">Tất cả sản phẩm</a>
-        <a routerLink="/virtual-try-on">Phòng thử đồ ảo AI</a>
-        <a routerLink="/visual-search">Tìm kiếm bằng ảnh</a>
-        <a routerLink="/cart">Giỏ hàng</a>
+      <div class="trust-item">
+        <span class="trust-icon">🚚</span>
+        <div class="trust-text">
+          <strong>Giao Hàng Miễn Phí</strong>
+          <span>Đơn hàng toàn quốc từ 499.000₫</span>
+        </div>
       </div>
-
-      <div class="col">
-        <h4>Thông Tin</h4>
-        <a routerLink="/content/about">Về FashionAI</a>
-        <a routerLink="/content/blog">Tin tức thời trang</a>
-        <a routerLink="/content/faq">Câu hỏi thường gặp</a>
-        <a routerLink="/content/contact">Liên hệ hỗ trợ</a>
+      <div class="trust-item">
+        <span class="trust-icon">🔄</span>
+        <div class="trust-text">
+          <strong>Đổi Trả Dễ Dàng Trong 7 Ngày</strong>
+          <span>Hỗ trợ đổi size và mẫu tận nơi miễn phí</span>
+        </div>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon">🔒</span>
+        <div class="trust-text">
+          <strong>Bảo Mật Hình Ảnh Tuyệt Đối</strong>
+          <span>Ảnh thử đồ được tự động xóa sau 24 giờ</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="footer-copyright">
-    <div class="copy-container">
-      <p>&copy; {{ currentYear }} FashionAI Studio. Nền tảng E-Commerce AI chuẩn Clean Architecture.</p>
+  <!-- Main Footer Links & Newsletter -->
+  <div class="container footer-main">
+    <div class="footer-columns">
+      <!-- Column 1: Brand & Philosophy -->
+      <div class="footer-col brand-col">
+        <div class="footer-logo">
+          <span class="brand-badge">AI</span>
+          <span class="brand-name">FASHION<span class="brand-sub">STUDIO</span></span>
+        </div>
+        <p class="brand-desc">
+          Triết lý thời trang tối giản kết hợp đột phá trí tuệ nhân tạo. Trải nghiệm mua sắm thông minh, trực quan và vừa vặn nhất cho người dùng hiện đại.
+        </p>
+        <div class="contact-mini">
+          <div>📍 Khu Công Nghệ Cao, TP. Thủ Đức, TP. Hồ Chí Minh</div>
+          <div>📞 Hotline CSKH: <strong>1900 6868</strong> (08:00 - 21:00)</div>
+          <div>✉️ Email: support&#64;fashionai.vn</div>
+        </div>
+      </div>
+
+      <!-- Column 2: Mua Sắm & AI -->
+      <div class="footer-col">
+        <h4 class="col-title">DANH MỤC SẢN PHẨM</h4>
+        <ul class="col-links">
+          <li><a routerLink="/catalog">Tất Cả Sản Phẩm</a></li>
+          <li><a [routerLink]="['/catalog']" [queryParams]="{ gender: 'women' }">Thời Trang Nữ</a></li>
+          <li><a [routerLink]="['/catalog']" [queryParams]="{ gender: 'men' }">Thời Trang Nam</a></li>
+          <li><a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-women-dresses' }">Đầm Liền & Chân Váy</a></li>
+          <li><a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-men-jackets' }">Áo Khoác Nam Nữ</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 3: AI Tech & Hỗ Trợ -->
+      <div class="footer-col">
+        <h4 class="col-title">CÔNG NGHỆ AI & HỖ TRỢ</h4>
+        <ul class="col-links">
+          <li><a routerLink="/virtual-try-on">✨ Phòng Thử Đồ Ảo (IDM-VTON)</a></li>
+          <li><a routerLink="/visual-search">📷 Tìm Kiếm Bằng Ảnh (SigLIP)</a></li>
+          <li><a routerLink="/content/about">Về Dự Án Fashion AI</a></li>
+          <li><a routerLink="/content/faq">Câu Hỏi Thường Gặp (FAQ)</a></li>
+          <li><a routerLink="/content/contact">Liên Hệ Đội Ngũ Hỗ Trợ</a></li>
+          <li><a routerLink="/admin">Trang Quản Trị Hệ Thống</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 4: Newsletter -->
+      <div class="footer-col newsletter-col">
+        <h4 class="col-title">ĐĂNG KÝ NHẬN ƯU ĐÃI</h4>
+        <p class="newsletter-desc">
+          Đăng ký để nhận voucher giảm <strong>10%</strong> cho đơn hàng đầu tiên và thông báo về các bộ sưu tập mới nhất.
+        </p>
+        <form class="newsletter-form" (submit)="$event.preventDefault()">
+          <input type="email" placeholder="Nhập địa chỉ email của bạn" class="newsletter-input" required />
+          <button type="submit" class="newsletter-btn">Đăng Ký</button>
+        </form>
+        <div class="payment-icons">
+          <span class="pay-chip">VISA</span>
+          <span class="pay-chip">Mastercard</span>
+          <span class="pay-chip">MoMo</span>
+          <span class="pay-chip">VNPay</span>
+          <span class="pay-chip">COD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Copyright Bar -->
+  <div class="footer-bottom">
+    <div class="container bottom-container">
+      <div class="copy-text">
+        &copy; 2026 Fashion AI Studio. Nền tảng E-Commerce AI tích hợp IDM-VTON & SigLIP FAISS.
+      </div>
+      <div class="bottom-links">
+        <a routerLink="/content/about">Điều khoản sử dụng</a>
+        <span>•</span>
+        <a routerLink="/content/faq">Chính sách bảo mật AI</a>
+        <span>•</span>
+        <a routerLink="/content/contact">Hợp tác kinh doanh</a>
+      </div>
     </div>
   </div>
 </footer>

@@ -1,27 +1,135 @@
+<!-- Top Announcement Bar -->
+<div class="announcement-bar">
+  <div class="container announcement-content">
+    <div class="announcement-text">
+      <span>Miễn phí giao hàng cho đơn từ 499.000₫ • Đổi trả dễ dàng trong 7 ngày</span>
+    </div>
+    <div class="announcement-links">
+      <a routerLink="/content/faq">Trợ Giúp</a>
+      <span class="sep">|</span>
+      <a routerLink="/account">Tra Cứu Đơn Hàng</a>
+      <span class="sep">|</span>
+      <a routerLink="/admin" class="admin-link">⚙️ Quản Trị</a>
+    </div>
+  </div>
+</div>
+
+<!-- Main Header -->
 <header class="site-header">
-  <div class="nav-container">
+  <div class="container header-container">
+    <!-- Brand Logo -->
     <a routerLink="/" class="brand-logo" (click)="closeMenu()">
-      <span class="logo-accent">Fashion</span>AI Studio
+      <span class="brand-badge">AI</span>
+      <span class="brand-name">FASHION<span class="brand-sub">STUDIO</span></span>
     </a>
 
-    <button class="mobile-toggle" (click)="toggleMenu()" aria-label="Menu" [attr.aria-expanded]="isMenuOpen()">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </button>
-
-    <nav class="nav-links" [class.open]="isMenuOpen()">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Trang chủ</a>
-      <a routerLink="/catalog" routerLinkActive="active" (click)="closeMenu()">Bộ sưu tập</a>
-      <a routerLink="/virtual-try-on" routerLinkActive="active" class="highlight-link" (click)="closeMenu()">
-        ✨ Thử Đồ AI
+    <!-- Desktop Navigation Links -->
+    <nav class="desktop-nav">
+      <a routerLink="/catalog" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">TẤT CẢ</a>
+      <a [routerLink]="['/catalog']" [queryParams]="{ gender: 'women' }" routerLinkActive="active">NỮ</a>
+      <a [routerLink]="['/catalog']" [queryParams]="{ gender: 'men' }" routerLinkActive="active">NAM</a>
+      <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-women-dresses' }" routerLinkActive="active">ĐẦM & VÁY</a>
+      <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-men-jackets' }" routerLinkActive="active">ÁO KHOÁC</a>
+      
+      <!-- AI Highlights -->
+      <a routerLink="/virtual-try-on" routerLinkActive="active" class="nav-ai-tryon">
+        ✨ THỬ ĐỒ ẢO
       </a>
-      <a routerLink="/visual-search" routerLinkActive="active" class="highlight-link" (click)="closeMenu()">
-        📷 Tìm Bằng Ảnh
+      <a routerLink="/visual-search" routerLinkActive="active" class="nav-visual-search">
+        📷 TÌM BẰNG ẢNH
       </a>
-      <a routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">Giỏ hàng</a>
-      <a routerLink="/content/about" routerLinkActive="active" (click)="closeMenu()">Về chúng tôi</a>
-      <a routerLink="/content/contact" class="btn-cta" (click)="closeMenu()">Liên hệ</a>
     </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <!-- Search Box with Camera Shortcut -->
+      <div class="search-box">
+        <form (ngSubmit)="onSearchSubmit()" class="search-form">
+          <input
+            type="text"
+            placeholder="Tìm áo, quần, đầm..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            name="search"
+            class="search-input"
+          />
+          <button
+            type="button"
+            class="search-camera-btn"
+            (click)="openVisualSearch()"
+            title="Tìm kiếm bằng hình ảnh (Visual Search)"
+          >
+            📷
+          </button>
+          <button type="submit" class="search-submit-btn" title="Tìm kiếm">
+            🔍
+          </button>
+        </form>
+      </div>
+
+      <!-- Account Icon -->
+      <a routerLink="/account" class="action-icon-btn" title="Tài khoản / Đăng nhập">
+        <span class="icon">👤</span>
+      </a>
+
+      <!-- Cart Icon with Live Badge -->
+      <a routerLink="/cart" class="action-icon-btn cart-btn" title="Giỏ hàng">
+        <span class="icon">🛍️</span>
+        @if (cartService.count() > 0) {
+          <span class="cart-badge">{{ cartService.count() }}</span>
+        }
+      </a>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button
+        class="mobile-toggle"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="isMenuOpen()"
+        aria-label="Menu"
+      >
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+    </div>
   </div>
 </header>
+
+<!-- Mobile Navigation Drawer -->
+<div class="mobile-drawer" [class.open]="isMenuOpen()">
+  <div class="drawer-header">
+    <div class="drawer-title">DANH MỤC THỜI TRANG</div>
+    <button class="drawer-close" (click)="closeMenu()">✕</button>
+  </div>
+
+  <nav class="drawer-nav">
+    <a routerLink="/" (click)="closeMenu()">Trang Chủ</a>
+    <a routerLink="/catalog" (click)="closeMenu()">Tất Cả Sản Phẩm</a>
+    <a [routerLink]="['/catalog']" [queryParams]="{ gender: 'women' }" (click)="closeMenu()">Thời Trang Nữ</a>
+    <a [routerLink]="['/catalog']" [queryParams]="{ gender: 'men' }" (click)="closeMenu()">Thời Trang Nam</a>
+    <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-women-dresses' }" (click)="closeMenu()">Đầm & Chân Váy</a>
+    <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-men-jackets' }" (click)="closeMenu()">Áo Khoác Nam</a>
+
+    <div class="drawer-divider"></div>
+
+    <a routerLink="/virtual-try-on" class="drawer-ai-item" (click)="closeMenu()">
+      ✨ Phòng Thử Đồ Ảo AI (IDM-VTON)
+    </a>
+    <a routerLink="/visual-search" class="drawer-ai-item" (click)="closeMenu()">
+      📷 Tìm Kiếm Bằng Hình Ảnh (SigLIP)
+    </a>
+
+    <div class="drawer-divider"></div>
+
+    <a routerLink="/account" (click)="closeMenu()">👤 Tài Khoản / Đăng Nhập</a>
+    <a routerLink="/cart" (click)="closeMenu()">🛍️ Giỏ Hàng ({{ cartService.count() }})</a>
+    <a routerLink="/content/about" (click)="closeMenu()">Về FashionAI</a>
+    <a routerLink="/content/faq" (click)="closeMenu()">Câu Hỏi Thường Gặp</a>
+    <a routerLink="/content/contact" (click)="closeMenu()">Liên Hệ</a>
+    <a routerLink="/admin" (click)="closeMenu()">⚙️ Quản Trị</a>
+  </nav>
+</div>
+
+@if (isMenuOpen()) {
+  <div class="drawer-backdrop" (click)="closeMenu()"></div>
+}

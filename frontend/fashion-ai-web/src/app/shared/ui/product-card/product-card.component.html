@@ -1,0 +1,81 @@
+<div class="product-card">
+  <div class="image-wrapper">
+    <a [routerLink]="['/catalog', product().slug]" class="image-link">
+      <img
+        [src]="currentImage"
+        [alt]="product().name"
+        class="product-image"
+        loading="lazy"
+      />
+    </a>
+
+    <!-- Top Badges -->
+    <div class="badge-group">
+      @if (discountPercentage) {
+        <span class="badge-sale">-{{ discountPercentage }}%</span>
+      }
+      @if (product().featured) {
+        <span class="badge-new">NỔI BẬT</span>
+      }
+    </div>
+
+    <!-- Quick Hover Action Overlay -->
+    <div class="card-overlay">
+      <a
+        [routerLink]="['/virtual-try-on']"
+        [queryParams]="{ productId: product().id }"
+        class="action-btn btn-tryon"
+        title="Thử đồ ảo AI"
+      >
+        <span>✨ Thử Đồ Ảo</span>
+      </a>
+      <button
+        type="button"
+        class="action-btn btn-cart"
+        (click)="onAddToCart($event)"
+        title="Thêm vào giỏ hàng"
+      >
+        <span>+ Giỏ Hàng</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="product-info">
+    <!-- Color Swatches -->
+    @if (uniqueColors.length > 0) {
+      <div class="color-swatches">
+        @for (c of uniqueColors; track c.name) {
+          <button
+            type="button"
+            class="swatch-dot"
+            [class.active]="selectedColor() === c.name"
+            [style.background-color]="c.hex"
+            [title]="c.name"
+            (click)="onColorSelect(c, $event)"
+          ></button>
+        }
+      </div>
+    }
+
+    <div class="category-tag">{{ product().categoryName || 'Thời Trang' }}</div>
+
+    <h3 class="product-title">
+      <a [routerLink]="['/catalog', product().slug]" [title]="product().name">
+        {{ product().name }}
+      </a>
+    </h3>
+
+    <div class="price-container">
+      <span class="current-price">{{ product().basePrice | number }}₫</span>
+      @if (hasDiscount) {
+        <span class="original-price">{{ product().originalPrice | number }}₫</span>
+      }
+    </div>
+
+    <div class="stock-indicator">
+      <span class="dot" [class.in-stock]="product().inStock"></span>
+      <span class="text">{{ product().inStock ? 'Còn hàng' : 'Hết hàng' }}</span>
+      <span class="ai-supported" title="Hỗ trợ mô phỏng IDM-VTON">✨ AI Ready</span>
+    </div>
+  </div>
+</div>

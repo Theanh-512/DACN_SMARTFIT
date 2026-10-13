@@ -1,58 +1,54 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { SectionHeaderComponent } from '../../../shared/ui/section-header/section-header.component';
-import { ButtonComponent } from '../../../shared/ui/button/button.component';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { CartService } from '../../../core/services/cart.service';
 import { SeoService } from '../../../core/services/seo.service';
-import { CartItem } from '../models/cart.model';
 
 @Component({
   selector: 'app-cart-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, SectionHeaderComponent, ButtonComponent],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './cart-page.component.html',
   styleUrls: ['./cart-page.component.scss']
 })
 export class CartPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
+  private readonly router = inject(Router);
+  readonly cartService = inject(CartService);
 
-  cartItems = signal<CartItem[]>([
-    {
-      id: 'ci-1',
-      productId: 'p-1',
-      productName: 'Áo Blazer Oversize Thanh Lịch',
-      size: 'M',
-      color: 'Đen',
-      price: 850000,
-      quantity: 1,
-      thumbnailUrl: ''
-    }
-  ]);
+  promoCode = signal<string>('');
+  discountRate = signal<number>(0);
+  promoMessage = signal<string | null>(null);
 
-  get subtotal(): number {
-    return this.cartItems().reduce((acc, item) => acc + item.price * item.quantity, 0);
+  get discountAmount(): number {
+    return Math.round(this.cartService.subtotal() * this.discountRate());
+  }
+
+  get finalTotal(): number {
+    return Math.max(0, this.cartService.total() - this.discountAmount);
   }
 
   ngOnInit(): void {
     this.seo.updateSeo({
-      title: 'Giỏ Hàng - FashionAI Studio',
-      description: 'Giỏ hàng mua sắm thời trang của bạn tại FashionAI Studio.'
+      title: 'Giỏ Hàng | Fashion AI Studio',
+      description: 'Xem lại các sản phẩm thời trang trong giỏ hàng của bạn và tiến hành đặt hàng tiện lợi.',
+      keywords: 'Giỏ hàng, thanh toán, thời trang LifeWear'
     });
   }
 
-  updateQuantity(item: CartItem, delta: number): void {
-    this.cartItems.update(items =>
-      items.map(i => {
-        if (i.id === item.id) {
-          const newQty = Math.max(1, i.quantity + delta);
-          return { ...i, quantity: newQty };
-        }
-        return i;
-      })
-    );
+  applyPromo(): void {
+    const code = this.promoCode().trim().toUpperCase();
+    if (code === 'FASHIONAI10' || code === 'UNIQLO10') {
+      this.discountRate.set(0.1);
+      this.promoMessage.set('Áp dụng mã thành công: Giảm 10% tổng đơn hàng!');
+    } else if (code) {
+      this.discountRate.set(0);
+      this.promoMessage.set('Mã ưu đãi không hợp lệ hoặc đã hết hạn.');
+    }
   }
 
-  removeItem(item: CartItem): void {
-    this.cartItems.update(items => items.filter(i => i.id !== item.id));
+  proceedToCheckout(): void {
+    this.router.navigate(['/cart/checkout']);
   }
 }

@@ -27,6 +27,16 @@ export const routes: Routes = [
     title: 'Giỏ Hàng - FashionAI'
   },
   {
+    path: 'account',
+    loadComponent: () => import('./features/account/account-page.component').then(m => m.AccountPageComponent),
+    title: 'Tài Khoản & Lịch Sử Đơn Hàng - FashionAI'
+  },
+  {
+    path: 'admin',
+    loadComponent: () => import('./features/admin/pages/admin-page.component').then(m => m.AdminPageComponent),
+    title: 'Quản Trị Hệ Thống - FashionAI'
+  },
+  {
     path: 'content',
     children: [
       {
