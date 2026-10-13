@@ -1,0 +1,11 @@
+<div class="section-header" [class]="'align-' + align">
+  @if (badge) {
+    <span class="header-badge">{{ badge }}</span>
+  }
+  @if (title) {
+    <h2 class="header-title">{{ title }}</h2>
+  }
+  @if (subtitle) {
+    <p class="header-subtitle">{{ subtitle }}</p>
+  }
+</div>

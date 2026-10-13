@@ -1,0 +1,84 @@
+.contact-section {
+  padding: 4rem 1.5rem 5rem;
+}
+
+.contact-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.contact-info {
+  h3 {
+    font-size: 1.6rem;
+    color: #f8fafc;
+    margin-bottom: 0.5rem;
+  }
+
+  .tagline {
+    color: #38bdf8;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+  }
+
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+
+    .info-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+
+      .info-icon {
+        font-size: 1.4rem;
+        line-height: 1;
+      }
+
+      strong {
+        color: #e2e8f0;
+        font-size: 0.9rem;
+      }
+
+      p {
+        color: #94a3b8;
+        font-size: 0.95rem;
+        margin-top: 0.15rem;
+      }
+    }
+  }
+
+  .hours-card {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+
+    h4 {
+      color: #f1f5f9;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+  }
+}
+
+@media (max-width: 860px) {
+  .contact-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}

@@ -1,0 +1,24 @@
+<header class="site-header">
+  <div class="nav-container">
+    <a routerLink="/" class="brand-logo" (click)="closeMenu()">
+      <span class="logo-accent">Smart</span>Fit Studio
+    </a>
+
+    <button class="mobile-toggle" (click)="toggleMenu()" aria-label="Menu" [attr.aria-expanded]="isMenuOpen()">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <nav class="nav-links" [class.open]="isMenuOpen()">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Trang chủ</a>
+      <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">Giới thiệu</a>
+      <a routerLink="/services" routerLinkActive="active" (click)="closeMenu()">Dịch vụ</a>
+      <a routerLink="/pricing" routerLinkActive="active" (click)="closeMenu()">Bảng giá</a>
+      <a routerLink="/portfolio" routerLinkActive="active" (click)="closeMenu()">Dự án</a>
+      <a routerLink="/blog" routerLinkActive="active" (click)="closeMenu()">Blog</a>
+      <a routerLink="/faq" routerLinkActive="active" (click)="closeMenu()">FAQ</a>
+      <a routerLink="/contact" class="btn-cta" (click)="closeMenu()">Liên hệ</a>
+    </nav>
+  </div>
+</header>

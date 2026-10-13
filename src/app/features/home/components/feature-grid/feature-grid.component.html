@@ -1,0 +1,20 @@
+<section class="features-wrapper">
+  <div class="features-container">
+    <app-ui-section-header
+      badge="Cấu Trúc Cốt Lõi"
+      title="Điểm Nhấn Công Nghệ & Kiến Trúc"
+      subtitle="Thiết kế chuẩn hóa dành cho các giải pháp thể thao kết hợp chuyển đổi số quy mô lớn."
+    />
+
+    <div class="grid">
+      @for (item of features; track item.title) {
+        <app-ui-content-card
+          [title]="item.title"
+          [subtitle]="item.subtitle"
+          [icon]="item.icon"
+          [badge]="item.badge"
+        />
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,73 @@
+<div class="contact-form-card">
+  @if (isSuccess()) {
+    <div class="success-message">
+      <div class="success-icon">✓</div>
+      <h3>Gửi yêu cầu thành công!</h3>
+      <p>Đội ngũ chuyên viên SmartFit Studio sẽ liên hệ với bạn trong vòng 24 giờ làm việc.</p>
+    </div>
+  } @else {
+    <form (ngSubmit)="onSubmit()" class="form-grid">
+      <div class="form-group">
+        <label for="fullName">Họ và tên *</label>
+        <input
+          type="text"
+          id="fullName"
+          name="fullName"
+          [(ngModel)]="formData.fullName"
+          placeholder="Nguyễn Văn A"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Địa chỉ Email *</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="formData.email"
+          placeholder="example@domain.com"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Số điện thoại</label>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          [(ngModel)]="formData.phone"
+          placeholder="0912 345 678"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="serviceInterest">Dịch vụ quan tâm</label>
+        <select id="serviceInterest" name="serviceInterest" [(ngModel)]="formData.serviceInterest">
+          <option value="smart-tracking-ai">Smart Tracking AI</option>
+          <option value="personal-training">HLV Cá Nhân 1-on-1</option>
+          <option value="hybrid-studio">Phòng Tập Hybrid Studio</option>
+          <option value="enterprise-solution">Giải pháp Doanh nghiệp</option>
+        </select>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="message">Nội dung ghi chú</label>
+        <textarea
+          id="message"
+          name="message"
+          [(ngModel)]="formData.message"
+          rows="4"
+          placeholder="Mục tiêu tập luyện hoặc thời gian bạn muốn hẹn gặp..."
+        ></textarea>
+      </div>
+
+      <div class="form-actions full-width">
+        <app-ui-button type="submit" [loading]="isSubmitting()" size="lg">
+          Gửi Yêu Cầu Tư Vấn
+        </app-ui-button>
+      </div>
+    </form>
+  }
+</div>

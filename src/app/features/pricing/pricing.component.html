@@ -1,0 +1,46 @@
+<section class="pricing-section">
+  <div class="pricing-container">
+    <app-ui-section-header
+      badge="Chi Phí Minh Bạch"
+      title="Bảng Giá Dịch Vụ Rèn Luyện"
+      subtitle="Lựa chọn gói tập phù hợp với mục tiêu thể lực của bạn. Hỗ trợ thanh toán linh hoạt hàng tháng hoặc theo năm."
+    />
+
+    <div class="pricing-grid">
+      @for (plan of plans; track plan.id) {
+        <div class="pricing-card" [class.popular]="plan.popular">
+          @if (plan.popular) {
+            <div class="popular-ribbon">Phổ biến nhất</div>
+          }
+
+          <div class="plan-header">
+            <h3>{{ plan.name }}</h3>
+            <div class="price-box">
+              <span class="price">{{ plan.price }}</span>
+              <span class="period">{{ plan.period }}</span>
+            </div>
+          </div>
+
+          <ul class="feature-list">
+            @for (f of plan.features; track f) {
+              <li>
+                <span class="check">✓</span>
+                <span>{{ f }}</span>
+              </li>
+            }
+          </ul>
+
+          <div class="plan-cta">
+            <app-ui-button
+              [variant]="plan.popular ? 'primary' : 'secondary'"
+              size="md"
+              (clicked)="selectPlan(plan)"
+            >
+              {{ plan.ctaText }}
+            </app-ui-button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>

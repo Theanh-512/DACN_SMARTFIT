@@ -1,0 +1,25 @@
+<section class="faq-section">
+  <div class="faq-container">
+    <app-ui-section-header
+      badge="Trung Tâm Trợ Giúp"
+      title="Câu Hỏi Thường Gặp (FAQ)"
+      subtitle="Tổng hợp những câu hỏi phổ biến nhất của hội viên về dịch vụ và phương pháp rèn luyện tại SmartFit Studio."
+    />
+
+    <div class="faq-accordion">
+      @for (item of faqList(); track item.question; let i = $index) {
+        <div class="faq-item" [class.open]="item.open">
+          <button class="faq-question" (click)="toggleFaq(i)">
+            <span>{{ item.question }}</span>
+            <span class="faq-toggle-icon">{{ item.open ? '−' : '+' }}</span>
+          </button>
+          @if (item.open) {
+            <div class="faq-answer">
+              <p>{{ item.answer }}</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</section>

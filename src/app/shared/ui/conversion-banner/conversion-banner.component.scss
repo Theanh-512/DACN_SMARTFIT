@@ -1,0 +1,48 @@
+.conversion-banner {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 1.25rem;
+  padding: 3rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+
+  .banner-content {
+    max-width: 650px;
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #f8fafc;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      color: #cbd5e1;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+  }
+
+  .banner-action {
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .conversion-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 2.25rem 1.5rem;
+
+    .banner-action {
+      width: 100%;
+
+      app-ui-button {
+        width: 100%;
+      }
+    }
+  }
+}

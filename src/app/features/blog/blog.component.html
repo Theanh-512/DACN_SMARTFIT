@@ -1,0 +1,25 @@
+<section class="blog-section">
+  <div class="blog-container">
+    <app-ui-section-header
+      badge="Tin Tức & Kiến Thức"
+      title="Bài Viết Chuyên Sâu"
+      subtitle="Cập nhật những công nghệ rèn luyện thể thao tiên tiến và kinh nghiệm phát triển phần mềm chuẩn quốc tế."
+    />
+
+    <div class="blog-grid">
+      @for (post of posts; track post.id) {
+        <app-ui-content-card
+          [title]="post.title"
+          [subtitle]="post.excerpt"
+          [badge]="post.category"
+          icon="📰"
+        >
+          <div class="card-footer">
+            <span class="post-date">{{ post.date }}</span>
+            <app-ui-button size="sm" variant="ghost">Đọc tiếp &rarr;</app-ui-button>
+          </div>
+        </app-ui-content-card>
+      }
+    </div>
+  </div>
+</section>

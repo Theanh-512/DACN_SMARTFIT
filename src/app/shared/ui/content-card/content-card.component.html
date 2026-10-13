@@ -1,0 +1,22 @@
+<div class="content-card" [class.hoverable]="hoverable">
+  <div class="card-header">
+    @if (icon) {
+      <div class="card-icon">{{ icon }}</div>
+    }
+    @if (badge) {
+      <span class="card-badge">{{ badge }}</span>
+    }
+  </div>
+
+  @if (title) {
+    <h3 class="card-title">{{ title }}</h3>
+  }
+
+  @if (subtitle) {
+    <p class="card-subtitle">{{ subtitle }}</p>
+  }
+
+  <div class="card-body">
+    <ng-content></ng-content>
+  </div>
+</div>

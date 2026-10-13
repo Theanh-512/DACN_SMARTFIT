@@ -1,0 +1,12 @@
+<button
+  [type]="type"
+  [disabled]="disabled || loading"
+  [class]="'ui-btn btn-' + variant + ' btn-' + size"
+  [class.loading]="loading"
+  (click)="handleClick($event)"
+>
+  @if (loading) {
+    <span class="btn-spinner"></span>
+  }
+  <ng-content></ng-content>
+</button>

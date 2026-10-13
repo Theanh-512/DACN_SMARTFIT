@@ -1,0 +1,38 @@
+<section class="about-section">
+  <div class="about-container">
+    <app-ui-section-header
+      badge="Kiến Trúc Tổng Thể"
+      title="Tổ Chức & Tái Cấu Trúc Dự Án"
+      subtitle="Thiết kế module hoá chuẩn Enterprise giúp mở rộng quy mô dễ dàng, bảo trì tối ưu và hiệu năng vượt trội."
+    />
+
+    <div class="diagram-grid">
+      <app-ui-content-card
+        title="Core Module"
+        subtitle="Quản lý toàn bộ Singleton Service, Adapter kết nối CMS, State Authentication, SEO và Layout Shell."
+        icon="🏛️"
+        badge="Layer 1"
+      />
+
+      <app-ui-content-card
+        title="Features Module"
+        subtitle="Mỗi tính năng là một module độc lập (Home, About, Services, Pricing, Blog...), tải lười (lazy load) theo URL."
+        icon="🚀"
+        badge="Layer 2"
+      />
+
+      <app-ui-content-card
+        title="Shared UI Module"
+        subtitle="Bộ linh kiện UI dùng chung (Buttons, Contact Form, Content Cards, Conversion Banner, Section Header)."
+        icon="🎨"
+        badge="Layer 3"
+      />
+    </div>
+
+    <div class="cta-box">
+      <a routerLink="/">
+        <app-ui-button variant="outline">&larr; Quay lại Trang chủ</app-ui-button>
+      </a>
+    </div>
+  </div>
+</section>

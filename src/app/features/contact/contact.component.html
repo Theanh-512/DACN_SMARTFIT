@@ -1,0 +1,52 @@
+<section class="contact-section">
+  <div class="contact-container">
+    <app-ui-section-header
+      badge="Kết Nối Với Chúng Tôi"
+      title="Liên Hệ Tư Vấn Trực Tiếp"
+      subtitle="Để lại thông tin để nhận hỗ trợ nhanh chóng từ chuyên gia thể hình và công nghệ của SmartFit Studio."
+    />
+
+    <div class="contact-layout">
+      <div class="contact-info">
+        <h3>Thông Tin Trụ Sở</h3>
+        <p class="tagline">{{ brand.tagline }}</p>
+
+        <div class="info-list">
+          <div class="info-item">
+            <span class="info-icon">📍</span>
+            <div>
+              <strong>Địa chỉ:</strong>
+              <p>{{ brand.contact.address }}</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-icon">📞</span>
+            <div>
+              <strong>Hotline:</strong>
+              <p>{{ brand.contact.hotline }}</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-icon">✉️</span>
+            <div>
+              <strong>Email:</strong>
+              <p>{{ brand.contact.email }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hours-card">
+          <h4>Thời Gian Hoạt Động</h4>
+          <p>Thứ Hai - Thứ Bảy: 06:00 - 22:00</p>
+          <p>Chủ Nhật: 07:00 - 20:00</p>
+        </div>
+      </div>
+
+      <div class="contact-form-wrapper">
+        <app-ui-contact-form (formSubmitted)="handleFormSubmission($event)" />
+      </div>
+    </div>
+  </div>
+</section>
