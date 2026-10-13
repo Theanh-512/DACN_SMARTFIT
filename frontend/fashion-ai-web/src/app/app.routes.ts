@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './core/auth/admin.guard';
 
 export const routes: Routes = [
   {
@@ -34,7 +35,13 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadComponent: () => import('./features/admin/pages/admin-page.component').then(m => m.AdminPageComponent),
+    canActivate: [adminGuard],
     title: 'Quản Trị Hệ Thống - FashionAI'
+  },
+  {
+    path: 'access-denied',
+    loadComponent: () => import('./features/not-found/access-denied.component').then(m => m.AccessDeniedComponent),
+    title: '403 - Quyền Truy Cập Bị Từ Chối - FashionAI'
   },
   {
     path: 'content',

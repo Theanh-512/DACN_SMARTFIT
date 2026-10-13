@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { SeoService } from '../../../core/services/seo.service';
 import { CartService } from '../../../core/services/cart.service';
-import { MOCK_PRODUCTS, MOCK_CATEGORIES } from '../../../core/data/mock-products';
+import { ProductStateService } from '../../../core/services/product-state.service';
 import { Product } from '../../catalog/models/product.model';
 import { ProductGridComponent } from '../../../shared/ui/product-grid/product-grid.component';
 
@@ -18,10 +18,12 @@ export class HomePageComponent implements OnInit {
   private readonly seo = inject(SeoService);
   private readonly router = inject(Router);
   readonly cartService = inject(CartService);
+  readonly productState = inject(ProductStateService);
 
-  readonly allProducts = signal<Product[]>(MOCK_PRODUCTS);
-  readonly categories = signal(MOCK_CATEGORIES);
+  readonly allProducts = this.productState.products;
+  readonly categories = this.productState.categories;
   readonly activeTab = signal<'featured' | 'new' | 'sale'>('featured');
+
 
   readonly displayedProducts = computed(() => {
     const list = this.allProducts();

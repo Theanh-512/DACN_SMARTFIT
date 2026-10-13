@@ -5,6 +5,7 @@ import { Product, ProductVariant } from '../../models/product.model';
 import { MOCK_PRODUCTS } from '../../../../core/data/mock-products';
 import { CartService } from '../../../../core/services/cart.service';
 import { SeoService } from '../../../../core/services/seo.service';
+import { ProductStateService } from '../../../../core/services/product-state.service';
 import { ProductGridComponent } from '../../../../shared/ui/product-grid/product-grid.component';
 import { ModalComponent } from '../../../../shared/ui/modal/modal.component';
 
@@ -20,6 +21,7 @@ export class ProductDetailPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly seo = inject(SeoService);
   readonly cartService = inject(CartService);
+  readonly productState = inject(ProductStateService);
 
   product = signal<Product | null>(null);
   selectedImage = signal<string>('');
@@ -34,8 +36,9 @@ export class ProductDetailPageComponent implements OnInit {
   readonly relatedProducts = computed(() => {
     const current = this.product();
     if (!current) return [];
-    return MOCK_PRODUCTS.filter(p => p.id !== current.id).slice(0, 4);
+    return this.productState.products().filter(p => p.id !== current.id).slice(0, 4);
   });
+
 
   readonly discountPercentage = computed(() => {
     const p = this.product();
@@ -87,7 +90,7 @@ export class ProductDetailPageComponent implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       const slug = params.get('slug');
-      const found = MOCK_PRODUCTS.find(p => p.slug === slug) || MOCK_PRODUCTS[0];
+      const found = this.productState.products().find(p => p.slug === slug) || this.productState.products()[0];
       this.product.set(found);
 
       if (found) {

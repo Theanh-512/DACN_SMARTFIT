@@ -1,15 +1,49 @@
-<!-- Top Announcement Bar -->
+<!-- Top Announcement Bar with Role Switcher Simulator -->
 <div class="announcement-bar">
   <div class="container announcement-content">
     <div class="announcement-text">
-      <span>Miễn phí giao hàng cho đơn từ 499.000₫ • Đổi trả dễ dàng trong 7 ngày</span>
+      <span class="promo-text">Miễn phí giao hàng cho đơn từ 499.000₫ • Đổi trả trong 7 ngày</span>
+      
+      <!-- Role Switcher Simulator Bar for Quick Demo -->
+      <div class="header-role-switcher" title="Chuyển đổi vai trò để thử nghiệm phân quyền hệ thống">
+        <span class="role-sim-txt">Vai trò demo:</span>
+        <button
+          type="button"
+          class="role-pill-btn"
+          [class.active]="authService.isAdmin()"
+          (click)="switchRole('admin')"
+          title="Đăng nhập tài khoản Quản trị viên (Toàn quyền)"
+        >
+          👑 Admin
+        </button>
+        <button
+          type="button"
+          class="role-pill-btn"
+          [class.active]="authService.isCustomer()"
+          (click)="switchRole('customer')"
+          title="Đăng nhập tài khoản Người Xem / Khách Hàng (Thêm giỏ hàng, thử đồ, không vào được Admin)"
+        >
+          👤 Người Xem
+        </button>
+      </div>
     </div>
+
     <div class="announcement-links">
       <a routerLink="/content/faq">Trợ Giúp</a>
       <span class="sep">|</span>
       <a routerLink="/account">Tra Cứu Đơn Hàng</a>
       <span class="sep">|</span>
-      <a routerLink="/admin" class="admin-link">⚙️ Quản Trị</a>
+      
+      <!-- Admin Link with Role Status Badge -->
+      @if (authService.isAdmin()) {
+        <a routerLink="/admin" class="admin-link is-admin" title="Truy cập Backoffice Quản Trị Hệ Thống">
+          ⚙️ Quản Trị <span class="badge-admin-tag">ADMIN</span>
+        </a>
+      } @else {
+        <a routerLink="/admin" class="admin-link is-customer" title="Khu vực dành riêng cho Admin (Bấm để thử nghiệm bảo mật)">
+          🔒 Quản Trị (Chỉ Admin)
+        </a>
+      }
     </div>
   </div>
 </div>
@@ -67,9 +101,14 @@
         </form>
       </div>
 
-      <!-- Account Icon -->
-      <a routerLink="/account" class="action-icon-btn" title="Tài khoản / Đăng nhập">
+      <!-- Account Icon with Role Status -->
+      <a routerLink="/account" class="action-icon-btn user-btn" [title]="authService.isAdmin() ? 'Tài khoản: ADMIN' : 'Tài khoản: Người Xem / Khách Hàng'">
         <span class="icon">👤</span>
+        @if (authService.isAdmin()) {
+          <span class="user-role-badge admin">ADMIN</span>
+        } @else {
+          <span class="user-role-badge customer">USER</span>
+        }
       </a>
 
       <!-- Cart Icon with Live Badge -->
@@ -102,6 +141,28 @@
     <button class="drawer-close" (click)="closeMenu()">✕</button>
   </div>
 
+  <div class="drawer-role-box">
+    <span class="drawer-role-label">Vai trò hiện tại:</span>
+    <div class="drawer-role-btns">
+      <button
+        type="button"
+        class="drawer-role-btn"
+        [class.active]="authService.isAdmin()"
+        (click)="switchRole('admin'); closeMenu()"
+      >
+        👑 Admin
+      </button>
+      <button
+        type="button"
+        class="drawer-role-btn"
+        [class.active]="authService.isCustomer()"
+        (click)="switchRole('customer'); closeMenu()"
+      >
+        👤 Người Xem
+      </button>
+    </div>
+  </div>
+
   <nav class="drawer-nav">
     <a routerLink="/" (click)="closeMenu()">Trang Chủ</a>
     <a routerLink="/catalog" (click)="closeMenu()">Tất Cả Sản Phẩm</a>
@@ -126,7 +187,7 @@
     <a routerLink="/content/about" (click)="closeMenu()">Về FashionAI</a>
     <a routerLink="/content/faq" (click)="closeMenu()">Câu Hỏi Thường Gặp</a>
     <a routerLink="/content/contact" (click)="closeMenu()">Liên Hệ</a>
-    <a routerLink="/admin" (click)="closeMenu()">⚙️ Quản Trị</a>
+    <a routerLink="/admin" (click)="closeMenu()">⚙️ Quản Trị Hệ Thống</a>
   </nav>
 </div>
 

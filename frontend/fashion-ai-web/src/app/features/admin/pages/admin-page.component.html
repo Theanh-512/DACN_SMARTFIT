@@ -1,271 +1,1010 @@
-<div class="admin-page container">
-  <!-- Top Admin Bar -->
-  <div class="admin-top-bar">
-    <div>
-      <div class="admin-badge">BACKOFFICE MANAGEMENT</div>
-      <h1 class="page-title">HỆ THỐNG QUẢN TRỊ FASHION AI</h1>
-    </div>
-    <div class="top-actions">
-      <a routerLink="/" class="btn-uniqlo-outline">← Về Cửa Hàng</a>
-    </div>
-  </div>
+<div class="admin-portal-wrapper">
+  <!-- Top Admin Backoffice Header -->
+  <header class="admin-header">
+    <div class="container admin-header-content">
+      <div class="admin-brand">
+        <span class="badge-role-admin">👑 SUPER ADMIN</span>
+        <div class="brand-title-wrap">
+          <h1 class="brand-title">FASHION AI • BACKOFFICE PORTAL</h1>
+          <span class="brand-subtitle">Hệ Thống Quản Trị Trung Tâm & Phân Quyền Vai Trò</span>
+        </div>
+      </div>
 
-  @if (adminMessage()) {
-    <div class="alert-success fade-in">
-      ✓ {{ adminMessage() }}
-    </div>
-  }
+      <!-- Quick Demo Role Switcher Simulator -->
+      <div class="admin-top-actions">
+        <div class="role-simulator-box" title="Thử nghiệm phân quyền: Chuyển sang vai trò Người Xem để kiểm tra rào cản truy cập">
+          <span class="sim-label">Kiểm tra phân quyền:</span>
+          <button type="button" class="btn-sim-customer" (click)="simulateSwitchToCustomer()">
+            👤 Đổi Sang Vai Trò Người Xem
+          </button>
+        </div>
 
-  <!-- Admin Main Navigation Tabs -->
-  <div class="admin-nav-tabs">
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'products'"
-      (click)="activeTab.set('products')"
-    >
-      👗 Quản Lý Sản Phẩm ({{ products().length }})
-    </button>
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'categories'"
-      (click)="activeTab.set('categories')"
-    >
-      📁 Danh Mục Hàng Hóa ({{ categories().length }})
-    </button>
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'inventory'"
-      (click)="activeTab.set('inventory')"
-    >
-      📊 Quản Lý Tồn Kho
-    </button>
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'orders'"
-      (click)="activeTab.set('orders')"
-    >
-      📦 Quản Lý Đơn Hàng ({{ orders().length }})
-    </button>
-  </div>
+        <a routerLink="/" class="btn-top-link">
+          🛍️ Về Cửa Hàng
+        </a>
 
-  <!-- Content 1: Products Table -->
-  @if (activeTab() === 'products') {
-    <div class="admin-card">
-      <div class="card-toolbar">
-        <h3>Danh Sách Sản Phẩm Trong Kho</h3>
-        <button type="button" class="btn-uniqlo-primary" (click)="isAddProductOpen.set(true)">
-          + Thêm Sản Phẩm Mới
+        <button type="button" class="btn-top-logout" (click)="simulateLogout()" title="Đăng xuất khỏi hệ thống">
+          🚪 Đăng Xuất
         </button>
       </div>
+    </div>
+  </header>
 
-      <!-- Add Product Modal / Box -->
-      @if (isAddProductOpen()) {
-        <div class="add-product-box fade-in">
-          <h4>Thêm Sản Phẩm Mới Vào Hệ Thống</h4>
-          <div class="add-form-row">
-            <input
-              type="text"
-              placeholder="Tên sản phẩm..."
-              [(ngModel)]="newProductName"
-              class="add-input"
-            />
-            <input
-              type="number"
-              placeholder="Giá bán (₫)"
-              [(ngModel)]="newProductPrice"
-              class="add-input"
-            />
-            <select [(ngModel)]="newProductCategory" class="add-select">
-              @for (c of categories(); track c.id) {
-                <option [value]="c.id">{{ c.name }}</option>
-              }
-            </select>
-            <button type="button" class="btn-uniqlo-primary" (click)="saveNewProduct()">
-              Lưu Sản Phẩm
-            </button>
-            <button type="button" class="btn-uniqlo-outline" (click)="isAddProductOpen.set(false)">
-              Hủy
-            </button>
+  <div class="container admin-main-container">
+    <!-- Feedback Alert Toast -->
+    @if (adminMessage()) {
+      <div class="alert-toast fade-in">
+        <span class="toast-icon">✓</span>
+        <span>{{ adminMessage() }}</span>
+      </div>
+    }
+
+    <!-- Admin Navigation Tabs -->
+    <nav class="admin-tabs-nav">
+      <button
+        type="button"
+        class="tab-link"
+        [class.active]="activeTab() === 'dashboard'"
+        (click)="activeTab.set('dashboard')"
+      >
+        📊 Tổng Quan
+      </button>
+      <button
+        type="button"
+        class="tab-link"
+        [class.active]="activeTab() === 'products'"
+        (click)="activeTab.set('products')"
+      >
+        👗 Quản Lý Sản Phẩm ({{ productState.products().length }})
+      </button>
+      <button
+        type="button"
+        class="tab-link"
+        [class.active]="activeTab() === 'categories'"
+        (click)="activeTab.set('categories')"
+      >
+        📁 Danh Mục Hàng Hóa ({{ productState.categories().length }})
+      </button>
+      <button
+        type="button"
+        class="tab-link"
+        [class.active]="activeTab() === 'inventory'"
+        (click)="activeTab.set('inventory')"
+      >
+        📊 Biến Thể & Tồn Kho
+        @if (productState.lowStockVariantsCount() > 0) {
+          <span class="tab-warn-badge">{{ productState.lowStockVariantsCount() }}</span>
+        }
+      </button>
+      <button
+        type="button"
+        class="tab-link"
+        [class.active]="activeTab() === 'orders'"
+        (click)="activeTab.set('orders')"
+      >
+        📦 Quản Lý Đơn Hàng ({{ productState.orders().length }})
+      </button>
+      <button
+        type="button"
+        class="tab-link"
+        [class.active]="activeTab() === 'users'"
+        (click)="activeTab.set('users')"
+      >
+        👥 Người Dùng & Phân Quyền ({{ authService.allUsers().length }})
+      </button>
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: DASHBOARD OVERVIEW                   -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'dashboard') {
+      <div class="dashboard-section fade-in">
+        <!-- 4 KPI Summary Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon">💰</div>
+            <div class="kpi-data">
+              <span class="kpi-value">{{ productState.totalRevenue() | number }}₫</span>
+              <span class="kpi-title">Tổng Doanh Thu Đơn Hàng</span>
+            </div>
+            <span class="kpi-growth">+14.8% tuần này</span>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon">📦</div>
+            <div class="kpi-data">
+              <span class="kpi-value">{{ productState.totalOrdersCount() }}</span>
+              <span class="kpi-title">Đơn Hàng Cần Xử Lý</span>
+            </div>
+            <span class="kpi-sub">Đồng bộ từ khách hàng</span>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon">👗</div>
+            <div class="kpi-data">
+              <span class="kpi-value">{{ productState.totalProductsCount() }}</span>
+              <span class="kpi-title">Mặt Hàng Đang Kinh Doanh</span>
+            </div>
+            <span class="kpi-sub">{{ productState.lowStockVariantsCount() }} biến thể sắp hết</span>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon">✨</div>
+            <div class="kpi-data">
+              <span class="kpi-value">{{ productState.tryOnCount() }}</span>
+              <span class="kpi-title">Lượt AI Virtual Try-On</span>
+            </div>
+            <span class="kpi-growth">Mô hình IDM-VTON</span>
           </div>
         </div>
-      }
 
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Ảnh</th>
-              <th>Tên Sản Phẩm</th>
-              <th>Danh Mục</th>
-              <th>Giá Bán</th>
-              <th>Tồn Kho</th>
-              <th>AI Try-On</th>
-              <th>Thao Tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (p of products(); track p.id) {
-              <tr>
-                <td>
-                  <img [src]="p.thumbnailUrl" [alt]="p.name" class="table-img" />
-                </td>
-                <td>
-                  <strong>{{ p.name }}</strong>
-                  <div class="table-sub">{{ p.slug }}</div>
-                </td>
-                <td>{{ p.categoryName }}</td>
-                <td><strong>{{ p.basePrice | number }}₫</strong></td>
-                <td>
-                  <span class="badge-stock" [class.out]="!p.inStock">
-                    {{ p.inStock ? 'Còn hàng' : 'Hết hàng' }}
-                  </span>
-                </td>
-                <td>
-                  <span class="badge-ai-flag">✓ Sẵn sàng</span>
-                </td>
-                <td>
-                  <button type="button" class="btn-del" (click)="deleteProduct(p.id)">
-                    Xóa
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
+        <!-- Role Permissions & Quick Admin Setup Notice -->
+        <div class="role-explain-banner">
+          <div class="banner-badge">CHẾ ĐỘ QUẢN TRỊ VIÊN HIỆN TẠI</div>
+          <p>
+            Bạn đang có <strong>Toàn Quyền Quản Trị (Role: ADMIN)</strong> trên hệ thống Fashion AI Studio.
+            Bạn có thể <em>Setup sản phẩm mới, thiết lập ảnh thử đồ AI, điều chỉnh giá bán, bật/tắt tồn kho, xử lý đơn hàng và gán vai trò</em> cho thành viên khác.
+          </p>
+        </div>
 
-  <!-- Content 2: Categories -->
-  @if (activeTab() === 'categories') {
-    <div class="admin-card">
-      <div class="card-toolbar">
-        <h3>Quản Lý Danh Mục Ngành Hàng</h3>
-      </div>
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Ảnh Danh Mục</th>
-              <th>Tên Danh Mục</th>
-              <th>Giới Tính / Phân Khúc</th>
-              <th>Số Lượng Mặt Hàng</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (cat of categories(); track cat.id) {
-              <tr>
-                <td>
-                  <img [src]="cat.imageUrl" [alt]="cat.name" class="table-img" />
-                </td>
-                <td><strong>{{ cat.name }}</strong></td>
-                <td>
-                  <span class="gender-pill">{{ cat.gender.toUpperCase() }}</span>
-                </td>
-                <td>{{ cat.itemCount }} sản phẩm</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
-
-  <!-- Content 3: Inventory -->
-  @if (activeTab() === 'inventory') {
-    <div class="admin-card">
-      <div class="card-toolbar">
-        <h3>Báo Cáo Tồn Kho Theo Biến Thể Size & Màu</h3>
-      </div>
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Sản Phẩm</th>
-              <th>SKU</th>
-              <th>Màu Sắc</th>
-              <th>Size</th>
-              <th>Số Lượng Tồn Kho</th>
-              <th>Cảnh Báo</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (p of products(); track p.id) {
-              @for (v of p.variants; track v.id) {
+        <!-- Recent Orders Snapshot -->
+        <div class="admin-panel">
+          <div class="panel-header">
+            <h3>Đơn Hàng Gần Đây Của Khách Hàng</h3>
+            <button type="button" class="btn-text-action" (click)="activeTab.set('orders')">
+              Xem Toàn Bộ Đơn Hàng →
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
                 <tr>
-                  <td>{{ p.name }}</td>
-                  <td><code>{{ v.sku }}</code></td>
-                  <td>{{ v.color }}</td>
-                  <td><strong>{{ v.size }}</strong></td>
-                  <td>{{ v.stockQuantity }} cái</td>
-                  <td>
-                    @if (v.stockQuantity < 15) {
-                      <span class="warn-low">⚠️ Sắp hết hàng</span>
-                    } @else {
-                      <span class="ok-stock">✓ Ổn định</span>
-                    }
-                  </td>
+                  <th>Mã Đơn</th>
+                  <th>Khách Hàng</th>
+                  <th>Ngày Đặt</th>
+                  <th>Số Lượng</th>
+                  <th>Tổng Tiền</th>
+                  <th>Hình Thức</th>
+                  <th>Trạng Thái</th>
                 </tr>
+              </thead>
+              <tbody>
+                @for (ord of productState.orders().slice(0, 3); track ord.id) {
+                  <tr>
+                    <td><strong>{{ ord.orderCode }}</strong></td>
+                    <td>{{ ord.customerName }}</td>
+                    <td>{{ ord.date }}</td>
+                    <td>{{ ord.itemsCount }} món</td>
+                    <td><strong>{{ ord.total | number }}₫</strong></td>
+                    <td><span class="badge-payment">{{ ord.payment }}</span></td>
+                    <td>
+                      <span class="badge-status" [class.done]="ord.status === 'Đã giao'">
+                        {{ ord.status }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 2: PRODUCT MANAGEMENT & SETUP (CRUD)   -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'products') {
+      <div class="products-section fade-in">
+        <div class="toolbar-panel">
+          <div class="search-filter-group">
+            <input
+              type="text"
+              placeholder="🔍 Tìm theo tên hoặc slug sản phẩm..."
+              [ngModel]="productSearch()"
+              (ngModelChange)="productSearch.set($event)"
+              class="admin-search-input"
+            />
+            <select
+              [ngModel]="productCategoryFilter()"
+              (ngModelChange)="productCategoryFilter.set($event)"
+              class="admin-filter-select"
+            >
+              <option value="all">Tất Cả Danh Mục</option>
+              @for (cat of productState.categories(); track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
               }
-            }
-          </tbody>
-        </table>
+            </select>
+          </div>
+
+          <button type="button" class="btn-action-primary" (click)="openAddProductModal()">
+            + SETUP SẢN PHẨM MỚI
+          </button>
+        </div>
+
+        <!-- Products Table -->
+        <div class="admin-panel">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ảnh</th>
+                  <th>Tên & Slug</th>
+                  <th>Danh Mục</th>
+                  <th>Giá Bán</th>
+                  <th>Tồn Kho</th>
+                  <th>Virtual Try-On</th>
+                  <th>Thao Tác Admin</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of filteredProducts(); track p.id) {
+                  <tr>
+                    <td>
+                      <img [src]="p.thumbnailUrl" [alt]="p.name" class="cell-thumb" />
+                    </td>
+                    <td>
+                      <div class="product-name-cell">
+                        <strong>{{ p.name }}</strong>
+                        <span class="slug-text">{{ p.slug }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge-category">{{ p.categoryName || 'Thời Trang' }}</span>
+                    </td>
+                    <td>
+                      <div class="price-cell">
+                        <strong>{{ p.basePrice | number }}₫</strong>
+                        @if (p.originalPrice && p.originalPrice > p.basePrice) {
+                          <span class="del-price">{{ p.originalPrice | number }}₫</span>
+                        }
+                      </div>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        class="btn-toggle-stock"
+                        [class.in-stock]="p.inStock"
+                        (click)="toggleStock(p)"
+                        title="Click để bật/tắt trạng thái còn hàng"
+                      >
+                        {{ p.inStock ? '✓ Còn Hàng' : '✕ Hết Hàng' }}
+                      </button>
+                    </td>
+                    <td>
+                      <span class="badge-tryon-ready">✨ Sẵn Sàng (IDM-VTON)</span>
+                    </td>
+                    <td>
+                      <div class="action-btn-group">
+                        <button type="button" class="btn-table-edit" (click)="openEditProductModal(p)" title="Chỉnh sửa sản phẩm">
+                          Sửa
+                        </button>
+                        <button type="button" class="btn-table-delete" (click)="deleteProduct(p)" title="Xóa sản phẩm">
+                          Xóa
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="7" class="empty-cell">Không tìm thấy sản phẩm nào phù hợp.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 3: CATEGORIES MANAGEMENT               -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'categories') {
+      <div class="categories-section fade-in">
+        <div class="toolbar-panel">
+          <h3>Quản Lý Ngành Hàng & Phân Khúc</h3>
+          <button type="button" class="btn-action-primary" (click)="isAddCategoryOpen.set(true)">
+            + Thêm Danh Mục Mới
+          </button>
+        </div>
+
+        <div class="admin-panel">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ảnh Bìa</th>
+                  <th>Tên Danh Mục</th>
+                  <th>Mã Slug</th>
+                  <th>Phân Khúc</th>
+                  <th>Số Lượng SP</th>
+                  <th>Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cat of productState.categories(); track cat.id) {
+                  <tr>
+                    <td>
+                      <img [src]="cat.imageUrl" [alt]="cat.name" class="cell-thumb square" />
+                    </td>
+                    <td><strong>{{ cat.name }}</strong></td>
+                    <td><code>{{ cat.slug }}</code></td>
+                    <td>
+                      <span class="badge-gender">{{ cat.gender.toUpperCase() }}</span>
+                    </td>
+                    <td>{{ cat.itemCount }} mặt hàng</td>
+                    <td>
+                      <button type="button" class="btn-table-delete" (click)="deleteCategory(cat)">
+                        Xóa
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 4: INVENTORY & VARIANTS                -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'inventory') {
+      <div class="inventory-section fade-in">
+        <div class="toolbar-panel">
+          <div>
+            <h3>Chi Tiết Tồn Kho Theo Từng Biến Thể (SKU)</h3>
+            <span class="sub-desc">Điều chỉnh số lượng hàng hóa trong kho cho từng màu sắc và kích cỡ</span>
+          </div>
+        </div>
+
+        <div class="admin-panel">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Tên Sản Phẩm</th>
+                  <th>Mã SKU</th>
+                  <th>Màu Sắc</th>
+                  <th>Kích Cỡ</th>
+                  <th>Số Lượng Tồn</th>
+                  <th>Tình Trạng</th>
+                  <th>Điều Chỉnh Nhanh</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of productState.products(); track p.id) {
+                  @for (v of p.variants; track v.id) {
+                    <tr>
+                      <td><strong>{{ p.name }}</strong></td>
+                      <td><code>{{ v.sku }}</code></td>
+                      <td>{{ v.color }}</td>
+                      <td><strong>{{ v.size }}</strong></td>
+                      <td>
+                        <span class="stock-num">{{ v.stockQuantity }} cái</span>
+                      </td>
+                      <td>
+                        @if (v.stockQuantity < 15) {
+                          <span class="badge-warn">⚠️ Sắp hết hàng</span>
+                        } @else {
+                          <span class="badge-ok">✓ Tồn kho dồi dào</span>
+                        }
+                      </td>
+                      <td>
+                        <div class="stock-adjust-group">
+                          <button
+                            type="button"
+                            class="btn-stock-step"
+                            (click)="adjustVariantStock(p.id, v.id, v.stockQuantity, -5)"
+                            title="Giảm 5 cái"
+                          >
+                            -5
+                          </button>
+                          <button
+                            type="button"
+                            class="btn-stock-step"
+                            (click)="adjustVariantStock(p.id, v.id, v.stockQuantity, 10)"
+                            title="Nhập thêm 10 cái"
+                          >
+                            +10
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 5: ORDERS MANAGEMENT                   -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'orders') {
+      <div class="orders-section fade-in">
+        <div class="toolbar-panel">
+          <div class="search-filter-group">
+            <span class="filter-label">Lọc theo trạng thái:</span>
+            <select
+              [ngModel]="orderStatusFilter()"
+              (ngModelChange)="orderStatusFilter.set($event)"
+              class="admin-filter-select"
+            >
+              <option value="all">Tất Cả Trạng Thái</option>
+              <option value="Chờ xử lý">Chờ xử lý</option>
+              <option value="Đang chuẩn bị">Đang chuẩn bị</option>
+              <option value="Đang giao hàng">Đang giao hàng</option>
+              <option value="Đã giao">Đã giao</option>
+              <option value="Đã hủy">Đã hủy</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="admin-panel">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Mã Đơn</th>
+                  <th>Khách Hàng</th>
+                  <th>SĐT & Địa Chỉ</th>
+                  <th>Ngày Đặt</th>
+                  <th>Tổng Tiền</th>
+                  <th>Thanh Toán</th>
+                  <th>Trạng Thái Hiện Tại</th>
+                  <th>Chi Tiết</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (ord of filteredOrders(); track ord.id) {
+                  <tr>
+                    <td><strong>{{ ord.orderCode }}</strong></td>
+                    <td>{{ ord.customerName }}</td>
+                    <td>
+                      <div class="sub-desc">{{ ord.customerPhone || '0988 123 456' }}</div>
+                      <div class="address-snippet">{{ ord.shippingAddress }}</div>
+                    </td>
+                    <td>{{ ord.date }}</td>
+                    <td><strong>{{ ord.total | number }}₫</strong></td>
+                    <td><span class="badge-payment">{{ ord.payment }}</span></td>
+                    <td>
+                      <select
+                        [value]="ord.status"
+                        (change)="updateOrderStatus(ord.id, $event)"
+                        class="status-select-box"
+                      >
+                        <option value="Chờ xử lý">Chờ xử lý</option>
+                        <option value="Đang chuẩn bị">Đang chuẩn bị</option>
+                        <option value="Đang giao hàng">Đang giao hàng</option>
+                        <option value="Đã giao">Đã giao</option>
+                        <option value="Đã hủy">Đã hủy</option>
+                      </select>
+                    </td>
+                    <td>
+                      <button type="button" class="btn-table-view" (click)="viewOrderDetail(ord)">
+                        Xem Món
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- TAB 6: USERS & ROLE PERMISSION MANAGEMENT  -->
+    <!-- ========================================== -->
+    @if (activeTab() === 'users') {
+      <div class="users-section fade-in">
+        <div class="toolbar-panel">
+          <div>
+            <h3>Quản Lý Người Dùng & Phân Bổ Vai Trò (RBAC)</h3>
+            <span class="sub-desc">Phân quyền trực tiếp giữa Admin (Toàn quyền) và Người Xem / Khách Hàng (Customer)</span>
+          </div>
+          <button type="button" class="btn-action-primary" (click)="isAddUserOpen.set(true)">
+            + Cấp Tài Khoản Mới
+          </button>
+        </div>
+
+        <div class="admin-panel">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Thành Viên</th>
+                  <th>Email</th>
+                  <th>Vai Trò (Role)</th>
+                  <th>Trạng Thái</th>
+                  <th>Ngày Đăng Ký</th>
+                  <th>Thao Tác Phân Quyền</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (u of authService.allUsers(); track u.id) {
+                  <tr>
+                    <td>
+                      <div class="user-cell">
+                        <img [src]="u.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80'" alt="Avatar" class="user-avatar" />
+                        <div>
+                          <strong>{{ u.fullName || u.username }}</strong>
+                          <div class="sub-desc">@{{ u.username }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ u.email }}</td>
+                    <td>
+                      @if (u.role === 'admin') {
+                        <span class="badge-role-tag admin">👑 ADMIN (TOÀN QUYỀN)</span>
+                      } @else {
+                        <span class="badge-role-tag customer">👤 NGƯỜI XEM (CUSTOMER)</span>
+                      }
+                    </td>
+                    <td>
+                      <span class="badge-user-status" [class.suspended]="u.status === 'suspended'">
+                        {{ u.status === 'suspended' ? 'Đang khóa' : 'Hoạt động' }}
+                      </span>
+                    </td>
+                    <td>{{ u.createdAt || '10/10/2026' }}</td>
+                    <td>
+                      <div class="action-btn-group">
+                        <button
+                          type="button"
+                          class="btn-role-switch"
+                          (click)="toggleUserRole(u)"
+                          title="Chuyển quyền giữa Admin và Customer"
+                        >
+                          {{ u.role === 'admin' ? 'Giảm quyền: Người Xem' : 'Thăng quyền: ADMIN' }}
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-toggle-suspend"
+                          (click)="toggleUserStatus(u)"
+                        >
+                          {{ u.status === 'suspended' ? 'Mở Khóa' : 'Khóa' }}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL 1: ADD NEW PRODUCT (FULL SETUP)      -->
+  <!-- ========================================== -->
+  @if (isAddModalOpen()) {
+    <div class="modal-backdrop" (click)="closeAddProductModal()">
+      <div class="modal-dialog full-setup-modal fade-in" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h3>SETUP VÀ TẠO MỚI SẢN PHẨM THỜI TRANG</h3>
+          <button type="button" class="btn-close-modal" (click)="closeAddProductModal()">✕</button>
+        </div>
+
+        <div class="modal-body-scroll">
+          <div class="form-grid">
+            <div class="form-group full-col">
+              <label>Tên Sản Phẩm *</label>
+              <input
+                type="text"
+                placeholder="Ví dụ: Áo Sơ Mi Oxford Dài Tay Tối Giản"
+                [ngModel]="newProductName()"
+                (ngModelChange)="newProductName.set($event)"
+                class="modal-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Danh Mục Hàng Hóa *</label>
+              <select
+                [ngModel]="newProductCategory()"
+                (ngModelChange)="newProductCategory.set($event)"
+                class="modal-select"
+              >
+                @for (c of productState.categories(); track c.id) {
+                  <option [value]="c.id">{{ c.name }} ({{ c.gender }})</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Giá Bán (₫) *</label>
+              <input
+                type="number"
+                [ngModel]="newProductBasePrice()"
+                (ngModelChange)="newProductBasePrice.set($event)"
+                class="modal-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Giá Gốc Niêm Yết (₫)</label>
+              <input
+                type="number"
+                [ngModel]="newProductOriginalPrice()"
+                (ngModelChange)="newProductOriginalPrice.set($event)"
+                class="modal-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Số Lượng Tồn Kho Ban Đầu</label>
+              <input
+                type="number"
+                [ngModel]="newProductStock()"
+                (ngModelChange)="newProductStock.set($event)"
+                class="modal-input"
+              />
+            </div>
+
+            <div class="form-group full-col">
+              <label>URL Ảnh Hiển Thị Chính</label>
+              <input
+                type="text"
+                [ngModel]="newProductThumbnail()"
+                (ngModelChange)="newProductThumbnail.set($event)"
+                class="modal-input"
+              />
+            </div>
+
+            <div class="form-group full-col">
+              <label>URL Ảnh Áo Phẳng Phục Vụ AI Virtual Try-On (IDM-VTON)</label>
+              <input
+                type="text"
+                [ngModel]="newProductGarment()"
+                (ngModelChange)="newProductGarment.set($event)"
+                class="modal-input"
+              />
+              <span class="field-hint">Ảnh chụp riêng quần/áo trên nền trắng hoặc trong suốt để thuật toán IDM-VTON bóc tách và thử đồ.</span>
+            </div>
+
+            <div class="form-group">
+              <label>Màu Sắc Mặc Định</label>
+              <input
+                type="text"
+                [ngModel]="newProductColor()"
+                (ngModelChange)="newProductColor.set($event)"
+                placeholder="VD: Đen, Trắng, Beige"
+                class="modal-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Danh Sách Kích Cỡ (Phân cách bằng dấu phẩy)</label>
+              <input
+                type="text"
+                [ngModel]="newProductSizes()"
+                (ngModelChange)="newProductSizes.set($event)"
+                placeholder="S, M, L, XL"
+                class="modal-input"
+              />
+            </div>
+
+            <div class="form-group full-col">
+              <label>Mô Tả Sản Phẩm & Chất Liệu</label>
+              <textarea
+                rows="3"
+                [ngModel]="newProductDescription()"
+                (ngModelChange)="newProductDescription.set($event)"
+                class="modal-textarea"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeAddProductModal()">Hủy</button>
+          <button type="button" class="btn-submit" (click)="saveNewProduct()">Lưu & Đăng Sản Phẩm</button>
+        </div>
       </div>
     </div>
   }
 
-  <!-- Content 4: Orders -->
-  @if (activeTab() === 'orders') {
-    <div class="admin-card">
-      <div class="card-toolbar">
-        <h3>Quản Lý Đơn Hàng Khách Hàng</h3>
+  <!-- ========================================== -->
+  <!-- MODAL 2: EDIT PRODUCT                      -->
+  <!-- ========================================== -->
+  @if (isEditModalOpen()) {
+    <div class="modal-backdrop" (click)="closeEditProductModal()">
+      <div class="modal-dialog fade-in" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h3>CHỈNH SỬA SẢN PHẨM</h3>
+          <button type="button" class="btn-close-modal" (click)="closeEditProductModal()">✕</button>
+        </div>
+
+        <div class="modal-body-scroll">
+          <div class="form-grid">
+            <div class="form-group full-col">
+              <label>Tên Sản Phẩm</label>
+              <input
+                type="text"
+                [ngModel]="editProductName()"
+                (ngModelChange)="editProductName.set($event)"
+                class="modal-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Danh Mục</label>
+              <select
+                [ngModel]="editProductCategory()"
+                (ngModelChange)="editProductCategory.set($event)"
+                class="modal-select"
+              >
+                @for (c of productState.categories(); track c.id) {
+                  <option [value]="c.id">{{ c.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Giá Bán (₫)</label>
+              <input
+                type="number"
+                [ngModel]="editProductBasePrice()"
+                (ngModelChange)="editProductBasePrice.set($event)"
+                class="modal-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Giá Gốc (₫)</label>
+              <input
+                type="number"
+                [ngModel]="editProductOriginalPrice()"
+                (ngModelChange)="editProductOriginalPrice.set($event)"
+                class="modal-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Trạng Thái Tồn Kho</label>
+              <select
+                [ngModel]="editProductInStock()"
+                (ngModelChange)="editProductInStock.set($event)"
+                class="modal-select"
+              >
+                <option [ngValue]="true">Còn hàng (In Stock)</option>
+                <option [ngValue]="false">Hết hàng (Out of Stock)</option>
+              </select>
+            </div>
+
+            <div class="form-group full-col">
+              <label>URL Ảnh Hiển Thị</label>
+              <input
+                type="text"
+                [ngModel]="editProductThumbnail()"
+                (ngModelChange)="editProductThumbnail.set($event)"
+                class="modal-input"
+              />
+            </div>
+
+            <div class="form-group full-col">
+              <label>Mô Tả Sản Phẩm</label>
+              <textarea
+                rows="3"
+                [ngModel]="editProductDescription()"
+                (ngModelChange)="editProductDescription.set($event)"
+                class="modal-textarea"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeEditProductModal()">Hủy</button>
+          <button type="button" class="btn-submit" (click)="saveEditProduct()">Lưu Thay Đổi</button>
+        </div>
       </div>
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Mã Đơn</th>
-              <th>Khách Hàng</th>
-              <th>Ngày Đặt</th>
-              <th>Tổng Tiền</th>
-              <th>Hình Thức</th>
-              <th>Trạng Thái</th>
-              <th>Cập Nhật</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (ord of orders(); track ord.id) {
-              <tr>
-                <td><strong>{{ ord.orderCode }}</strong></td>
-                <td>{{ ord.customerName }}</td>
-                <td>{{ ord.date }}</td>
-                <td><strong>{{ ord.total | number }}₫</strong></td>
-                <td><span class="pay-chip">{{ ord.payment }}</span></td>
-                <td>
-                  <span class="status-chip" [class.done]="ord.status === 'Đã giao'">
-                    {{ ord.status }}
-                  </span>
-                </td>
-                <td>
-                  <select
-                    [value]="ord.status"
-                    (change)="updateOrderStatus(ord.id, $any($event.target).value)"
-                    class="status-select"
-                  >
-                    <option value="Đang chuẩn bị">Đang chuẩn bị</option>
-                    <option value="Đang giao hàng">Đang giao hàng</option>
-                    <option value="Đã giao">Đã giao</option>
-                    <option value="Đã hủy">Đã hủy</option>
-                  </select>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+    </div>
+  }
+
+  <!-- ========================================== -->
+  <!-- MODAL 3: VIEW ORDER DETAIL                 -->
+  <!-- ========================================== -->
+  @if (selectedOrder(); as ord) {
+    <div class="modal-backdrop" (click)="closeOrderDetail()">
+      <div class="modal-dialog fade-in" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h3>CHI TIẾT ĐƠN HÀNG #{{ ord.orderCode }}</h3>
+          <button type="button" class="btn-close-modal" (click)="closeOrderDetail()">✕</button>
+        </div>
+
+        <div class="modal-body-scroll">
+          <div class="order-detail-info">
+            <div class="info-row">
+              <span class="lbl">Khách hàng:</span>
+              <strong>{{ ord.customerName }}</strong>
+            </div>
+            <div class="info-row">
+              <span class="lbl">Số điện thoại:</span>
+              <span>{{ ord.customerPhone || '0988 123 456' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="lbl">Địa chỉ giao hàng:</span>
+              <span>{{ ord.shippingAddress }}</span>
+            </div>
+            <div class="info-row">
+              <span class="lbl">Phương thức thanh toán:</span>
+              <span class="badge-payment">{{ ord.payment }}</span>
+            </div>
+            <div class="info-row">
+              <span class="lbl">Trạng thái:</span>
+              <span class="badge-status">{{ ord.status }}</span>
+            </div>
+          </div>
+
+          <h4 class="items-head">Danh Sách Mặt Hàng Đã Đặt:</h4>
+          <div class="items-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Sản Phẩm</th>
+                  <th>Phân Loại</th>
+                  <th>SL</th>
+                  <th>Đơn Giá</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of ord.items; track item.productName) {
+                  <tr>
+                    <td><strong>{{ item.productName }}</strong></td>
+                    <td>{{ item.variantInfo }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.price | number }}₫</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="total-calc-box">
+            <div class="calc-row">
+              <span>Tạm tính:</span>
+              <span>{{ ord.subtotal | number }}₫</span>
+            </div>
+            <div class="calc-row">
+              <span>Phí vận chuyển:</span>
+              <span>{{ ord.shippingFee === 0 ? 'Miễn phí' : (ord.shippingFee | number) + '₫' }}</span>
+            </div>
+            <div class="calc-row total-highlight">
+              <span>TỔNG CỘNG:</span>
+              <strong>{{ ord.total | number }}₫</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeOrderDetail()">Đóng</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================== -->
+  <!-- MODAL 4: ADD CATEGORY                      -->
+  <!-- ========================================== -->
+  @if (isAddCategoryOpen()) {
+    <div class="modal-backdrop" (click)="isAddCategoryOpen.set(false)">
+      <div class="modal-dialog fade-in" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h3>THÊM DANH MỤC NGÀNH HÀNG MỚI</h3>
+          <button type="button" class="btn-close-modal" (click)="isAddCategoryOpen.set(false)">✕</button>
+        </div>
+        <div class="modal-body-scroll">
+          <div class="form-grid">
+            <div class="form-group full-col">
+              <label>Tên Danh Mục *</label>
+              <input
+                type="text"
+                placeholder="VD: Áo Sơ Mi Nam"
+                [ngModel]="newCategoryName()"
+                (ngModelChange)="newCategoryName.set($event)"
+                class="modal-input"
+              />
+            </div>
+            <div class="form-group">
+              <label>Mã Slug (Không dấu)</label>
+              <input
+                type="text"
+                placeholder="VD: ao-so-mi-nam"
+                [ngModel]="newCategorySlug()"
+                (ngModelChange)="newCategorySlug.set($event)"
+                class="modal-input"
+              />
+            </div>
+            <div class="form-group">
+              <label>Phân Khúc Giới Tính</label>
+              <select
+                [ngModel]="newCategoryGender()"
+                (ngModelChange)="newCategoryGender.set($event)"
+                class="modal-select"
+              >
+                <option value="women">Nữ (Women)</option>
+                <option value="men">Nam (Men)</option>
+                <option value="kids">Trẻ Em (Kids)</option>
+                <option value="unisex">Unisex</option>
+              </select>
+            </div>
+            <div class="form-group full-col">
+              <label>URL Ảnh Bìa Danh Mục</label>
+              <input
+                type="text"
+                [ngModel]="newCategoryImageUrl()"
+                (ngModelChange)="newCategoryImageUrl.set($event)"
+                class="modal-input"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="isAddCategoryOpen.set(false)">Hủy</button>
+          <button type="button" class="btn-submit" (click)="saveNewCategory()">Thêm Danh Mục</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================== -->
+  <!-- MODAL 5: ADD NEW USER                      -->
+  <!-- ========================================== -->
+  @if (isAddUserOpen()) {
+    <div class="modal-backdrop" (click)="isAddUserOpen.set(false)">
+      <div class="modal-dialog fade-in" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h3>CẤP TÀI KHOẢN VÀ GÁN VAI TRÒ MỚI</h3>
+          <button type="button" class="btn-close-modal" (click)="isAddUserOpen.set(false)">✕</button>
+        </div>
+        <div class="modal-body-scroll">
+          <div class="form-grid">
+            <div class="form-group full-col">
+              <label>Họ và Tên</label>
+              <input
+                type="text"
+                placeholder="VD: Lê Minh Hoàng"
+                [ngModel]="newUserName()"
+                (ngModelChange)="newUserName.set($event)"
+                class="modal-input"
+              />
+            </div>
+            <div class="form-group full-col">
+              <label>Email Đăng Nhập *</label>
+              <input
+                type="email"
+                placeholder="VD: hoang.le@example.com"
+                [ngModel]="newUserEmail()"
+                (ngModelChange)="newUserEmail.set($event)"
+                class="modal-input"
+              />
+            </div>
+            <div class="form-group full-col">
+              <label>Vai Trò Được Cấp (Role)</label>
+              <select
+                [ngModel]="newUserRole()"
+                (ngModelChange)="newUserRole.set($event)"
+                class="modal-select"
+              >
+                <option value="customer">👤 Người Xem / Khách Hàng (Customer - Mua sắm, thử đồ)</option>
+                <option value="admin">👑 Quản Trị Viên (Admin - Toàn quyền Backoffice)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="isAddUserOpen.set(false)">Hủy</button>
+          <button type="button" class="btn-submit" (click)="saveNewUser()">Tạo & Phân Quyền</button>
+        </div>
       </div>
     </div>
   }

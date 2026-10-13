@@ -5,6 +5,7 @@ import { Product } from '../models/product.model';
 import { MOCK_PRODUCTS, MOCK_CATEGORIES, Category } from '../../../core/data/mock-products';
 import { CartService } from '../../../core/services/cart.service';
 import { SeoService } from '../../../core/services/seo.service';
+import { ProductStateService } from '../../../core/services/product-state.service';
 import { ProductGridComponent } from '../../../shared/ui/product-grid/product-grid.component';
 
 @Component({
@@ -19,9 +20,11 @@ export class CatalogPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly cartService = inject(CartService);
+  readonly productState = inject(ProductStateService);
 
-  readonly allProducts = signal<Product[]>(MOCK_PRODUCTS);
-  readonly categories = signal<Category[]>(MOCK_CATEGORIES);
+  readonly allProducts = this.productState.products;
+  readonly categories = this.productState.categories;
+
 
   // Filters State
   selectedGender = signal<string>('all');

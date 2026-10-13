@@ -1,8 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { ProductStateService } from '../../core/services/product-state.service';
 
 interface MockOrder {
   id: string;
@@ -10,7 +12,7 @@ interface MockOrder {
   date: string;
   itemsCount: number;
   total: number;
-  status: 'Đang chuẩn bị' | 'Đang giao hàng' | 'Đã giao' | 'Đã hủy';
+  status: 'Chờ xử lý' | 'Đang chuẩn bị' | 'Đang giao hàng' | 'Đã giao' | 'Đã hủy';
 }
 
 @Component({
@@ -22,65 +24,86 @@ interface MockOrder {
 })
 export class AccountPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  readonly authService = inject(AuthService);
+  readonly productState = inject(ProductStateService);
 
-  isLoggedIn = signal<boolean>(true);
   authTab = signal<'login' | 'register'>('login');
   accountActiveTab = signal<'profile' | 'orders' | 'ai-history'>('profile');
 
-  // Login / Register Form
-  loginEmail = signal('theanh.nguyen@example.com');
+  // Form Models
+  loginEmail = signal('customer@fashionai.com');
   loginPassword = signal('••••••••');
   regFullName = signal('');
   regEmail = signal('');
   regPassword = signal('');
 
-  // User Profile
-  userProfile = signal({
-    fullName: 'Nguyễn Thế Anh',
-    email: 'theanh.nguyen@example.com',
-    phone: '0988 123 456',
-    address: 'Khu Công Nghệ Cao, TP. Thủ Đức, TP. Hồ Chí Minh',
-    heightCm: 175,
-    weightKg: 68,
-    preferredSize: 'L'
-  });
+  // Editable Profile
+  userFullName = signal('Nguyễn Thế Anh');
+  userPhone = signal('0988 123 456');
+  userAddress = signal('Khu Công Nghệ Cao, TP. Thủ Đức, TP. Hồ Chí Minh');
+  userHeightCm = signal(175);
+  userWeightKg = signal(68);
+  userPreferredSize = signal('L');
 
-  // Mock Orders History
-  orders = signal<MockOrder[]>([
-    {
-      id: 'ord-1',
-      orderCode: 'FA-2026-981240',
-      date: '12/10/2026',
-      itemsCount: 2,
-      total: 1248000,
-      status: 'Đang giao hàng'
-    },
-    {
-      id: 'ord-2',
-      orderCode: 'FA-2026-773192',
-      date: '02/10/2026',
-      itemsCount: 1,
-      total: 899000,
-      status: 'Đã giao'
-    }
-  ]);
-
+  // Notice Message
   profileMessage = signal<string | null>(null);
+  authNotice = signal<string | null>(null);
 
   ngOnInit(): void {
     this.seo.updateSeo({
-      title: 'Tài Khoản & Lịch Sử Đơn Hàng | Fashion AI Studio',
-      description: 'Quản lý thông tin cá nhân, số đo vóc dáng AI và theo dõi tình trạng đơn hàng thời trang của bạn.',
-      keywords: 'Tài khoản người dùng, đơn hàng, số đo AI'
+      title: 'Tài Khoản & Phân Quyền | Fashion AI Studio',
+      description: 'Quản lý thông tin tài khoản, vai trò đăng nhập (Admin / Người Xem), số đo cơ thể AI và đơn hàng.',
+      keywords: 'Tài khoản, phân quyền, vai trò, số đo AI, đơn hàng'
     });
+
+    // Check query params for redirected errors
+    this.route.queryParams.subscribe(params => {
+      if (params['error'] === 'admin_required') {
+        this.authNotice.set('⚠️ Trang Quản Trị yêu cầu đăng nhập bằng tài khoản Quản Trị Viên (Role: Admin).');
+      }
+    });
+
+    const user = this.authService.currentUser();
+    if (user) {
+      this.userFullName.set(user.fullName || user.username);
+      this.userPhone.set(user.phone || '0988 123 456');
+      this.userAddress.set(user.address || 'Khu Công Nghệ Cao, TP. Thủ Đức, TP. Hồ Chí Minh');
+      if (user.heightCm) this.userHeightCm.set(user.heightCm);
+      if (user.weightKg) this.userWeightKg.set(user.weightKg);
+      if (user.preferredSize) this.userPreferredSize.set(user.preferredSize);
+    }
   }
 
   handleLogin(): void {
-    this.isLoggedIn.set(true);
+    const email = this.loginEmail().trim();
+    if (!email) return;
+
+    this.authService.login(email);
+    this.authNotice.set(null);
+    this.profileMessage.set(`Đăng nhập thành công với vai trò: ${this.authService.isAdmin() ? 'ADMIN' : 'NGƯỜI XEM (CUSTOMER)'}!`);
+    setTimeout(() => this.profileMessage.set(null), 3000);
+  }
+
+  loginAsAdmin(): void {
+    this.authService.switchRole('admin');
+    this.authNotice.set(null);
+    this.profileMessage.set('Đã đăng nhập với tài khoản Quản Trị Viên (Admin) - Toàn quyền!');
+    setTimeout(() => this.profileMessage.set(null), 3000);
+  }
+
+  loginAsCustomer(): void {
+    this.authService.switchRole('customer');
+    this.authNotice.set(null);
+    this.profileMessage.set('Đã đăng nhập với tài khoản Người Xem (Customer) - Mua sắm & Giỏ hàng!');
+    setTimeout(() => this.profileMessage.set(null), 3000);
   }
 
   handleLogout(): void {
-    this.isLoggedIn.set(false);
+    this.authService.logout();
+    this.profileMessage.set('Đã đăng xuất khỏi hệ thống.');
+    setTimeout(() => this.profileMessage.set(null), 2500);
   }
 
   saveProfile(): void {
@@ -91,7 +114,7 @@ export class AccountPageComponent implements OnInit {
   }
 
   viewOrderDetail(orderCode: string): void {
-    this.profileMessage.set(`Đang xem thông tin chi tiết của đơn hàng ${orderCode}`);
+    this.profileMessage.set(`Đang xem chi tiết đơn hàng: ${orderCode}`);
     setTimeout(() => {
       this.profileMessage.set(null);
     }, 2500);

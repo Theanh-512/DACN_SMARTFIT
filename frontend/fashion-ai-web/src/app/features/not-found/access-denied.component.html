@@ -1,0 +1,55 @@
+<div class="access-denied-container container">
+  <div class="denied-card fade-in">
+    <div class="lock-icon">🔒</div>
+    <div class="status-code">403 FORBIDDEN</div>
+    <h1 class="denied-title">BẠN KHÔNG CÓ QUYỀN TRUY CẬP TRANG QUẢN TRỊ</h1>
+    
+    <div class="role-status-box">
+      <div class="role-badge">
+        Vai trò hiện tại: <strong>{{ authService.currentUser()?.role === 'customer' ? 'NGƯỜI XEM / KHÁCH HÀNG' : 'KHÁCH VÃNG LAI' }}</strong>
+      </div>
+      <p class="role-desc">
+        Hệ thống phân quyền FashionAI yêu cầu tài khoản phải có vai trò <code>admin</code> (Quản trị viên) để truy cập giao diện Backoffice setup và chỉnh sửa sản phẩm.
+      </p>
+    </div>
+
+    <div class="permissions-comparison">
+      <div class="perm-col customer-perm">
+        <div class="perm-header">
+          <span class="icon">👤</span>
+          <h3>Quyền Của Người Xem (Hiện Tại)</h3>
+        </div>
+        <ul>
+          <li>✓ Xem danh mục và chi tiết sản phẩm thời trang</li>
+          <li>✓ Thêm sản phẩm vào giỏ hàng và điều chỉnh số lượng</li>
+          <li>✓ Đặt hàng và thanh toán trực tuyến</li>
+          <li>✓ Thử đồ ảo AI (IDM-VTON) & Tìm kiếm bằng ảnh</li>
+          <li>✗ Không thể can thiệp thêm, xóa, sửa sản phẩm của cửa hàng</li>
+        </ul>
+      </div>
+
+      <div class="perm-col admin-perm">
+        <div class="perm-header">
+          <span class="icon">👑</span>
+          <h3>Quyền Quản Trị Viên (Admin)</h3>
+        </div>
+        <ul>
+          <li>✓ Toàn quyền thêm, xóa, sửa, setup sản phẩm & giá</li>
+          <li>✓ Quản lý danh mục hàng hóa & biến thể tồn kho (SKU)</li>
+          <li>✓ Duyệt và cập nhật trạng thái đơn hàng của khách</li>
+          <li>✓ Quản lý danh sách người dùng & phân bổ vai trò</li>
+          <li>✓ Xem Dashboard phân tích doanh số và AI Try-On</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="actions-group">
+      <a routerLink="/" class="btn-uniqlo-outline">
+        ← Về Cửa Hàng Mua Sắm
+      </a>
+      <button type="button" class="btn-uniqlo-primary btn-demo-admin" (click)="switchToAdmin()">
+        👑 Chuyển Sang Quyền Admin (Thử Nghiệm Đồ Án)
+      </button>
+    </div>
+  </div>
+</div>

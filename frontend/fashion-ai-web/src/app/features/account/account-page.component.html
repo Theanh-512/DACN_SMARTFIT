@@ -5,7 +5,19 @@
     <span>Tài khoản của tôi</span>
   </div>
 
-  @if (!isLoggedIn()) {
+  @if (authNotice()) {
+    <div class="alert-notice fade-in">
+      {{ authNotice() }}
+    </div>
+  }
+
+  @if (profileMessage()) {
+    <div class="alert-success fade-in">
+      ✓ {{ profileMessage() }}
+    </div>
+  }
+
+  @if (!authService.isAuthenticated()) {
     <!-- Login & Register Modal / Card -->
     <div class="auth-card fade-in">
       <div class="auth-tabs">
@@ -27,19 +39,33 @@
         </button>
       </div>
 
+      <!-- Quick Role Test Buttons for Demo -->
+      <div class="demo-quick-auth">
+        <span class="demo-txt">Đăng nhập nhanh cho đồ án:</span>
+        <div class="demo-auth-btns">
+          <button type="button" class="btn-demo-auth admin" (click)="loginAsAdmin()">
+            👑 Đăng Nhập Với Quyền ADMIN (Toàn quyền)
+          </button>
+          <button type="button" class="btn-demo-auth customer" (click)="loginAsCustomer()">
+            👤 Đăng Nhập Với Quyền NGƯỜI XEM (Mua hàng & Thêm giỏ)
+          </button>
+        </div>
+      </div>
+
       @if (authTab() === 'login') {
         <form class="auth-form" (ngSubmit)="handleLogin()">
           <h2 class="form-title">Đăng Nhập Thành Viên</h2>
-          <p class="form-sub">Đăng nhập để xem lịch sử mua sắm và lưu kết quả thử đồ ảo AI.</p>
+          <p class="form-sub">Đăng nhập để xem lịch sử mua sắm, quản lý giỏ hàng và lưu kết quả thử đồ ảo AI.</p>
 
           <div class="form-group">
             <label>Địa chỉ Email</label>
-            <input type="email" [(ngModel)]="loginEmail" name="email" required />
+            <input type="email" [ngModel]="loginEmail()" (ngModelChange)="loginEmail.set($event)" name="email" required />
+            <span class="input-hint">Gợi ý: Nhập email chứa chữ "admin" để vào vai trò Quản Trị Viên</span>
           </div>
 
           <div class="form-group">
             <label>Mật khẩu</label>
-            <input type="password" [(ngModel)]="loginPassword" name="password" required />
+            <input type="password" [ngModel]="loginPassword()" (ngModelChange)="loginPassword.set($event)" name="password" required />
           </div>
 
           <button type="submit" class="btn-uniqlo-primary auth-submit-btn">
@@ -53,17 +79,17 @@
 
           <div class="form-group">
             <label>Họ và tên</label>
-            <input type="text" [(ngModel)]="regFullName" name="regName" placeholder="Nguyễn Văn A" required />
+            <input type="text" [ngModel]="regFullName()" (ngModelChange)="regFullName.set($event)" name="regName" placeholder="Nguyễn Văn A" required />
           </div>
 
           <div class="form-group">
             <label>Địa chỉ Email</label>
-            <input type="email" [(ngModel)]="regEmail" name="regEmail" placeholder="name@domain.com" required />
+            <input type="email" [ngModel]="regEmail()" (ngModelChange)="regEmail.set($event)" name="regEmail" placeholder="name@domain.com" required />
           </div>
 
           <div class="form-group">
             <label>Mật khẩu (tối thiểu 6 ký tự)</label>
-            <input type="password" [(ngModel)]="regPassword" name="regPassword" placeholder="••••••••" required />
+            <input type="password" [ngModel]="regPassword()" (ngModelChange)="regPassword.set($event)" name="regPassword" placeholder="••••••••" required />
           </div>
 
           <button type="submit" class="btn-uniqlo-primary auth-submit-btn">
@@ -78,11 +104,45 @@
       <!-- Sidebar Navigation -->
       <aside class="dashboard-sidebar">
         <div class="user-brief">
-          <div class="avatar-circle">👤</div>
-          <div class="user-meta">
-            <strong class="user-name">{{ userProfile().fullName }}</strong>
-            <span class="user-email">{{ userProfile().email }}</span>
+          <div class="avatar-circle">
+            <img [src]="authService.currentUser()?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'" alt="Avatar" class="brief-avatar-img" />
           </div>
+          <div class="user-meta">
+            <strong class="user-name">{{ authService.currentUser()?.fullName || authService.currentUser()?.username }}</strong>
+            <span class="user-email">{{ authService.currentUser()?.email }}</span>
+            <div class="role-indicator-tag" [class.admin]="authService.isAdmin()">
+              {{ authService.isAdmin() ? '👑 VAI TRÒ: ADMIN' : '👤 VAI TRÒ: NGƯỜI XEM (CUSTOMER)' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Role Action Gateway -->
+        @if (authService.isAdmin()) {
+          <div class="admin-gateway-box">
+            <a routerLink="/admin" class="btn-admin-gateway">
+              ⚙️ VÀO TRANG QUẢN TRỊ ADMIN →
+            </a>
+          </div>
+        } @else {
+          <div class="customer-info-box">
+            <span class="role-privilege-label">Quyền hạn tài khoản:</span>
+            <p>✓ Được phép thêm sản phẩm vào giỏ hàng, mua sắm và thử đồ ảo AI.</p>
+            <p class="role-restricted-txt">✗ Không có quyền truy cập Backoffice Quản Trị.</p>
+          </div>
+        }
+
+        <!-- 1-Click Role Switch in Account -->
+        <div class="account-role-switch-test">
+          <span class="sw-title">Đổi vai trò để thử nghiệm:</span>
+          @if (authService.isAdmin()) {
+            <button type="button" class="btn-sw-pill" (click)="loginAsCustomer()">
+              Đổi sang: Người Xem (Customer)
+            </button>
+          } @else {
+            <button type="button" class="btn-sw-pill admin" (click)="loginAsAdmin()">
+              👑 Đổi sang: Quản Trị Viên (Admin)
+            </button>
+          }
         </div>
 
         <nav class="sidebar-menu">
@@ -92,7 +152,7 @@
             [class.active]="accountActiveTab() === 'profile'"
             (click)="accountActiveTab.set('profile')"
           >
-            📋 Thông tin cá nhân & Số đo
+            📋 Thông tin & Số đo AI
           </button>
           <button
             type="button"
@@ -100,7 +160,7 @@
             [class.active]="accountActiveTab() === 'orders'"
             (click)="accountActiveTab.set('orders')"
           >
-            📦 Lịch sử đơn hàng ({{ orders().length }})
+            📦 Đơn hàng của tôi ({{ productState.orders().length }})
           </button>
           <button
             type="button"
@@ -118,55 +178,49 @@
 
       <!-- Dashboard Main View -->
       <main class="dashboard-content">
-        @if (profileMessage()) {
-          <div class="alert-success fade-in">
-            ✓ {{ profileMessage() }}
-          </div>
-        }
-
         <!-- Tab 1: Profile & Measurements -->
         @if (accountActiveTab() === 'profile') {
           <div class="panel-card">
             <h2 class="panel-title">THÔNG TIN CÁ NHÂN & SỐ ĐO CƠ THỂ</h2>
             <p class="panel-sub">
-              Dữ liệu số đo giúp mô hình AI <strong>IDM-VTON</strong> gợi ý size chuẩn xác và mô phỏng trang phục vừa vặn nhất.
+              Dữ liệu số đo giúp mô hình AI <strong>IDM-VTON</strong> gợi ý size chuẩn xác và mô phỏng trang phục vừa vặn nhất với vóc dáng của bạn.
             </p>
 
             <form class="profile-form" (ngSubmit)="saveProfile()">
               <div class="form-row">
                 <div class="form-group">
                   <label>Họ và tên</label>
-                  <input type="text" [(ngModel)]="userProfile().fullName" name="pName" />
+                  <input type="text" [ngModel]="userFullName()" (ngModelChange)="userFullName.set($event)" name="pName" />
                 </div>
                 <div class="form-group">
                   <label>Số điện thoại</label>
-                  <input type="tel" [(ngModel)]="userProfile().phone" name="pPhone" />
+                  <input type="tel" [ngModel]="userPhone()" (ngModelChange)="userPhone.set($event)" name="pPhone" />
                 </div>
               </div>
 
               <div class="form-group">
                 <label>Địa chỉ nhận hàng mặc định</label>
-                <input type="text" [(ngModel)]="userProfile().address" name="pAddress" />
+                <input type="text" [ngModel]="userAddress()" (ngModelChange)="userAddress.set($event)" name="pAddress" />
               </div>
 
               <div class="measurements-section">
-                <h3 class="meas-heading">📏 Số Đo Vóc Dáng Để Thử Đồ Ảo (AI)</h3>
+                <h3 class="meas-heading">📏 Số Đo Vóc Dáng Phục Vụ Virtual Try-On</h3>
                 <div class="form-row">
                   <div class="form-group">
                     <label>Chiều cao (cm)</label>
-                    <input type="number" [(ngModel)]="userProfile().heightCm" name="pHeight" />
+                    <input type="number" [ngModel]="userHeightCm()" (ngModelChange)="userHeightCm.set($event)" name="pHeight" />
                   </div>
                   <div class="form-group">
                     <label>Cân nặng (kg)</label>
-                    <input type="number" [(ngModel)]="userProfile().weightKg" name="pWeight" />
+                    <input type="number" [ngModel]="userWeightKg()" (ngModelChange)="userWeightKg.set($event)" name="pWeight" />
                   </div>
                   <div class="form-group">
                     <label>Size trang phục ưa thích</label>
-                    <select [(ngModel)]="userProfile().preferredSize" name="pSize">
-                      <option value="S">Size S</option>
-                      <option value="M">Size M</option>
-                      <option value="L">Size L</option>
-                      <option value="XL">Size XL</option>
+                    <select [ngModel]="userPreferredSize()" (ngModelChange)="userPreferredSize.set($event)" name="pSize">
+                      <option value="S">Size S (Chuẩn)</option>
+                      <option value="M">Size M (Chuẩn)</option>
+                      <option value="L">Size L (Chuẩn)</option>
+                      <option value="XL">Size XL (Chuẩn)</option>
                     </select>
                   </div>
                 </div>
@@ -182,7 +236,7 @@
         <!-- Tab 2: Orders History -->
         @if (accountActiveTab() === 'orders') {
           <div class="panel-card">
-            <h2 class="panel-title">LỊCH SỬ ĐƠN HÀNG</h2>
+            <h2 class="panel-title">LỊCH SỬ ĐƠN HÀNG CỦA BẠN</h2>
             <div class="orders-table-wrapper">
               <table class="orders-table">
                 <thead>
@@ -196,7 +250,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (ord of orders(); track ord.id) {
+                  @for (ord of productState.orders(); track ord.id) {
                     <tr>
                       <td><strong>{{ ord.orderCode }}</strong></td>
                       <td>{{ ord.date }}</td>
@@ -224,7 +278,7 @@
         @if (accountActiveTab() === 'ai-history') {
           <div class="panel-card">
             <h2 class="panel-title">LỊCH SỬ THỬ ĐỒ ẢO CỦA BẠN (IDM-VTON)</h2>
-            <p class="panel-sub">Lưu trữ các phiên mô phỏng trang phục gần nhất của bạn.</p>
+            <p class="panel-sub">Lưu trữ các phiên mô phỏng trang phục gần nhất của bạn trên hệ thống AI.</p>
 
             <div class="ai-history-grid">
               <div class="ai-hist-item">

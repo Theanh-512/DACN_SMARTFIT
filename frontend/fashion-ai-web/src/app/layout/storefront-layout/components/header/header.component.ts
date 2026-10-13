@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../../../core/services/cart.service';
+import { AuthService } from '../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-site-header',
@@ -14,6 +15,7 @@ import { CartService } from '../../../../core/services/cart.service';
 export class HeaderComponent {
   private readonly router = inject(Router);
   readonly cartService = inject(CartService);
+  readonly authService = inject(AuthService);
 
   isMenuOpen = signal(false);
   searchQuery = signal('');
@@ -37,5 +39,9 @@ export class HeaderComponent {
   openVisualSearch(): void {
     this.router.navigate(['/visual-search']);
     this.closeMenu();
+  }
+
+  switchRole(role: 'admin' | 'customer' | 'guest'): void {
+    this.authService.switchRole(role);
   }
 }

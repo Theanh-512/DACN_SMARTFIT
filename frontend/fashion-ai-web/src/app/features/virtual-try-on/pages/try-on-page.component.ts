@@ -4,7 +4,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SeoService } from '../../../core/services/seo.service';
 import { CartService } from '../../../core/services/cart.service';
-import { MOCK_PRODUCTS, MOCK_TRYON_MODELS } from '../../../core/data/mock-products';
+import { ProductStateService } from '../../../core/services/product-state.service';
+import { MOCK_TRYON_MODELS } from '../../../core/data/mock-products';
 import { Product } from '../../catalog/models/product.model';
 
 @Component({
@@ -18,15 +19,17 @@ export class TryOnPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
   private readonly route = inject(ActivatedRoute);
   readonly cartService = inject(CartService);
+  readonly productState = inject(ProductStateService);
 
-  readonly availableProducts = signal<Product[]>(MOCK_PRODUCTS);
+  readonly availableProducts = this.productState.products;
   readonly sampleModels = signal(MOCK_TRYON_MODELS);
 
   // Selections
   selectedModelUrl = signal<string>(MOCK_TRYON_MODELS[0].imageUrl);
   userUploadedUrl = signal<string | null>(null);
-  selectedProduct = signal<Product>(MOCK_PRODUCTS[0]);
+  selectedProduct = signal<Product>(this.productState.products()[0]);
   selectedSize = signal<string>('M');
+
 
   // Processing & Results
   isProcessing = signal<boolean>(false);
@@ -36,13 +39,7 @@ export class TryOnPageComponent implements OnInit {
   showComparison = signal<boolean>(false);
 
   // History
-  tryOnHistory = signal<{ product: Product; resultUrl: string; time: string }[]>([
-    {
-      product: MOCK_PRODUCTS[0],
-      resultUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
-      time: 'Vừa xong'
-    }
-  ]);
+  tryOnHistory = signal<{ product: Product; resultUrl: string; time: string }[]>([]);
 
   addedMessage = signal<string | null>(null);
 
@@ -51,6 +48,17 @@ export class TryOnPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const initialProd = this.productState.products()[0];
+    if (initialProd) {
+      this.tryOnHistory.set([
+        {
+          product: initialProd,
+          resultUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
+          time: 'Vừa xong'
+        }
+      ]);
+    }
+
     this.seo.updateSeo({
       title: 'Phòng Thử Đồ Ảo AI (IDM-VTON) | Fashion AI Studio',
       description: 'Mô phỏng ướm trang phục ảo lên cơ thể bạn trong 3-5 giây với công nghệ IDM-VTON Diffusion Model.',
@@ -59,7 +67,7 @@ export class TryOnPageComponent implements OnInit {
 
     this.route.queryParams.subscribe(params => {
       if (params['productId']) {
-        const found = MOCK_PRODUCTS.find(p => p.id === params['productId']);
+        const found = this.productState.products().find(p => p.id === params['productId']);
         if (found) {
           this.selectedProduct.set(found);
           if (found.variants[0]?.size) {
@@ -69,6 +77,7 @@ export class TryOnPageComponent implements OnInit {
       }
     });
   }
+
 
   selectSampleModel(url: string): void {
     this.userUploadedUrl.set(null);
@@ -119,6 +128,7 @@ export class TryOnPageComponent implements OnInit {
       const chosenProd = this.selectedProduct();
       const result = chosenProd.thumbnailUrl;
       this.resultImageUrl.set(result);
+      this.productState.incrementTryOn();
 
       // Add to session history
       this.tryOnHistory.update(hist => [

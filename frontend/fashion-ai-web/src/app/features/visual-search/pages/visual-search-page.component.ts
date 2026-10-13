@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { SeoService } from '../../../core/services/seo.service';
 import { CartService } from '../../../core/services/cart.service';
-import { MOCK_PRODUCTS } from '../../../core/data/mock-products';
+import { ProductStateService } from '../../../core/services/product-state.service';
 import { Product } from '../../catalog/models/product.model';
 
 export interface VisualSearchResultItem {
@@ -22,6 +22,8 @@ export class VisualSearchPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
   private readonly router = inject(Router);
   readonly cartService = inject(CartService);
+  readonly productState = inject(ProductStateService);
+
 
   // Sample Query Images for 1-click testing
   readonly sampleQueryImages = [
@@ -83,12 +85,14 @@ export class VisualSearchPageComponent implements OnInit {
       this.isSearching.set(false);
       this.searchTimeMs.set(Math.floor(120 + Math.random() * 80));
 
+      const prods = this.productState.products();
       this.searchResults.set([
-        { product: MOCK_PRODUCTS[0], similarityScore: 0.968 },
-        { product: MOCK_PRODUCTS[7], similarityScore: 0.892 },
-        { product: MOCK_PRODUCTS[5], similarityScore: 0.845 },
-        { product: MOCK_PRODUCTS[2], similarityScore: 0.781 }
+        { product: prods[0], similarityScore: 0.968 },
+        { product: prods[prods.length > 7 ? 7 : 1], similarityScore: 0.892 },
+        { product: prods[prods.length > 5 ? 5 : 2], similarityScore: 0.845 },
+        { product: prods[prods.length > 2 ? 2 : 0], similarityScore: 0.781 }
       ]);
+
     }, 1200);
   }
 
