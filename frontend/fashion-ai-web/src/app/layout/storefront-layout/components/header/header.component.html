@@ -1,0 +1,27 @@
+<header class="site-header">
+  <div class="nav-container">
+    <a routerLink="/" class="brand-logo" (click)="closeMenu()">
+      <span class="logo-accent">Fashion</span>AI Studio
+    </a>
+
+    <button class="mobile-toggle" (click)="toggleMenu()" aria-label="Menu" [attr.aria-expanded]="isMenuOpen()">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <nav class="nav-links" [class.open]="isMenuOpen()">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">Trang chủ</a>
+      <a routerLink="/catalog" routerLinkActive="active" (click)="closeMenu()">Bộ sưu tập</a>
+      <a routerLink="/virtual-try-on" routerLinkActive="active" class="highlight-link" (click)="closeMenu()">
+        ✨ Thử Đồ AI
+      </a>
+      <a routerLink="/visual-search" routerLinkActive="active" class="highlight-link" (click)="closeMenu()">
+        📷 Tìm Bằng Ảnh
+      </a>
+      <a routerLink="/cart" routerLinkActive="active" (click)="closeMenu()">Giỏ hàng</a>
+      <a routerLink="/content/about" routerLinkActive="active" (click)="closeMenu()">Về chúng tôi</a>
+      <a routerLink="/content/contact" class="btn-cta" (click)="closeMenu()">Liên hệ</a>
+    </nav>
+  </div>
+</header>

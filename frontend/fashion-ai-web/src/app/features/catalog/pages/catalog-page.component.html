@@ -1,0 +1,36 @@
+<section class="catalog-section">
+  <div class="catalog-container">
+    <app-ui-section-header
+      badge="Bộ Sưu Tập Mới 2026"
+      title="Tất Cả Sản Phẩm Thời Trang"
+      subtitle="Thử đồ tức thì với công nghệ AI Virtual Try-On trước khi quyết định đặt hàng."
+    />
+
+    <div class="product-grid">
+      @for (item of products(); track item.id) {
+        <app-ui-content-card
+          [title]="item.name"
+          [subtitle]="item.description"
+          [badge]="item.categoryName"
+          icon="👗"
+        >
+          <div class="price-box">
+            <span class="price">{{ item.basePrice | number }}₫</span>
+            @if (item.originalPrice) {
+              <span class="old-price">{{ item.originalPrice | number }}₫</span>
+            }
+          </div>
+
+          <div class="product-actions">
+            <a [routerLink]="['/virtual-try-on']" [queryParams]="{ productId: item.id }">
+              <app-ui-button size="sm" variant="primary">✨ Thử Đồ Ngay</app-ui-button>
+            </a>
+            <a routerLink="/cart">
+              <app-ui-button size="sm" variant="outline">Thêm vào giỏ</app-ui-button>
+            </a>
+          </div>
+        </app-ui-content-card>
+      }
+    </div>
+  </div>
+</section>

@@ -5,7 +5,7 @@ Write-Host "========================================" -ForegroundColor Cyan
 
 # 1. Build .NET Backend
 Write-Host "`n[1/2] Building ASP.NET Core Solution..." -ForegroundColor Yellow
-dotnet build apps/api-dotnet/FashionAI.sln -c Debug
+dotnet build backend/FashionAI.Backend/FashionAI.sln -c Debug
 if ($LASTEXITCODE -ne 0) {
     Write-Host "X Failed to build .NET solution!" -ForegroundColor Red
     exit 1
@@ -13,7 +13,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # 2. Build Angular Frontend
 Write-Host "`n[2/2] Building Angular Frontend..." -ForegroundColor Yellow
-npm --prefix apps/web-angular run build:prod
+npm --prefix frontend/fashion-ai-web run build:prod
 if ($LASTEXITCODE -ne 0) {
     Write-Host "X Failed to build Angular frontend!" -ForegroundColor Red
     exit 1

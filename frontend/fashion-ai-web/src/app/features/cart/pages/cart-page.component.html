@@ -1,0 +1,58 @@
+<section class="cart-section">
+  <div class="cart-container">
+    <app-ui-section-header
+      badge="Giỏ Hàng Của Bạn"
+      title="Túi Đồ Mua Sắm"
+      subtitle="Kiểm tra lại sản phẩm, kích thước và số lượng trước khi tiến hành thanh toán."
+    />
+
+    @if (cartItems().length === 0) {
+      <div class="empty-cart">
+        <span class="empty-icon">🛒</span>
+        <h3>Giỏ hàng đang trống</h3>
+        <p>Hãy khám phá các mẫu thời trang mới nhất và thử đồ ảo ngay.</p>
+        <a routerLink="/catalog">
+          <app-ui-button size="md">Xem Sản Phẩm</app-ui-button>
+        </a>
+      </div>
+    } @else {
+      <div class="cart-layout">
+        <div class="cart-items">
+          @for (item of cartItems(); track item.id) {
+            <div class="cart-item-card">
+              <div class="item-img-placeholder">👗</div>
+              <div class="item-details">
+                <h4>{{ item.productName }}</h4>
+                <p class="variant">Size: {{ item.size }} | Màu: {{ item.color }}</p>
+                <div class="item-price">{{ item.price | number }}₫</div>
+              </div>
+              <div class="qty-control">
+                <button (click)="updateQuantity(item, -1)">-</button>
+                <span>{{ item.quantity }}</span>
+                <button (click)="updateQuantity(item, 1)">+</button>
+              </div>
+              <button class="btn-remove" (click)="removeItem(item)" title="Xóa">✕</button>
+            </div>
+          }
+        </div>
+
+        <div class="cart-summary">
+          <h3>Tổng Đơn Hàng</h3>
+          <div class="summary-row">
+            <span>Tạm tính</span>
+            <span>{{ subtotal | number }}₫</span>
+          </div>
+          <div class="summary-row">
+            <span>Phí giao hàng</span>
+            <span class="free">Miễn phí</span>
+          </div>
+          <div class="summary-total">
+            <span>Tổng cộng</span>
+            <span class="total-price">{{ subtotal | number }}₫</span>
+          </div>
+          <app-ui-button size="lg" variant="primary">Tiến Hành Thanh Toán</app-ui-button>
+        </div>
+      </div>
+    }
+  </div>
+</section>

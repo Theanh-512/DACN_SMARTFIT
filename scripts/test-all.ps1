@@ -5,7 +5,7 @@ Write-Host "========================================" -ForegroundColor Cyan
 
 # 1. Test .NET Backend
 Write-Host "`n[1/2] Running ASP.NET Core Unit Tests..." -ForegroundColor Yellow
-dotnet test apps/api-dotnet/FashionAI.sln --logger "console;verbosity=normal"
+dotnet test backend/FashionAI.Backend/FashionAI.sln --logger "console;verbosity=normal"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "X .NET tests failed!" -ForegroundColor Red
     exit 1
@@ -13,7 +13,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # 2. Test Angular Frontend
 Write-Host "`n[2/2] Running Angular Unit Tests..." -ForegroundColor Yellow
-npm --prefix apps/web-angular test -- --watch=false --browsers=ChromeHeadless
+npm --prefix frontend/fashion-ai-web test -- --watch=false --browsers=ChromeHeadless
 if ($LASTEXITCODE -ne 0) {
     Write-Host "X Angular tests failed!" -ForegroundColor Red
     exit 1

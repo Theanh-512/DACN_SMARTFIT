@@ -1,0 +1,52 @@
+<section class="search-section">
+  <div class="search-container">
+    <app-ui-section-header
+      badge="SigLIP & FAISS Search"
+      title="Tìm Kiếm Sản Phẩm Bằng Hình Ảnh"
+      subtitle="Chụp ảnh một bộ đồ bạn thấy ngoài đời hoặc tải ảnh mẫu từ Pinterest/Instagram để tìm sản phẩm tương tự trong kho."
+    />
+
+    <div class="search-box">
+      <div class="upload-zone">
+        @if (previewUrl()) {
+          <img [src]="previewUrl()" alt="Ảnh tìm kiếm" class="query-preview" />
+        } @else {
+          <div class="prompt">
+            <span class="icon">📷</span>
+            <span>Tải lên hoặc kéo thả ảnh trang phục cần tìm</span>
+          </div>
+        }
+        <input type="file" accept="image/*" (change)="onImageSelected($event)" class="file-input" />
+      </div>
+    </div>
+
+    <!-- Search Results -->
+    @if (isSearching()) {
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p>SigLIP đang trích xuất vector embedding và truy vấn FAISS index...</p>
+      </div>
+    } @else if (searchResults().length > 0) {
+      <div class="results-area">
+        <h3>Tìm thấy {{ searchResults().length }} sản phẩm tương tự:</h3>
+        <div class="results-grid">
+          @for (item of searchResults(); track item.productId) {
+            <app-ui-content-card
+              [title]="item.name"
+              [subtitle]="'Độ tương đồng: ' + (item.similarityScore * 100 | number:'1.1-1') + '%'"
+              badge="Top Match"
+              icon="🔍"
+            >
+              <div class="price">{{ item.price | number }}₫</div>
+              <div class="actions">
+                <a [routerLink]="['/virtual-try-on']" [queryParams]="{ productId: item.productId }">
+                  <app-ui-button size="sm" variant="primary">✨ Thử Đồ Ngay</app-ui-button>
+                </a>
+              </div>
+            </app-ui-content-card>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>

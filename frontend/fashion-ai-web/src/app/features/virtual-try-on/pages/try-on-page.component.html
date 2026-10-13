@@ -1,0 +1,66 @@
+<section class="tryon-section">
+  <div class="tryon-container">
+    <app-ui-section-header
+      badge="AI Diffusion Pipeline"
+      title="Phòng Thử Đồ Ảo Thông Minh"
+      subtitle="Tải ảnh chân dung hoặc toàn thân của bạn để xem ngay diện mạo khi diện trang phục thực tế."
+    />
+
+    <div class="tryon-workspace">
+      <!-- Upload Card -->
+      <div class="panel upload-panel">
+        <h3>1. Ảnh Của Bạn</h3>
+        <p class="guide-text">Chụp thẳng người, phông nền đơn giản để AI xử lý chuẩn xác nhất.</p>
+
+        <div class="upload-dropzone">
+          @if (previewUrl()) {
+            <img [src]="previewUrl()" alt="Ảnh người dùng" class="preview-img" />
+          } @else {
+            <div class="placeholder">
+              <span class="upload-icon">📸</span>
+              <span>Kéo thả ảnh hoặc bấm để chọn</span>
+            </div>
+          }
+          <input type="file" accept="image/*" (change)="onFileSelected($event)" class="file-input" />
+        </div>
+
+        <div class="action-box">
+          <app-ui-button
+            [disabled]="!selectedFile() || isProcessing()"
+            [loading]="isProcessing()"
+            (clicked)="startTryOn()"
+            size="lg"
+          >
+            ✨ Bắt Đầu Thử Đồ AI
+          </app-ui-button>
+        </div>
+      </div>
+
+      <!-- Result Card -->
+      <div class="panel result-panel">
+        <h3>2. Kết Quả Thử Đồ (IDM-VTON)</h3>
+        <p class="guide-text">Mô hình khuếch tán tái tạo nếp gấp vải và ánh sáng tự nhiên.</p>
+
+        <div class="result-display">
+          @if (isProcessing()) {
+            <div class="loading-state">
+              <div class="spinner"></div>
+              <p>AI đang tiền xử lý dáng người & may đồ ảo...</p>
+              <span class="time-hint">Thời gian ước tính: ~5-10 giây</span>
+            </div>
+          } @else if (resultImageUrl()) {
+            <div class="success-state">
+              <img [src]="resultImageUrl()" alt="Kết quả thử đồ" class="result-img" />
+              <div class="result-badge">✓ Hoàn tất thử đồ</div>
+            </div>
+          } @else {
+            <div class="idle-state">
+              <span class="idle-icon">👗</span>
+              <p>Kết quả thử đồ của bạn sẽ hiển thị tại đây.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
