@@ -33,6 +33,16 @@ export const routes: Routes = [
     title: 'Tài Khoản & Lịch Sử Đơn Hàng - FashionAI'
   },
   {
+    path: 'login',
+    redirectTo: 'account',
+    pathMatch: 'full'
+  },
+  {
+    path: 'register',
+    redirectTo: 'account',
+    pathMatch: 'full'
+  },
+  {
     path: 'admin',
     loadComponent: () => import('./features/admin/pages/admin-page.component').then(m => m.AdminPageComponent),
     canActivate: [adminGuard],

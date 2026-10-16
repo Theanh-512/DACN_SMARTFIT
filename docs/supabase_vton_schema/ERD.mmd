@@ -1,0 +1,97 @@
+erDiagram
+    AUTH_USERS ||--|| PROFILES : has
+    AUTH_USERS ||--o{ USER_ROLES : receives
+    CATEGORIES o|--o{ CATEGORIES : parent_of
+    CATEGORIES o|--o{ PRODUCTS : classifies
+    PRODUCTS ||--o{ PRODUCT_VARIANTS : has
+    PRODUCTS ||--o{ PRODUCT_IMAGES : displays
+    PRODUCT_VARIANTS o|--o{ PRODUCT_IMAGES : variant_images
+    AUTH_USERS ||--o{ USER_ADDRESSES : saves
+    AUTH_USERS ||--o{ CART_ITEMS : owns
+    PRODUCT_VARIANTS ||--o{ CART_ITEMS : selected_in
+    AUTH_USERS ||--o{ WISHLISTS : owns
+    PRODUCTS ||--o{ WISHLISTS : saved_in
+    AUTH_USERS ||--o{ ORDERS : places
+    USER_ADDRESSES o|--o{ ORDERS : snapshot_source
+    ORDERS ||--|{ ORDER_ITEMS : contains
+    PRODUCT_VARIANTS ||--o{ ORDER_ITEMS : ordered_as
+    ORDERS ||--o{ PAYMENTS : paid_by
+    ORDERS ||--o{ PAYMENT_EVENTS : receives
+    PAYMENTS o|--o{ PAYMENT_EVENTS : records
+    PRODUCT_VARIANTS ||--o{ INVENTORY_MOVEMENTS : tracks
+    ORDERS o|--o{ INVENTORY_MOVEMENTS : causes
+    AUTH_USERS ||--o{ REVIEWS : writes
+    PRODUCTS ||--o{ REVIEWS : reviewed
+    ORDER_ITEMS ||--o| REVIEWS : verified_by
+    AUTH_USERS ||--o{ TRY_ON_JOBS : requests
+    PRODUCT_VARIANTS ||--o{ TRY_ON_JOBS : tries_on
+
+    PROFILES {
+      uuid id PK
+      text full_name
+      text phone
+      text avatar_path
+    }
+    CATEGORIES {
+      uuid id PK
+      uuid parent_id FK
+      text name
+      text slug UK
+      boolean is_active
+    }
+    PRODUCTS {
+      uuid id PK
+      uuid category_id FK
+      text name
+      text slug UK
+      numeric base_price
+      text status
+    }
+    PRODUCT_VARIANTS {
+      uuid id PK
+      uuid product_id FK
+      text sku UK
+      text size
+      text color
+      numeric price_override
+      int stock_quantity
+      int reserved_quantity
+    }
+    ORDERS {
+      uuid id PK
+      bigint order_number UK
+      uuid user_id FK
+      numeric subtotal_amount
+      numeric shipping_fee
+      numeric total_amount
+      text status
+      timestamptz reservation_expires_at
+      uuid idempotency_key
+    }
+    ORDER_ITEMS {
+      uuid id PK
+      uuid order_id FK
+      uuid product_variant_id FK
+      text product_name_snapshot
+      numeric unit_price
+      int quantity
+      numeric line_total
+    }
+    PAYMENTS {
+      uuid id PK
+      uuid order_id FK
+      text provider
+      text status
+      numeric amount
+      text provider_transaction_id
+    }
+    TRY_ON_JOBS {
+      uuid id PK
+      uuid user_id FK
+      uuid product_variant_id FK
+      text input_image_path
+      text garment_image_path
+      text output_image_path
+      text status
+      text model_version
+    }

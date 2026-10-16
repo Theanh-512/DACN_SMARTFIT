@@ -10,14 +10,11 @@
     </a>
 
     <!-- Top Badges -->
-    <div class="badge-group">
-      @if (discountPercentage) {
-        <span class="badge-sale">-{{ discountPercentage }}%</span>
-      }
-      @if (product().featured) {
+    @if (product().featured) {
+      <div class="badge-group">
         <span class="badge-new">NỔI BẬT</span>
-      }
-    </div>
+      </div>
+    }
 
     <!-- Quick Hover Action Overlay -->
     <div class="card-overlay">
@@ -27,7 +24,7 @@
         class="action-btn btn-tryon"
         title="Thử đồ ảo AI"
       >
-        <span>✨ Thử Đồ Ảo</span>
+        <span>THỬ ĐỒ ẢO</span>
       </a>
       <button
         type="button"
@@ -35,7 +32,7 @@
         (click)="onAddToCart($event)"
         title="Thêm vào giỏ hàng"
       >
-        <span>+ Giỏ Hàng</span>
+        <span>+ GIỎ HÀNG</span>
       </button>
     </div>
   </div>
@@ -67,15 +64,19 @@
 
     <div class="price-container">
       <span class="current-price">{{ product().basePrice | number }}₫</span>
-      @if (hasDiscount) {
-        <span class="original-price">{{ product().originalPrice | number }}₫</span>
-      }
+    </div>
+
+    <!-- Star Rating Strip (Uniqlo Style) -->
+    <div class="rating-strip">
+      <span class="stars">★★★★★</span>
+      <span class="score">{{ product().rating || 4.8 }}</span>
+      <span class="count">({{ product().reviewCount || 112 }})</span>
     </div>
 
     <div class="stock-indicator">
       <span class="dot" [class.in-stock]="product().inStock"></span>
       <span class="text">{{ product().inStock ? 'Còn hàng' : 'Hết hàng' }}</span>
-      <span class="ai-supported" title="Hỗ trợ mô phỏng IDM-VTON">✨ AI Ready</span>
+      <span class="ai-supported" title="Hỗ trợ mô phỏng IDM-VTON">AI VTON</span>
     </div>
   </div>
 </div>

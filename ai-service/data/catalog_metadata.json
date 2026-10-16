@@ -1,0 +1,422 @@
+[
+  {
+    "id": "prod-001",
+    "name": "Áo Cardigan Vải Gân Cổ V | Flower",
+    "slug": "ao-cardigan-vai-gan-co-v-flower-489399",
+    "categoryId": "cat-jackets",
+    "categoryName": "Áo Khoác",
+    "basePrice": 391000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/489399/item/vngoods_69_489399_3x4.jpg?width=750",
+    "color": "69 NAVY"
+  },
+  {
+    "id": "uq-825412",
+    "name": "Bộ Sưu Tập Áo Khoác Casual",
+    "slug": "bo-suu-tap-ao-khoac-casual-825412",
+    "categoryId": "cat-jackets",
+    "categoryName": "Áo Khoác",
+    "basePrice": 611250,
+    "thumbnailUrl": "https://im.uniqlo.com/global-cms/spa/res0163d1c2b3236d8ec89f660d80aac7a4fr.jpg",
+    "color": "09 BLACK"
+  },
+  {
+    "id": "uq-485671",
+    "name": "Áo Parka Chống Tia UV Bỏ Túi | NANO Design",
+    "slug": "ao-parka-chong-tia-uv-bo-tui-nano-design-485671",
+    "categoryId": "cat-jackets",
+    "categoryName": "Áo Khoác",
+    "basePrice": 980000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/485671/item/vngoods_19_485671_3x4.jpg?width=750",
+    "color": "19 BURGUNDY"
+  },
+  {
+    "id": "uq-488785",
+    "name": "Áo Khoác Kéo Khóa Dáng Ngắn",
+    "slug": "ao-khoac-keo-khoa-dang-ngan-488785",
+    "categoryId": "cat-jackets",
+    "categoryName": "Áo Khoác",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/488785/item/vngoods_34_488785_3x4.jpg?width=750",
+    "color": "34 BROWN"
+  },
+  {
+    "id": "uq-469871",
+    "name": "PUFFTECH Áo Khoác Chần Bông | Có Mũ",
+    "slug": "pufftech-ao-khoac-chan-bong-co-mu-469871",
+    "categoryId": "cat-jackets",
+    "categoryName": "Áo Khoác",
+    "basePrice": 2085000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/469871/item/vngoods_06_469871_3x4.jpg?width=750",
+    "color": "06 GRAY"
+  },
+  {
+    "id": "uq-465203",
+    "name": "DRY-EX Áo Hoodie Chống Tia UV Kéo Khóa",
+    "slug": "dry-ex-ao-hoodie-chong-tia-uv-keo-khoa-465203",
+    "categoryId": "cat-jackets",
+    "categoryName": "Áo Khoác",
+    "basePrice": 588000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/465203/item/vngoods_18_465203_3x4.jpg?width=750",
+    "color": "18 WINE"
+  },
+  {
+    "id": "uq-487324",
+    "name": "Áo Khoác Hai Mặt",
+    "slug": "ao-khoac-hai-mat-487324",
+    "categoryId": "cat-jackets",
+    "categoryName": "Áo Khoác",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/487324/item/vngoods_09_487324_3x4.jpg?width=750",
+    "color": "09 BLACK"
+  },
+  {
+    "id": "uq-470118",
+    "name": "PUFFTECH Áo Khoác Chần Bông | Có Mũ",
+    "slug": "pufftech-ao-khoac-chan-bong-co-mu-470118",
+    "categoryId": "cat-jackets",
+    "categoryName": "Áo Khoác",
+    "basePrice": 2085000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/470118/item/vngoods_69_470118_3x4.jpg?width=750",
+    "color": "69 NAVY"
+  },
+  {
+    "id": "uq-486816",
+    "name": "Áo Khoác Đa Năng",
+    "slug": "ao-khoac-da-nang-486816",
+    "categoryId": "cat-jackets",
+    "categoryName": "Áo Khoác",
+    "basePrice": 1471000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/486816/item/vngoods_09_486816_3x4.jpg?width=750",
+    "color": "09 BLACK"
+  },
+  {
+    "id": "uq-484610",
+    "name": "Áo Khoác Harrington",
+    "slug": "ao-khoac-harrington-484610",
+    "categoryId": "cat-jackets",
+    "categoryName": "Áo Khoác",
+    "basePrice": 1593750,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/484610/item/vngoods_38_484610_3x4.jpg?width=750",
+    "color": "38 DARK BROWN"
+  },
+  {
+    "id": "uq-487594",
+    "name": "Áo Khoác Phối Lót Lông Giả Lông Cừu",
+    "slug": "ao-khoac-phoi-lot-long-gia-long-cuu-487594",
+    "categoryId": "cat-fleece",
+    "categoryName": "Áo Lông Cừu",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/487594/item/vngoods_01_487594_3x4.jpg?width=750",
+    "color": "01 OFF WHITE"
+  },
+  {
+    "id": "uq-912812",
+    "name": "Bộ Sưu Tập Áo Giả Lông Cừu",
+    "slug": "bo-suu-tap-ao-gia-long-cuu-912812",
+    "categoryId": "cat-fleece",
+    "categoryName": "Áo Lông Cừu",
+    "basePrice": 611250,
+    "thumbnailUrl": "https://im.uniqlo.com/global-cms/spa/resca00dbd0bbb16c83cd729854442cff37fr.jpg",
+    "color": "09 BLACK"
+  },
+  {
+    "id": "uq-486116",
+    "name": "Áo Khoác Giả Lông Cừu Cản Gió Kéo Khóa",
+    "slug": "ao-khoac-gia-long-cuu-can-gio-keo-khoa-486116",
+    "categoryId": "cat-fleece",
+    "categoryName": "Áo Lông Cừu",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/486116/item/vngoods_69_486116_3x4.jpg?width=750",
+    "color": "69 NAVY"
+  },
+  {
+    "id": "uq-489487",
+    "name": "Áo Khoác Blouson Giả Lông Cừu Kéo Khóa",
+    "slug": "ao-khoac-blouson-gia-long-cuu-keo-khoa-489487",
+    "categoryId": "cat-fleece",
+    "categoryName": "Áo Lông Cừu",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/489487/item/vngoods_16_489487_3x4.jpg?width=750",
+    "color": "16 COLOR"
+  },
+  {
+    "id": "uq-488747",
+    "name": "Áo Khoác Blouson Giả Lông Cừu Kéo Khóa",
+    "slug": "ao-khoac-blouson-gia-long-cuu-keo-khoa-488747",
+    "categoryId": "cat-fleece",
+    "categoryName": "Áo Lông Cừu",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/488747/item/vngoods_32_488747_3x4.jpg?width=750",
+    "color": "32 BEIGE"
+  },
+  {
+    "id": "uq-488774",
+    "name": "Áo Khoác Cản Gió Giả Lông Cừu",
+    "slug": "ao-khoac-can-gio-gia-long-cuu-488774",
+    "categoryId": "cat-fleece",
+    "categoryName": "Áo Lông Cừu",
+    "basePrice": 1593750,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/488774/item/vngoods_09_488774_3x4.jpg?width=750",
+    "color": "09 BLACK"
+  },
+  {
+    "id": "uq-252255",
+    "name": "Bộ Sưu Tập Quần Jeans",
+    "slug": "bo-suu-tap-quan-jeans-252255",
+    "categoryId": "cat-jeans",
+    "categoryName": "Quần Jeans",
+    "basePrice": 611250,
+    "thumbnailUrl": "https://im.uniqlo.com/global-cms/spa/res1c2cabcbd404f569d144443c0f5de217fr.jpg",
+    "color": "09 BLACK"
+  },
+  {
+    "id": "uq-477335",
+    "name": "Quần Jeans Ống Suông",
+    "slug": "quan-jeans-ong-suong-477335",
+    "categoryId": "cat-jeans",
+    "categoryName": "Quần Jeans",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/477335/item/vngoods_65_477335_3x4.jpg?width=750",
+    "color": "65 BLUE LIGHT"
+  },
+  {
+    "id": "uq-482281",
+    "name": "Quần Jeans EZY Dáng Rộng Ống Suông",
+    "slug": "quan-jeans-ezy-dang-rong-ong-suong-482281",
+    "categoryId": "cat-jeans",
+    "categoryName": "Quần Jeans",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/482281/item/vngoods_07_482281_3x4.jpg?width=750",
+    "color": "07 GRAY BEIGE"
+  },
+  {
+    "id": "uq-480740",
+    "name": "Quần Jeans Baggy Ống Cong Barrel",
+    "slug": "quan-jeans-baggy-ong-cong-barrel-480740",
+    "categoryId": "cat-jeans",
+    "categoryName": "Quần Jeans",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/480740/item/vngoods_67_480740_3x4.jpg?width=750",
+    "color": "67 BLUE"
+  },
+  {
+    "id": "uq-484808",
+    "name": "Quần Jeans Baggy Ống Cong Barrel",
+    "slug": "quan-jeans-baggy-ong-cong-barrel-484808",
+    "categoryId": "cat-jeans",
+    "categoryName": "Quần Jeans",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/484808/item/vngoods_64_484808_3x4.jpg?width=750",
+    "color": "64 COLOR"
+  },
+  {
+    "id": "uq-487207",
+    "name": "Quần Jeans Ống Barrel | Nhung Gân",
+    "slug": "quan-jeans-ong-barrel-nhung-gan-487207",
+    "categoryId": "cat-jeans",
+    "categoryName": "Quần Jeans",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/487207/item/vngoods_09_487207_3x4.jpg?width=750",
+    "color": "09 BLACK"
+  },
+  {
+    "id": "uq-488630",
+    "name": "Quần Jeans EZY Ống Cong Barrel​",
+    "slug": "quan-jeans-ezy-ong-cong-barrel-488630",
+    "categoryId": "cat-jeans",
+    "categoryName": "Quần Jeans",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/488630/item/vngoods_66_488630_3x4.jpg?width=750",
+    "color": "66 COLOR"
+  },
+  {
+    "id": "uq-488743",
+    "name": "Quần Jeans Ống Cong Barrel​",
+    "slug": "quan-jeans-ong-cong-barrel-488743",
+    "categoryId": "cat-jeans",
+    "categoryName": "Quần Jeans",
+    "basePrice": 1225000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/488743/item/vngoods_69_488743_3x4.jpg?width=750",
+    "color": "69 NAVY"
+  },
+  {
+    "id": "uq-486317",
+    "name": "Quần Easy Ống Rộng Vải Gân",
+    "slug": "quan-easy-ong-rong-vai-gan-486317",
+    "categoryId": "cat-pants",
+    "categoryName": "Quần Dài",
+    "basePrice": 588000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/486317/item/vngoods_03_486317_3x4.jpg?width=750",
+    "color": "03 GRAY"
+  },
+  {
+    "id": "uq-2825",
+    "name": "Áo Thun Vải Gân Có Mũ",
+    "slug": "ao-thun-vai-gan-co-mu-2825",
+    "categoryId": "cat-pants",
+    "categoryName": "Quần Dài",
+    "basePrice": 488750,
+    "thumbnailUrl": "https://im.uniqlo.com/global-cms/spa/resa99572d7444d1cff9daf1e40c8c6a01efr.jpg",
+    "color": "09 BLACK"
+  },
+  {
+    "id": "uq-233741",
+    "name": "Quần Easy Ống Rộng Vải Gân",
+    "slug": "quan-easy-ong-rong-vai-gan-233741",
+    "categoryId": "cat-pants",
+    "categoryName": "Quần Dài",
+    "basePrice": 588000,
+    "thumbnailUrl": "https://im.uniqlo.com/global-cms/spa/res8bb2c8eb5368a3d102b274d9d25fab27fr.jpg",
+    "color": "09 BLACK"
+  },
+  {
+    "id": "uq-487837",
+    "name": "Quần Culottes Vải Denim Dáng Rũ",
+    "slug": "quan-culottes-vai-denim-dang-ru-487837",
+    "categoryId": "cat-pants",
+    "categoryName": "Quần Dài",
+    "basePrice": 784000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/487837/item/vngoods_69_487837_3x4.jpg?width=750",
+    "color": "69 NAVY"
+  },
+  {
+    "id": "uq-487214",
+    "name": "Quần Chino Dáng Barrel",
+    "slug": "quan-chino-dang-barrel-487214",
+    "categoryId": "cat-pants",
+    "categoryName": "Quần Dài",
+    "basePrice": 784000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/487214/item/vngoods_07_487214_3x4.jpg?width=750",
+    "color": "07 GRAY BEIGE"
+  },
+  {
+    "id": "uq-484875",
+    "name": "Quần Dài Ống Cong Barrel",
+    "slug": "quan-dai-ong-cong-barrel-484875",
+    "categoryId": "cat-pants",
+    "categoryName": "Quần Dài",
+    "basePrice": 980000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/484875/item/vngoods_32_484875_3x4.jpg?width=750",
+    "color": "32 BEIGE"
+  },
+  {
+    "id": "uq-488739",
+    "name": "Quần Easy Co Giãn | Vải Jersey",
+    "slug": "quan-easy-co-gian-vai-jersey-488739",
+    "categoryId": "cat-pants",
+    "categoryName": "Quần Dài",
+    "basePrice": 588000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/488739/item/vngoods_69_488739_3x4.jpg?width=750",
+    "color": "69 NAVY"
+  },
+  {
+    "id": "uq-475344",
+    "name": "Quần Dài Ống Cong Barrel Vải Jersey​",
+    "slug": "quan-dai-ong-cong-barrel-vai-jersey-475344",
+    "categoryId": "cat-pants",
+    "categoryName": "Quần Dài",
+    "basePrice": 980000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/475344/item/vngoods_58_475344_3x4.jpg?width=750",
+    "color": "58 DARK GREEN"
+  },
+  {
+    "id": "uq-121425",
+    "name": "Áo Ba Lỗ và Áo Hai Dây",
+    "slug": "ao-ba-lo-va-ao-hai-day-121425",
+    "categoryId": "cat-tshirts",
+    "categoryName": "Áo Thun",
+    "basePrice": 195000,
+    "thumbnailUrl": "https://im.uniqlo.com/global-cms/spa/resf950b9d786a1f1c815c1c3614ae4b854fr.jpg",
+    "color": "09 BLACK"
+  },
+  {
+    "id": "uq-487120",
+    "name": "Áo Ba Lỗ Cổ Henley",
+    "slug": "ao-ba-lo-co-henley-487120",
+    "categoryId": "cat-tshirts",
+    "categoryName": "Áo Thun",
+    "basePrice": 195000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/487120/item/vngoods_09_487120_3x4.jpg?width=750",
+    "color": "09 BLACK"
+  },
+  {
+    "id": "uq-487908",
+    "name": "Áo Thun Vải Gân Cổ Henley",
+    "slug": "ao-thun-vai-gan-co-henley-487908",
+    "categoryId": "cat-tshirts",
+    "categoryName": "Áo Thun",
+    "basePrice": 488750,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/487908/item/vngoods_69_487908_3x4.jpg?width=750",
+    "color": "69 NAVY"
+  },
+  {
+    "id": "uq-488298",
+    "name": "Áo Thun Vải Gân Có Mũ",
+    "slug": "ao-thun-vai-gan-co-mu-488298",
+    "categoryId": "cat-tshirts",
+    "categoryName": "Áo Thun",
+    "basePrice": 488750,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/488298/item/vngoods_69_488298_3x4.jpg?width=750",
+    "color": "69 NAVY"
+  },
+  {
+    "id": "uq-489372",
+    "name": "Áo Thun Mini | Raglan",
+    "slug": "ao-thun-mini-raglan-489372",
+    "categoryId": "cat-tshirts",
+    "categoryName": "Áo Thun",
+    "basePrice": 488750,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/489372/item/vngoods_37_489372_3x4.jpg?width=750",
+    "color": "37 BROWN"
+  },
+  {
+    "id": "uq-489061",
+    "name": "Áo Polo | Kẻ Sọc",
+    "slug": "ao-polo-ke-soc-489061",
+    "categoryId": "cat-tshirts",
+    "categoryName": "Áo Thun",
+    "basePrice": 735000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/489061/item/vngoods_69_489061_3x4.jpg?width=750",
+    "color": "69 NAVY"
+  },
+  {
+    "id": "uq-487328",
+    "name": "Áo Choàng Balmacaan",
+    "slug": "ao-choang-balmacaan-487328",
+    "categoryId": "cat-tshirts",
+    "categoryName": "Áo Thun",
+    "basePrice": 3680000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/487328/item/vngoods_07_487328_3x4.jpg?width=750",
+    "color": "07 GRAY BEIGE"
+  },
+  {
+    "id": "uq-477704",
+    "name": "AirSense Áo Blazer",
+    "slug": "airsense-ao-blazer-477704",
+    "categoryId": "cat-tshirts",
+    "categoryName": "Áo Thun",
+    "basePrice": 1838750,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/477704/item/vngoods_69_477704_3x4.jpg?width=750",
+    "color": "69 NAVY"
+  },
+  {
+    "id": "uq-491199",
+    "name": "Bộ Pyjama Vải Satin",
+    "slug": "bo-pyjama-vai-satin-491199",
+    "categoryId": "cat-loungewear",
+    "categoryName": "Đồ Mặc Nhà",
+    "basePrice": 588000,
+    "thumbnailUrl": "https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/491199/item/vngoods_10_491199_3x4.jpg?width=750",
+    "color": "10 PINK"
+  },
+  {
+    "id": "uq-294585",
+    "name": "Chân Váy Xếp Ly Vải Nylon",
+    "slug": "chan-vay-xep-ly-vai-nylon-294585",
+    "categoryId": "cat-dresses",
+    "categoryName": "Đầm & Váy",
+    "basePrice": 784000,
+    "thumbnailUrl": "https://im.uniqlo.com/global-cms/spa/res106761bfa26551b32346d847bdde1715fr.jpg",
+    "color": "09 BLACK"
+  }
+]

@@ -1,6 +1,7 @@
 import { Injectable, inject, signal, computed, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { User, AuthState, UserRole } from '../models/user.model';
+import { SupabaseService } from '../services/supabase.service';
 
 export const DEMO_ADMIN_USER: User = {
   id: 'usr-admin-1',
@@ -37,14 +38,19 @@ export const DEMO_CUSTOMER_USER: User = {
 export class AuthService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
+  private readonly supabase = inject(SupabaseService);
+
   private readonly TOKEN_KEY = 'studio_auth_token';
   private readonly USER_KEY = 'studio_auth_user';
 
+  // Loading indicator for async auth calls
+  readonly isLoading = signal<boolean>(false);
+
   // State
   private readonly state = signal<AuthState>({
-    user: DEMO_CUSTOMER_USER, // Default to Customer role so user can see shopper features and restricted admin
-    token: 'mock-jwt-token-customer',
-    isAuthenticated: true
+    user: null,
+    token: null,
+    isAuthenticated: false
   });
 
   // Mock list of all registered users for Admin User Management
@@ -87,11 +93,12 @@ export class AuthService {
 
   constructor() {
     if (this.isBrowser) {
-      this.initAuthFromStorage();
+      this.initAuth();
     }
   }
 
-  private initAuthFromStorage(): void {
+  private async initAuth(): Promise<void> {
+    // 1. Try restore cached session first for instantaneous UI render
     try {
       const storedToken = localStorage.getItem(this.TOKEN_KEY);
       const storedUser = localStorage.getItem(this.USER_KEY);
@@ -105,6 +112,76 @@ export class AuthService {
     } catch {
       this.clearStorage();
     }
+
+    // 2. Synchronize with real Supabase Auth session
+    try {
+      const session = await this.supabase.getSession();
+      if (session) {
+        await this.syncSupabaseUser(session);
+      }
+
+      // Listen for background auth changes (sign-in, sign-out, token refresh)
+      this.supabase.onAuthStateChange(async (event, currentSession) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          if (currentSession) {
+            await this.syncSupabaseUser(currentSession);
+          }
+        } else if (event === 'SIGNED_OUT') {
+          const cur = this.currentUser();
+          if (cur && !cur.id.toString().startsWith('usr-')) {
+            this.clearLocalSession();
+          }
+        }
+      });
+    } catch (err) {
+      console.warn('Supabase Auth init error:', err);
+    }
+  }
+
+  private async syncSupabaseUser(session: any): Promise<void> {
+    const sbUser = session.user;
+    if (!sbUser) return;
+
+    let fullName = sbUser.user_metadata?.['full_name'] || sbUser.email?.split('@')[0] || 'Khách Hàng';
+    let phone = '';
+    let avatarUrl = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
+
+    try {
+      const { data: profile } = await this.supabase.from('profiles').select('*').eq('id', sbUser.id).maybeSingle();
+      if (profile) {
+        if (profile.full_name) fullName = profile.full_name;
+        if (profile.phone) phone = profile.phone;
+        if (profile.avatar_path) avatarUrl = profile.avatar_path;
+      }
+    } catch (err) {
+      console.warn('Failed to load Supabase profile:', err);
+    }
+
+    let role: UserRole = 'customer';
+    try {
+      const { data: roleRow } = await this.supabase.from('user_roles').select('role').eq('user_id', sbUser.id).maybeSingle();
+      if (roleRow?.role === 'admin' || sbUser.user_metadata?.['role'] === 'admin' || sbUser.email?.includes('admin')) {
+        role = 'admin';
+      }
+    } catch {
+      if (sbUser.email?.includes('admin')) {
+        role = 'admin';
+      }
+    }
+
+    const appUser: User = {
+      id: sbUser.id,
+      username: sbUser.email?.split('@')[0] || sbUser.id,
+      email: sbUser.email || '',
+      fullName,
+      phone,
+      role,
+      avatarUrl,
+      status: 'active',
+      createdAt: sbUser.created_at ? new Date(sbUser.created_at).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN')
+    };
+
+    this.setSession(session.access_token, appUser);
   }
 
   setSession(token: string, user: User): void {
@@ -116,6 +193,101 @@ export class AuthService {
     if (this.isBrowser) {
       localStorage.setItem(this.TOKEN_KEY, token);
       localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    }
+  }
+
+  /**
+   * Đăng nhập thật qua Supabase Auth
+   */
+  async loginWithSupabase(email: string, password: string): Promise<{ success: boolean; error?: string }> {
+    this.isLoading.set(true);
+    try {
+      const { data, error } = await this.supabase.client.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim()
+      });
+
+      if (error) {
+        return { success: false, error: this.translateAuthError(error.message) };
+      }
+
+      if (data.session) {
+        await this.syncSupabaseUser(data.session);
+      }
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Không thể kết nối đến máy chủ xác thực.' };
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  /**
+   * Đăng ký tài khoản mới qua Supabase Auth
+   */
+  async registerWithSupabase(
+    email: string,
+    password: string,
+    fullName: string
+  ): Promise<{ success: boolean; error?: string; needsConfirmation?: boolean }> {
+    this.isLoading.set(true);
+    try {
+      const { data, error } = await this.supabase.client.auth.signUp({
+        email: email.trim(),
+        password: password.trim(),
+        options: {
+          data: {
+            full_name: fullName.trim()
+          }
+        }
+      });
+
+      if (error) {
+        return { success: false, error: this.translateAuthError(error.message) };
+      }
+
+      if (data.session) {
+        await this.syncSupabaseUser(data.session);
+        return { success: true, needsConfirmation: false };
+      } else {
+        return { success: true, needsConfirmation: true };
+      }
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Không thể hoàn tất đăng ký tài khoản.' };
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  /**
+   * Cập nhật thông tin profile lên bảng `profiles` của Supabase
+   */
+  async updateProfile(updates: { fullName?: string; phone?: string; avatarUrl?: string }): Promise<{ success: boolean; error?: string }> {
+    const cur = this.currentUser();
+    if (!cur) return { success: false, error: 'Chưa đăng nhập' };
+
+    try {
+      if (typeof cur.id === 'string' && !cur.id.startsWith('usr-')) {
+        const { error } = await this.supabase.from('profiles').update({
+          full_name: updates.fullName ?? cur.fullName,
+          phone: updates.phone ?? cur.phone
+        }).eq('id', cur.id);
+
+        if (error) {
+          console.warn('Profile update warning:', error.message);
+        }
+      }
+
+      const updatedUser: User = {
+        ...cur,
+        fullName: updates.fullName ?? cur.fullName,
+        phone: updates.phone ?? cur.phone,
+        avatarUrl: updates.avatarUrl ?? cur.avatarUrl
+      };
+      this.setSession(this.token() || '', updatedUser);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
     }
   }
 
@@ -132,6 +304,9 @@ export class AuthService {
     }
   }
 
+  /**
+   * Fallback mock login cho demo
+   */
   login(email: string, _password?: string): boolean {
     if (email.toLowerCase().includes('admin')) {
       this.setSession('mock-jwt-admin-token', DEMO_ADMIN_USER);
@@ -149,7 +324,16 @@ export class AuthService {
     return true;
   }
 
-  logout(): void {
+  async logout(): Promise<void> {
+    try {
+      await this.supabase.client.auth.signOut();
+    } catch (err) {
+      console.warn('Supabase signOut error:', err);
+    }
+    this.clearLocalSession();
+  }
+
+  private clearLocalSession(): void {
     this.state.set({
       token: null,
       user: null,
@@ -160,12 +344,31 @@ export class AuthService {
     }
   }
 
+  private translateAuthError(msg: string): string {
+    const lower = msg.toLowerCase();
+    if (lower.includes('invalid login credentials') || lower.includes('invalid credentials')) {
+      return 'Email hoặc mật khẩu không chính xác.';
+    }
+    if (lower.includes('user already registered') || lower.includes('already registered')) {
+      return 'Email này đã được sử dụng. Vui lòng chọn đăng nhập hoặc dùng email khác.';
+    }
+    if (lower.includes('password should be at least')) {
+      return 'Mật khẩu phải chứa ít nhất 6 ký tự.';
+    }
+    if (lower.includes('email not confirmed')) {
+      return 'Tài khoản chưa được kích hoạt qua email. Vui lòng kiểm tra hộp thư của bạn.';
+    }
+    if (lower.includes('rate limit')) {
+      return 'Thao tác quá nhiều lần liên tiếp. Vui lòng đợi ít phút và thử lại.';
+    }
+    return msg;
+  }
+
   // --- Admin User Management Methods ---
   updateUserRole(userId: string | number, newRole: UserRole): void {
     this.allUsers.update(users =>
       users.map(u => (u.id === userId ? { ...u, role: newRole } : u))
     );
-    // If updating current logged in user, refresh current user state too
     const current = this.currentUser();
     if (current && current.id === userId) {
       this.setSession(this.token() || '', { ...current, role: newRole });

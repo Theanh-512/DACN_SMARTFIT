@@ -173,12 +173,39 @@
     font-size: 15px;
     font-weight: 700;
     color: var(--color-text-main);
+
+    &.is-sale {
+      color: #e60012;
+    }
   }
 
   .original-price {
     font-size: 13px;
     color: var(--color-text-light);
     text-decoration: line-through;
+  }
+}
+
+.rating-strip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  margin-bottom: 6px;
+
+  .stars {
+    color: #f59e0b;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .score {
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+
+  .count {
+    color: var(--color-text-muted);
   }
 }
 
@@ -202,12 +229,14 @@
 
   .ai-supported {
     margin-left: auto;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--color-ai-violet);
-    background: var(--color-ai-violet-light);
-    padding: 1px 6px;
-    border-radius: var(--radius-xs);
+    font-size: 10px;
+    font-weight: 700;
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 1px 5px;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
   }
 }
 

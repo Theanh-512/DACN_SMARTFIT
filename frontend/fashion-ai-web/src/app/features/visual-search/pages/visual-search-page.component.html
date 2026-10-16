@@ -37,7 +37,9 @@
           class="file-input"
         />
         <label for="queryImageFile" class="drop-label">
-          <span class="icon">📷</span>
+          <span class="icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          </span>
           <strong>Tải ảnh từ thiết bị của bạn</strong>
           <span>(Kéo thả tệp hoặc nhấp để chọn ảnh JPG, PNG)</span>
         </label>
@@ -62,7 +64,7 @@
         [disabled]="isSearching()"
         (click)="runSearch()"
       >
-        {{ isSearching() ? '⏳ ĐANG ĐỐI SOÁT FAISS...' : '🔍 TÌM KIẾM SẢN PHẨM TƯƠNG TỰ' }}
+        {{ isSearching() ? 'ĐANG ĐỐI SOÁT FAISS...' : 'TÌM KIẾM SẢN PHẨM TƯƠNG TỰ' }}
       </button>
     </div>
   </div>
@@ -88,7 +90,7 @@
         @for (item of searchResults(); track item.product.id) {
           <div class="match-card">
             <div class="match-badge">
-              🎯 {{ (item.similarityScore * 100) | number:'1.1-1' }}% Khớp
+              {{ (item.similarityScore * 100) | number:'1.0-0' }}% KHỚP
             </div>
             <a [routerLink]="['/catalog', item.product.slug]">
               <img [src]="item.product.thumbnailUrl" [alt]="item.product.name" class="card-img" />
@@ -106,10 +108,10 @@
                   [queryParams]="{ productId: item.product.id }"
                   class="btn-tryon-mini"
                 >
-                  ✨ Thử Đồ
+                  THỬ ĐỒ
                 </a>
                 <button type="button" class="btn-cart-mini" (click)="onAddToCart(item.product)">
-                  + Giỏ Hàng
+                  + GIỎ HÀNG
                 </button>
               </div>
             </div>

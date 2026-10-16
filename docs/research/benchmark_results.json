@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-10-16 14:56:09",
+  "hardware_environment": "CPU / Intel Core / PyTorch 2.11 / MobileNetV3-L2",
+  "visual_search": {
+    "p1": 100.0,
+    "p3": 62.67,
+    "p5": 52.0,
+    "map5": 90.12,
+    "hybrid_p5": 100.0,
+    "latency_mean_ms": 0.21,
+    "latency_p50_ms": 0.17,
+    "latency_p95_ms": 0.28
+  },
+  "size_recommendation": {
+    "top1_accuracy": 70.0,
+    "top2_accuracy": 80.0,
+    "coverage_rate": 100.0,
+    "latency_ms": 0.095
+  },
+  "vton_quality_pipeline": {
+    "filter_accuracy": 100.0,
+    "filter_latency_ms": 17.41
+  }
+}

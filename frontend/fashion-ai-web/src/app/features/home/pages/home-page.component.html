@@ -6,141 +6,401 @@
   </div>
 }
 
-<!-- 1. Hero Editorial Section -->
-<section class="hero-section">
-  <div class="hero-inner">
-    <div class="hero-media">
-      <img
-        src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1600&q=85"
-        alt="Fashion AI LifeWear 2026 Collection"
-        class="hero-img"
-      />
-      <div class="hero-overlay"></div>
-    </div>
+<div class="uniqlo-home-page">
+  <!-- 1. Hero Main Campaign Video Background -->
+  <section class="main-campaign-hero">
+    <div class="campaign-banner-wrapper">
+      @if (activeHeroVideo() === 'pc') {
+        <video
+          autoplay
+          loop
+          muted
+          playsinline
+          class="campaign-banner-video"
+          [poster]="uniqloCmsBannerImg"
+        >
+          <source [src]="heroVideoUrl" type="video/mp4" />
+        </video>
+      } @else {
+        <video
+          autoplay
+          loop
+          muted
+          playsinline
+          class="campaign-banner-video"
+          [poster]="uniqloCmsBannerImg"
+        >
+          <source [src]="jwaVideoUrl" type="video/mp4" />
+        </video>
+      }
 
-    <div class="hero-content container">
-      <div class="hero-badge">BỘ SƯU TẬP THU ĐÔNG 2026 • LIFEWEAR x AI</div>
-      <h1 class="hero-title">
-        Thời Trang Tối Giản.<br />
-        Vừa Vặn Tuyệt Đối Cùng AI.
-      </h1>
-      <p class="hero-subtitle">
-        Trải nghiệm phòng thử đồ ảo <strong>IDM-VTON</strong> chân thực ngay trên ảnh của bạn và tìm trang phục yêu thích tức thì qua <strong>SigLIP Search</strong>.
-      </p>
-      <div class="hero-actions">
-        <a routerLink="/virtual-try-on" class="btn-ai-tryon">
-          ✨ Thử Đồ Ảo Ngay
-        </a>
-        <a routerLink="/catalog" class="btn-uniqlo-outline hero-btn-light">
-          Khám Phá Bộ Sưu Tập
-        </a>
+      <div class="campaign-overlay container">
+        <div class="campaign-tag">BỘ SƯU TẬP THU ĐÔNG 2026 • LIFEWEAR × SMARTFIT</div>
+        <h1 class="campaign-title">Trang Phục Tinh Giản.<br />Được May Đo Bằng Trí Tuệ Nhân Tạo.</h1>
+        <p class="campaign-sub">Công nghệ thử đồ ảo IDM-VTON cho phép bạn nhìn thấy phom dáng chuẩn xác ngay trên cơ thể mình trước khi quyết định mua.</p>
+        
+        <div class="campaign-btns">
+          <a routerLink="/virtual-try-on" class="btn-tryon-hero">
+            THỬ ĐỒ ẢO VỚI AI (IDM-VTON)
+          </a>
+          <a routerLink="/catalog" class="btn-browse-hero">
+            Xem Tất Cả Sản Phẩm
+          </a>
+
+          <!-- Video Selector Switch -->
+          <div class="hero-video-switcher">
+            <button
+              type="button"
+              class="video-switch-btn"
+              [class.active]="activeHeroVideo() === 'pc'"
+              (click)="activeHeroVideo.set('pc')"
+              title="Bộ sưu tập Thu Đông 2026"
+            >
+              FW26 Collection
+            </button>
+            <button
+              type="button"
+              class="video-switch-btn"
+              [class.active]="activeHeroVideo() === 'jwa'"
+              (click)="activeHeroVideo.set('jwa')"
+              title="Bộ sưu tập JW Anderson"
+            >
+              JW Anderson
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- 2. Category Shortcuts Grid -->
-<section class="section-categories container">
-  <div class="section-header-clean">
-    <h2 class="section-title">DANH MỤC THỜI TRANG</h2>
-    <a routerLink="/catalog" class="view-all-link">Xem tất cả →</a>
-  </div>
-
-  <div class="category-grid">
-    @for (cat of categories(); track cat.id) {
-      <a [routerLink]="['/catalog']" [queryParams]="{ category: cat.id }" class="category-card">
-        <div class="cat-img-wrapper">
-          <img [src]="cat.imageUrl" [alt]="cat.name" class="cat-img" loading="lazy" />
+  <!-- 2. Circular Subcategories Strip (Clean Minimalist Icons) -->
+  <section class="category-strip-section container">
+    <div class="category-strip-scroll">
+      @for (cat of categories(); track cat.id) {
+        <a [routerLink]="['/catalog']" [queryParams]="{ category: cat.id }" class="category-circle-item">
+          <div class="circle-avatar">
+            <img [src]="cat.imageUrl" [alt]="cat.name" class="avatar-img" loading="lazy" />
+          </div>
+          <span class="category-label">{{ cat.name }}</span>
+        </a>
+      }
+      <!-- Special AI Try-On Circle Item with Clean SVG Badge -->
+      <a routerLink="/virtual-try-on" class="category-circle-item ai-circle-highlight" title="Phòng Thử Đồ Ảo AI">
+        <div class="circle-avatar ai-avatar">
+          <span class="ai-text-icon">AI</span>
         </div>
-        <div class="cat-info">
-          <h3 class="cat-name">{{ cat.name }}</h3>
-          <span class="cat-count">{{ cat.itemCount }} sản phẩm</span>
+        <span class="category-label ai-label">Thử Đồ AI</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 3. Warning Alert Banner (Authentic Uniqlo Vietnam Clean SVG Notice) -->
+  <section class="warning-alert-section container">
+    <div class="alert-box">
+      <div class="alert-icon-col">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e60012" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+      <div class="alert-content-col">
+        <strong class="alert-heading">CẢNH BÁO MẠO DANH VÀ LỪA ĐẢO QUA MẠNG</strong>
+        <p class="alert-desc">
+          SmartFit chỉ kinh doanh qua website chính thức và hệ thống showroom toàn quốc. SmartFit tuyệt đối KHÔNG tuyển dụng cộng tác viên qua tin nhắn, KHÔNG yêu cầu nạp tiền hoặc làm nhiệm vụ online. Quý khách vui lòng nâng cao cảnh giác.
+        </p>
+      </div>
+      <a routerLink="/content/faq" class="alert-action-btn">Tìm hiểu thêm →</a>
+    </div>
+  </section>
+
+  <!-- 4. "ƯU ĐÃI ĐẶC BIỆT" Collage Hero Section (Clean Studio Shots) -->
+  <section class="special-offers-section container">
+    <div class="special-offers-grid">
+      <!-- Tile 1: Top Left Product - Studio Knitwear -->
+      <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-jackets' }" class="promo-tile tile-img">
+        <img
+          src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=700&q=80"
+          alt="Áo Dệt Kim & Cardigan"
+          class="tile-bg-img"
+        />
+        <div class="tile-caption">
+          <span class="tile-badge">Áo Cardigan Dệt Kim</span>
+          <span class="tile-price">Từ 699.000₫</span>
         </div>
       </a>
-    }
-  </div>
-</section>
 
-<!-- 3. AI Innovations Spotlight Banner -->
-<section class="section-ai-spotlight container">
-  <div class="ai-spotlight-card">
-    <div class="spotlight-content">
-      <div class="badge-ai">CÔNG NGHỆ ĐỘT PHÁ</div>
-      <h2 class="spotlight-title">Mua Sắm Không Còn Nỗi Lo Chọn Sai Size & Dáng</h2>
-      <p class="spotlight-desc">
-        Hệ thống AI tiên tiến tích hợp mô hình khuếch tán <strong>IDM-VTON</strong> giúp bạn xem trước trang phục được ướm chính xác trên vóc dáng cơ thể. Kết hợp cùng <strong>SigLIP & FAISS</strong> tìm kiếm sản phẩm qua ảnh trong nháy mắt.
-      </p>
-      <div class="spotlight-buttons">
-        <a routerLink="/virtual-try-on" class="btn-uniqlo-primary">
-          ✨ Trải Nghiệm Virtual Try-On
-        </a>
-        <a routerLink="/visual-search" class="btn-uniqlo-outline">
-          📷 Thử Tìm Bằng Ảnh
-        </a>
+      <!-- Tile 2: Center Iconic Red Banner Box -->
+      <div class="promo-tile tile-red-center">
+        <div class="red-box-content">
+          <span class="red-box-sup">BỘ SƯU TẬP GIỚI HẠN</span>
+          <h2 class="red-box-title">ƯU ĐÃI<br />ĐẶC BIỆT</h2>
+          <div class="red-box-date">
+            <span>Áp dụng từ Thứ Sáu đến Thứ Năm</span>
+            <strong>16.10 – 26.10</strong>
+          </div>
+          <a [routerLink]="['/catalog']" class="red-box-btn">
+            Xem Tất Cả Ưu Đãi →
+          </a>
+        </div>
+      </div>
+
+      <!-- Tile 3: Top Right Product - Fleece Outerwear -->
+      <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-fleece' }" class="promo-tile tile-img">
+        <img
+          src="https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=700&q=80"
+          alt="Áo Lông Cừu Fleece"
+          class="tile-bg-img"
+        />
+        <div class="tile-caption">
+          <span class="tile-badge">Áo Lông Cừu Fleece</span>
+          <span class="tile-price">Từ 699.000₫</span>
+        </div>
+      </a>
+
+      <!-- Tile 4: Bottom Left - Smart Casual Chino Trousers -->
+      <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-pants' }" class="promo-tile tile-img">
+        <img
+          src="https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=700&q=80"
+          alt="Quần Chino Kando"
+          class="tile-bg-img"
+        />
+        <div class="tile-caption">
+          <span class="tile-badge">Quần Chino Co Giãn</span>
+          <span class="tile-price">699.000₫</span>
+        </div>
+      </a>
+
+      <!-- Tile 5: Bottom Center - Studio Denim Jeans -->
+      <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-jeans' }" class="promo-tile tile-img">
+        <img
+          src="https://images.unsplash.com/photo-1582552938357-32b906df40cb?auto=format&fit=crop&w=700&q=80"
+          alt="Quần Jeans Kaihara"
+          class="tile-bg-img"
+        />
+        <div class="tile-caption">
+          <span class="tile-badge">Quần Jeans Ống Suông</span>
+          <span class="tile-price">999.000₫</span>
+        </div>
+      </a>
+
+      <!-- Tile 6: Bottom Right - Oxford Shirt Studio -->
+      <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-shirts' }" class="promo-tile tile-img">
+        <img
+          src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=700&q=80"
+          alt="Áo Sơ Mi Oxford"
+          class="tile-bg-img"
+        />
+        <div class="tile-caption">
+          <span class="tile-badge">Sơ Mi Oxford Dài Tay</span>
+          <span class="tile-price">599.000₫</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 5. Editorial Story 1: HEATTECH & AIRism Video Background -->
+  <section class="editorial-collection container">
+    <div class="editorial-banner">
+      <video
+        autoplay
+        loop
+        muted
+        playsinline
+        class="editorial-banner-video"
+        [poster]="uniqloCmsBannerImg"
+      >
+        <source [src]="heattechVideoUrl" type="video/mp4" />
+      </video>
+      <div class="editorial-content-overlay">
+        <span class="editorial-tag">HEATTECH & AIRism • CÔNG NGHỆ VẢI NHẬT BẢN</span>
+        <h2 class="editorial-heading">ÁO KHÔNG GỌNG & TRANG PHỤC THOÁNG KHÍ</h2>
+        <p class="editorial-desc">
+          Mềm mại nâng niu làn da, thông thoáng tuyệt đối cho cảm giác tự do suốt cả ngày dài.
+        </p>
+        <div class="editorial-actions">
+          <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-innerwear' }" class="editorial-btn">
+            Xem Bộ Sưu Tập
+          </a>
+          <a routerLink="/virtual-try-on" class="editorial-btn-ai">
+            Thử Đồ Ảo AI
+          </a>
+        </div>
       </div>
     </div>
-    <div class="spotlight-visual">
-      <div class="visual-badge">Mô phỏng tức thì 3-5s</div>
-      <img
-        src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=800&q=80"
-        alt="Virtual Try-On Demo"
-        class="visual-img"
-        loading="lazy"
+
+    <!-- Product Grid for Story 1 -->
+    <div class="editorial-products-row">
+      <app-product-grid
+        [products]="airismProducts()"
+        [columns]="4"
+        (tryOnClicked)="onTryOn($event)"
+        (addToCartClicked)="onAddToCart($event)"
       />
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- 4. Tabbed Product Showcase -->
-<section class="section-products container">
-  <div class="products-header">
-    <div class="tab-buttons">
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="activeTab() === 'featured'"
-        (click)="setTab('featured')"
+  <!-- 6. Editorial Story 2: Áo Khoác Ngoài Casual Outer Video Background -->
+  <section class="editorial-collection container">
+    <div class="editorial-banner">
+      <video
+        autoplay
+        loop
+        muted
+        playsinline
+        class="editorial-banner-video"
+        [poster]="uniqloCmsBannerImg"
       >
-        SẢN PHẨM NỔI BẬT
-      </button>
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="activeTab() === 'new'"
-        (click)="setTab('new')"
-      >
-        HÀNG MỚI VỀ
-      </button>
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="activeTab() === 'sale'"
-        (click)="setTab('sale')"
-      >
-        ƯU ĐÃI GIỚI HẠN
-      </button>
+        <source [src]="casualOuterVideoUrl" type="video/mp4" />
+      </video>
+      <div class="editorial-content-overlay">
+        <span class="editorial-tag">CASUAL OUTER • PHONG CÁCH GIAO MÙA</span>
+        <h2 class="editorial-heading">ÁO KHOÁC CARDIGAN & CASUAL OUTER DÁNG NGẮN</h2>
+        <p class="editorial-desc">
+          Chất liệu len dệt mịn không xù lông, phom dáng thanh lịch hiện đại, phù hợp cho mọi hoạt động thường nhật.
+        </p>
+        <div class="editorial-actions">
+          <a [routerLink]="['/catalog', 'ao-cardigan-co-chu-v-dang-ngan']" class="editorial-btn">
+            Xem Chi Tiết Sản Phẩm
+          </a>
+          <a [routerLink]="['/virtual-try-on']" [queryParams]="{ productId: 'prod-003' }" class="editorial-btn-ai">
+            Thử Lên Người Ngay
+          </a>
+        </div>
+      </div>
     </div>
 
-    <a routerLink="/catalog" class="catalog-link">
-      Tất cả sản phẩm ({{ allProducts().length }}) →
-    </a>
-  </div>
+    <!-- Product Grid for Story 2 -->
+    <div class="editorial-products-row">
+      <app-product-grid
+        [products]="outerwearProducts()"
+        [columns]="4"
+        (tryOnClicked)="onTryOn($event)"
+        (addToCartClicked)="onAddToCart($event)"
+      />
+    </div>
+  </section>
 
-  <app-product-grid
-    [products]="displayedProducts()"
-    [columns]="4"
-    (tryOnClicked)="onTryOn($event)"
-    (addToCartClicked)="onAddToCart($event)"
-  />
-</section>
+  <!-- 7. Editorial Story 3: Quần Jeans Ống Suông Hiện Đại Video Background -->
+  <section class="editorial-collection container">
+    <div class="editorial-banner">
+      <video
+        autoplay
+        loop
+        muted
+        playsinline
+        class="editorial-banner-video"
+        [poster]="uniqloCmsBannerImg"
+      >
+        <source [src]="jeansVideoUrl" type="video/mp4" />
+      </video>
+      <div class="editorial-content-overlay">
+        <span class="editorial-tag">DENIM KAIHARA JAPAN</span>
+        <h2 class="editorial-heading">JEANS - BỘ SƯU TẬP QUẦN JEANS MỚI NHẤT</h2>
+        <p class="editorial-desc">
+          Ống suông thẳng đứng, cạp cao tôn dáng chân dài, công nghệ wash sinh thái tiết kiệm nước.
+        </p>
+        <div class="editorial-actions">
+          <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-jeans' }" class="editorial-btn">
+            Khám Phá Toàn Bộ Jeans
+          </a>
+        </div>
+      </div>
+    </div>
 
-<!-- 5. Minimalist Brand Philosophy (LifeWear) -->
-<section class="section-philosophy container">
-  <div class="philosophy-box">
-    <div class="philo-label">TRIẾT LÝ THIẾT KẾ</div>
-    <h3 class="philo-heading">Thời Trang Tạo Ra Cho Cuộc Sống Thường Nhật</h3>
-    <p class="philo-text">
-      Chúng tôi tin rằng sự tối giản là đỉnh cao của sự tinh tế. Từng đường may, chất liệu vải và gam màu trung tính được chăm chút kỹ lưỡng để bạn luôn cảm thấy thoải mái, tự tin trong mọi khoảnh khắc. Kết hợp cùng AI để cá nhân hóa việc mua sắm của bạn.
-    </p>
-  </div>
-</section>
+    <!-- Product Grid for Story 3 -->
+    <div class="editorial-products-row">
+      <app-product-grid
+        [products]="denimProducts()"
+        [columns]="4"
+        (tryOnClicked)="onTryOn($event)"
+        (addToCartClicked)="onAddToCart($event)"
+      />
+    </div>
+  </section>
+
+  <!-- 8. AI Virtual Try-On Studio Spotlight -->
+  <section class="ai-tryon-spotlight-section container">
+    <div class="ai-spotlight-card">
+      <div class="ai-spotlight-text">
+        <div class="ai-badge-row">
+          <span class="ai-tag">CÔNG NGHỆ ĐỘT PHÁ</span>
+          <span class="ai-model-tag">Mô hình IDM-VTON Khuếch Tán (Diffusion)</span>
+        </div>
+        <h2 class="ai-title">Không Còn Nỗi Lo Chọn Sai Size & Dáng Áo Khi Mua Hàng Online</h2>
+        <p class="ai-desc">
+          Công nghệ Trí tuệ Nhân tạo thế hệ mới cho phép bạn tải lên ảnh toàn thân của chính mình và ướm thử bất kỳ sản phẩm nào trong cửa hàng. Hệ thống tái hiện nếp gấp vải, độ ôm, và ánh sáng tự nhiên chỉ trong <strong>3 - 5 giây</strong>.
+        </p>
+        <div class="ai-steps-mini">
+          <div class="mini-step">
+            <span class="step-num">1</span>
+            <span class="step-txt">Chọn trang phục</span>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="mini-step">
+            <span class="step-num">2</span>
+            <span class="step-txt">Tải ảnh người mẫu</span>
+          </div>
+          <span class="step-arrow">→</span>
+          <div class="mini-step">
+            <span class="step-num">3</span>
+            <span class="step-txt">Nhận ảnh mô phỏng</span>
+          </div>
+        </div>
+        <div class="ai-actions">
+          <a routerLink="/virtual-try-on" class="btn-ai-primary">
+            TRẢI NGHIỆM PHÒNG THỬ ĐỒ ẢO
+          </a>
+          <a routerLink="/visual-search" class="btn-ai-secondary">
+            TÌM KIẾM BẰNG ẢNH
+          </a>
+        </div>
+      </div>
+      <div class="ai-spotlight-preview">
+        <div class="preview-card-wrap">
+          <video
+            autoplay
+            loop
+            muted
+            playsinline
+            class="preview-video"
+            [poster]="uniqloCmsBannerImg"
+          >
+            <source [src]="jwaVideoUrl" type="video/mp4" />
+          </video>
+          <div class="preview-overlay-tag">
+            <span>Mô phỏng chuyển động thực tế cùng AI</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Store Discovery Banner (Featuring Uniqlo CMS High-Res Banner) -->
+  <section class="store-discovery-section container">
+    <div class="store-banner-card">
+      <img
+        [src]="uniqloCmsBannerImg"
+        alt="Bộ Sưu Tập Đặc Biệt SmartFit LifeWear"
+        class="store-bg-img"
+      />
+      <div class="store-banner-content">
+        <span class="store-badge">BỘ SƯU TẬP ĐẶC BIỆT</span>
+        <h3 class="store-title">KHÁM PHÁ CỬA HÀNG TRẢI NGHIỆM AI & TOÀN BỘ LIFEWEAR 2026</h3>
+        <p class="store-subtitle">Trải nghiệm mua sắm thông minh tại AEON MALL Tân Phú và Hệ thống 12 Showroom toàn quốc.</p>
+        <a routerLink="/content/contact" class="store-link-btn">Xem Danh Sách Cửa Hàng →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Philosophy / LifeWear Strip -->
+  <section class="section-philosophy container">
+    <div class="philosophy-box">
+      <div class="philo-label">TRIẾT LÝ THIẾT KẾ LIFEWEAR</div>
+      <h3 class="philo-heading">Đơn Giản Để Đạt Đến Sự Hoàn Hảo</h3>
+      <p class="philo-text">
+        Trang phục được tạo ra để phục vụ cuộc sống của bạn. Tối giản trong từng đường kim mũi chỉ, chăm chút từ chất liệu sợi tự nhiên, và ứng dụng AI để bạn luôn tìm thấy món đồ vừa vặn nhất cho mình.
+      </p>
+    </div>
+  </section>
+</div>

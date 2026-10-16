@@ -1,195 +1,470 @@
-<!-- Toast Notification -->
-@if (addedMessage()) {
-  <div class="toast-notification fade-in">
-    <span>✓ {{ addedMessage() }}</span>
-    <a routerLink="/cart" class="toast-link">Xem giỏ hàng →</a>
-  </div>
+<!-- Toast Notification khi thêm vào giỏ hàng -->
+@if (addedToCartToast()) {
+<div class="toast-notification fade-in">
+  <span>✓ {{ addedToCartToast() }}</span>
+  <a routerLink="/cart" class="toast-link">Xem giỏ hàng →</a>
+</div>
 }
 
 <div class="tryon-page container">
-  <!-- Top Header -->
+  <!-- Top Header & Mode Switcher -->
   <div class="tryon-header">
-    <div class="badge-ai">CÔNG NGHỆ IDM-VTON DIFFUSION</div>
-    <h1 class="page-title">PHÒNG THỬ ĐỒ ẢO AI (VIRTUAL TRY-ON)</h1>
+    <div class="badge-ai">SMARTFIT FASHION AI STUDIO & ISO 8559</div>
+    <h1 class="page-title">PHÒNG THỬ ĐỒ ẢO & TƯ VẤN KÍCH CỠ THÔNG MINH</h1>
     <p class="page-desc">
-      Xem trước trang phục trên dáng người của bạn với độ chính xác cao về tỷ lệ cơ thể, ánh sáng và nếp vải trước khi quyết định mua hàng.
+      Trải nghiệm mua sắm thời trang thế hệ mới: Khởi tạo mô hình 3D cá nhân hóa, ướm thử trang phục đa dạng phom dáng,
+      và nhận tư vấn kích cỡ chuẩn xác dựa trên số đo nhân trắc học thực tế.
     </p>
+
+    <!-- Chuyển đổi giữa 2 chế độ riêng biệt -->
+    <div class="mode-switcher-bar">
+      <button type="button" class="mode-tab-btn" [class.active]="activeMode() === '3d_studio'" (click)="activeMode.set('3d_studio')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+        1. PHÒNG THỬ ĐỒ 3D TƯƠNG TÁC (3D STUDIO)
+      </button>
+
+      <button type="button" class="mode-tab-btn" [class.active]="activeMode() === '2d_vton'" (click)="activeMode.set('2d_vton')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        2. THỬ ĐỒ AI HÌNH ẢNH 2D (IMAGE-BASED VTON)
+      </button>
+    </div>
   </div>
 
-  <!-- Studio Workspace: 3 Columns -->
-  <div class="studio-grid">
-    <!-- Step 1: Person Photo Column -->
-    <div class="studio-card">
-      <div class="step-badge">BƯỚC 1</div>
-      <h3 class="card-title">ẢNH NGƯỜI MẪU / CÁ NHÂN</h3>
-      <p class="card-sub">Tải ảnh chụp của bạn hoặc chọn người mẫu sẵn có:</p>
+  <!-- ==================== CHẾ ĐỘ 1: PHÒNG THỬ ĐỒ 3D ==================== -->
+  @if (activeMode() === '3d_studio') {
+  <div class="studio-grid fade-in">
 
-      <!-- Sample Models Quick Selector -->
-      <div class="sample-models-row">
-        @for (m of sampleModels(); track m.id) {
-          <button
-            type="button"
-            class="sample-model-btn"
-            [class.active]="selectedModelUrl() === m.imageUrl && !userUploadedUrl()"
-            (click)="selectSampleModel(m.imageUrl)"
-            [title]="m.name"
-          >
-            <img [src]="m.imageUrl" [alt]="m.name" class="sample-img" />
+    <!-- CỘT 1: TÙY CHỈNH HÌNH THỂ & DIỆN MẠO (BƯỚC 1 & 2) -->
+    <div class="studio-card">
+      <div class="step-badge">BƯỚC 1 & 2</div>
+      <h3 class="card-title">HÌNH THỂ & DIỆN MẠO</h3>
+      <p class="card-sub">Tùy biến hình thể chuẩn hóa hoặc cá nhân hóa gương mặt:</p>
+
+      <!-- Giới tính: Nam / Nữ -->
+      <div class="gender-toggle-group">
+        <label class="group-title">Giới tính nhân vật:</label>
+        <div class="gender-buttons">
+          <button type="button" class="gender-btn" [class.active]="gender() === 'male'" (click)="setGender('male')">
+            👨 Nam (Men)
           </button>
+          <button type="button" class="gender-btn" [class.active]="gender() === 'female'" (click)="setGender('female')">
+            👩 Nữ (Women)
+          </button>
+        </div>
+      </div>
+
+      <!-- Presets vóc dáng chuẩn hóa (Body Archetypes) -->
+      <div class="presets-group">
+        <label class="group-title">Vóc dáng chuẩn hóa (Body Archetypes):</label>
+        <div class="presets-grid">
+          @for (preset of currentPresets(); track preset.key) {
+          <button type="button" class="preset-card-btn" [class.active]="selectedPreset() === preset.key"
+            (click)="selectPreset(preset.key)">
+            <span class="preset-name">{{ preset.name }}</span>
+            <span class="preset-desc">{{ preset.desc }}</span>
+          </button>
+          }
+        </div>
+      </div>
+
+      <!-- Sliders Chiều cao & Cân nặng -->
+      <div class="sliders-section">
+        <div class="slider-group">
+          <div class="slider-header">
+            <label>Chiều cao (Stature):</label>
+            <span class="slider-val">{{ heightCm() }} cm</span>
+          </div>
+          <input type="range" min="150" max="195" step="1" [(ngModel)]="heightCm" (input)="reconstructBaseAvatar()" class="range-slider" />
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <label>Cân nặng (Weight):</label>
+            <span class="slider-val">{{ weightKg() }} kg</span>
+          </div>
+          <input type="range" min="45" max="115" step="1" [(ngModel)]="weightKg" (input)="reconstructBaseAvatar()" class="range-slider" />
+        </div>
+
+        <!-- Bảng màu da PBR -->
+        <div class="slider-group">
+          <label class="group-title">Màu da nhân vật (PBR Skin Shading):</label>
+          <div class="skin-palette">
+            @for (st of skinTones; track st.key) {
+            <button type="button" class="skin-circle-btn" [class.active]="skinTone() === st.key"
+              [style.background-color]="st.hex" (click)="selectSkinTone(st)" [title]="st.name">
+            </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Khối Cá Nhân Hóa Khuôn Mặt & Quyền Riêng Tư (Privacy-First Face Upload) -->
+      <div class="face-personalization-card">
+        <div class="face-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+            <line x1="15" y1="9" x2="15.01" y2="9"></line>
+          </svg>
+          CÁ NHÂN HÓA DIỆN MẠO TỪ ẢNH CHÂN DUNG
+        </div>
+
+        <p class="face-hint">
+          Tải ảnh selfie chính diện để AI quét nhận diện và phủ texture gương mặt lên nhân vật 3D:
+        </p>
+
+        <!-- Privacy Consent Checkbox -->
+        <label class="privacy-consent-label">
+          <input type="checkbox" [(ngModel)]="userConsent" />
+          <span>Tôi đồng ý xử lý tạm thời ảnh khuôn mặt phục vụ tạo avatar diện mạo cá nhân.</span>
+        </label>
+
+        @if (!hasCustomFace()) {
+        <div class="upload-face-box">
+          <input type="file" id="faceInput" accept="image/jpeg,image/png" (change)="onFacePhotoSelected($event)" class="file-input" />
+          <label for="faceInput" class="face-upload-label" [class.disabled]="!userConsent() || isUploadingFace()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span>{{ isUploadingFace() ? 'Đang nhận diện khuôn mặt...' : 'Chọn ảnh chân dung (JPG/PNG <= 5MB)' }}</span>
+          </label>
+        </div>
+        } @else {
+        <div class="custom-face-active fade-in">
+          <div class="face-preview-row">
+            <img [src]="facePreviewUrl()" alt="Face Preview" class="face-thumb" />
+            <div class="face-info">
+              <strong>Đã áp dụng diện mạo cá nhân</strong>
+              <span class="face-disclaimer">Phép chiếu diện mạo xấp xỉ (Texture Projection)</span>
+            </div>
+          </div>
+          <button type="button" class="delete-face-btn" (click)="deleteFaceData()">
+            🗑️ Xóa dữ liệu ảnh & Trở về mặc định
+          </button>
+        </div>
+        }
+
+        @if (faceErrorMessage()) {
+        <div class="face-error-alert fade-in">
+          ⚠️ {{ faceErrorMessage() }}
+        </div>
         }
       </div>
 
-      <!-- Upload Zone -->
-      <div class="upload-zone">
-        <input
-          type="file"
-          id="personPhoto"
-          accept="image/*"
-          (change)="onFileChange($event)"
-          class="file-input"
-        />
-        <label for="personPhoto" class="upload-label">
-          <span class="upload-icon">📁</span>
-          <strong>Tải ảnh của bạn lên</strong>
-          <span>(Chụp toàn thân hoặc nửa người, phông nền sáng)</span>
+      <!-- Bảng số đo nhân trắc học ISO 8559-1 -->
+      <div class="iso-measurements-card">
+        <div class="iso-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          SỐ ĐO NHÂN TRẮC HỌC (CHUẨN ISO 8559-1)
+        </div>
+        <div class="iso-grid">
+          <div class="iso-item">
+            <span class="iso-lbl">Vòng ngực (C):</span>
+            <strong class="iso-val">{{ isoMeasurements().chest_cm }} cm</strong>
+          </div>
+          <div class="iso-item">
+            <span class="iso-lbl">Vòng eo (W):</span>
+            <strong class="iso-val">{{ isoMeasurements().waist_cm }} cm</strong>
+          </div>
+          <div class="iso-item">
+            <span class="iso-lbl">Vòng mông (Hip):</span>
+            <strong class="iso-val">{{ isoMeasurements().hip_cm }} cm</strong>
+          </div>
+          <div class="iso-item">
+            <span class="iso-lbl">Rộng vai (Across):</span>
+            <strong class="iso-val">{{ isoMeasurements().shoulder_cm }} cm</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CỘT 2: SÂN KHẤU 3D TƯƠNG TÁC (3D VIEWPORT) -->
+    <div class="studio-card stage-card">
+      <div class="stage-header">
+        <div class="stage-status">
+          <span class="status-dot" [class.dressed]="isDressed()"></span>
+          <strong>{{ isDressed() ? 'ĐANG MẶC THỬ 3D' : 'NHÂN VẬT 3D MỘC (A-POSE)' }}</strong>
+        </div>
+
+        <!-- Camera Controls -->
+        <div class="camera-angle-controls">
+          <button type="button" class="cam-btn" [class.active]="cameraAngle() === 'front'" (click)="setCameraAngle('front')">Chính diện</button>
+          <button type="button" class="cam-btn" [class.active]="cameraAngle() === 'quarter'" (click)="setCameraAngle('quarter')">Xoay 45°</button>
+          <button type="button" class="cam-btn" [class.active]="cameraAngle() === 'side'" (click)="setCameraAngle('side')">Nghiêng</button>
+          <button type="button" class="cam-btn" [class.active]="cameraAngle() === 'back'" (click)="setCameraAngle('back')">Sau lưng</button>
+          <button type="button" class="cam-btn reset" (click)="resetCamera()" title="Đặt lại góc nhìn">↺ Đặt lại</button>
+        </div>
+      </div>
+
+      <!-- 3D Viewport with Google model-viewer -->
+      <div class="viewport-3d-wrapper">
+        <model-viewer
+          [src]="activeGlbUrl()"
+          camera-controls
+          auto-rotate-delay="4000"
+          [attr.camera-orbit]="cameraOrbit()"
+          camera-target="0m 0.88m 0m"
+          field-of-view="38deg"
+          shadow-intensity="1.2"
+          shadow-softness="0.8"
+          exposure="1.05"
+          interaction-prompt="none"
+          class="interactive-3d-model">
+        </model-viewer>
+
+        @if (isGeneratingAvatar() || isFitting()) {
+        <div class="loading-overlay fade-in">
+          <div class="spinner"></div>
+          <p class="loading-text">{{ isFitting() ? 'Đang nắn phom áo và quét va chạm vải...' : 'Đang tái cấu trúc hình thể 3D...' }}</p>
+        </div>
+        }
+
+        <div class="viewport-controls-hint">
+          <span>🖐️ Kéo chuột để xoay 360° | Cuộn chuột để phóng to/thu nhỏ</span>
+        </div>
+
+        <!-- Heatmap Overlay Indicator -->
+        @if (isDressed()) {
+        <div class="heatmap-legend fade-in">
+          <div class="legend-title">BẢN ĐỒ ÁP LỰC VA CHẠM (TENSION HEATMAP)</div>
+          <div class="legend-scale">
+            <span class="scale-item red">■ Vùng căng ép (Penetration)</span>
+            <span class="scale-item green">■ Vừa vặn (Optimal Ease)</span>
+            <span class="scale-item blue">■ Thoải mái (Relaxed)</span>
+          </div>
+          <div class="legend-disclaimer">Lưu ý: Mô phỏng khoảng cách hình học, không thay thế thử nghiệm vật lý vải.</div>
+        </div>
+        }
+      </div>
+
+      <!-- Stage Bottom Toggles -->
+      <div class="stage-footer">
+        <button type="button" class="stage-toggle-btn" [class.active]="!isDressed()" (click)="undressAvatar()">
+          👤 Nhân vật mộc
+        </button>
+        <button type="button" class="stage-toggle-btn primary" [class.active]="isDressed()" (click)="applyGarmentFitting()">
+          👕 Mặc áo lên 3D
+        </button>
+        <label class="heatmap-checkbox">
+          <input type="checkbox" [(ngModel)]="showHeatmap" (change)="isDressed() && applyGarmentFitting()" />
+          Bật quét nhiệt Tension Heatmap
         </label>
       </div>
-
-      <!-- Active Preview -->
-      <div class="preview-box">
-        <img [src]="currentPersonImage" alt="Person Preview" class="preview-img" />
-        <div class="photo-tag">
-          {{ userUploadedUrl() ? 'Ảnh của bạn' : 'Người mẫu mẫu' }}
-        </div>
-      </div>
     </div>
 
-    <!-- Step 2: Garment Selection Column -->
+    <!-- CỘT 3: TỦ ĐỒ, TƯ VẤN KÍCH CỠ & GIỎ HÀNG (BƯỚC 3 & 4) -->
     <div class="studio-card">
-      <div class="step-badge">BƯỚC 2</div>
-      <h3 class="card-title">CHỌN TRANG PHỤC THỬ</h3>
-      <p class="card-sub">Chọn sản phẩm bạn muốn ướm thử:</p>
+      <div class="step-badge">BƯỚC 3 & 4</div>
+      <h3 class="card-title">CHỌN TRANG PHỤC & TƯ VẤN SIZE</h3>
+      <p class="card-sub">Chọn sản phẩm, kích cỡ và kiểm tra độ vừa vặn AI:</p>
 
-      <!-- Mini Garment Carousel / List -->
-      <div class="garment-list">
-        @for (p of availableProducts(); track p.id) {
-          <button
-            type="button"
-            class="garment-chip"
-            [class.active]="selectedProduct().id === p.id"
-            (click)="selectProduct(p)"
-          >
-            <img [src]="p.thumbnailUrl" [alt]="p.name" class="chip-img" />
-            <div class="chip-info">
-              <strong class="chip-name">{{ p.name }}</strong>
-              <span class="chip-price">{{ p.basePrice | number }}₫</span>
-            </div>
-          </button>
+      <!-- Danh sách sản phẩm catalog -->
+      <div class="wardrobe-carousel">
+        @for (prod of availableProducts().slice(0, 4); track prod.id) {
+        <button type="button" class="wardrobe-item-btn" [class.active]="selectedProduct().id === prod.id"
+          (click)="selectProduct(prod)">
+          <img [src]="prod.thumbnailUrl" [alt]="prod.name" class="wardrobe-thumb" />
+          <div class="wardrobe-info">
+            <span class="wardrobe-name">{{ prod.name }}</span>
+            <span class="wardrobe-price">{{ prod.basePrice | number:'1.0-0' }}đ</span>
+          </div>
+        </button>
         }
       </div>
 
-      <!-- Selected Garment Summary -->
-      @if (selectedProduct(); as sel) {
-        <div class="selected-garment-box">
-          <div class="sel-preview">
-            <img [src]="sel.thumbnailUrl" [alt]="sel.name" class="sel-img" />
-            <div class="sel-details">
-              <h4>{{ sel.name }}</h4>
-              <div class="sel-price">{{ sel.basePrice | number }}₫</div>
-              <div class="size-select-row">
-                <label>Kích cỡ thử:</label>
-                <select [(ngModel)]="selectedSize" name="size">
-                  @for (v of sel.variants; track v.id) {
-                    <option [value]="v.size">Size {{ v.size }} ({{ v.color }})</option>
-                  }
-                </select>
-              </div>
-            </div>
+      <!-- Chi tiết trang phục đang chọn -->
+      <div class="selected-garment-details">
+        <div class="garment-card-header">
+          <img [src]="selectedProduct().thumbnailUrl" [alt]="selectedProduct().name" class="garment-mini-img" />
+          <div class="garment-head-info">
+            <h4 class="garment-title">{{ selectedProduct().name }}</h4>
+            <div class="garment-price">{{ selectedProduct().basePrice | number:'1.0-0' }}đ</div>
           </div>
-
-          <!-- Main CTA to Run AI -->
-          <button
-            type="button"
-            class="btn-ai-run"
-            [disabled]="isProcessing()"
-            (click)="startAiTryOn()"
-          >
-            @if (isProcessing()) {
-              <span>⏳ Đang xử lý AI...</span>
-            } @else {
-              <span>✨ BẮT ĐẦU THỬ ĐỒ ẢO (RUN IDM-VTON)</span>
-            }
-          </button>
         </div>
+
+        <!-- Chọn Size -->
+        <div class="garment-option-group">
+          <label class="opt-label">Kích cỡ thử nghiệm:</label>
+          <div class="size-buttons-row">
+            @for (sz of availableSizes; track sz) {
+            <button type="button" class="size-btn" [class.active]="selectedSize() === sz" (click)="selectSize(sz)">
+              {{ sz }}
+            </button>
+            }
+          </div>
+        </div>
+
+        <!-- Chọn Màu sắc -->
+        <div class="garment-option-group">
+          <label class="opt-label">Màu sắc vải:</label>
+          <div class="color-circles-row">
+            @for (c of garmentColors; track c.key) {
+            <button type="button" class="color-circle" [class.active]="selectedGarmentColor() === c.key"
+              [style.background-color]="c.hex" (click)="selectGarmentColor(c)" [title]="c.name">
+            </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 1: TƯ VẤN KÍCH CỠ GIẢI THÍCH ĐƯỢC (EXPLAINABLE SIZING ENGINE) -->
+      @if (sizeRecommendation(); as sRec) {
+      <div class="explainable-sizing-card fade-in">
+        <div class="sizing-card-header">
+          <div class="sizing-badge">AI TƯ VẤN KÍCH CỠ CHUẨN</div>
+          <span class="confidence-tag">Độ tin cậy: {{ sRec.confidence_score }}%</span>
+        </div>
+
+        <div class="recommendation-callout">
+          <span class="rec-label">Size phù hợp nhất:</span>
+          <strong class="rec-value">Size {{ sRec.recommended_size }}</strong>
+        </div>
+
+        <p class="rec-explanation">{{ sRec.explanation }}</p>
+
+        @if (sRec.alternative_size && sRec.alternative_size !== sRec.recommended_size) {
+        <div class="rec-alt">
+          Lựa chọn thay thế: <strong>Size {{ sRec.alternative_size }}</strong> (nếu thích mặc ôm hoặc thụng theo sở thích).
+        </div>
+        }
+
+        @if (selectedSize() !== sRec.recommended_size) {
+        <button type="button" class="apply-rec-btn" (click)="applyRecommendedSize()">
+          Đổi sang Size đề xuất (Size {{ sRec.recommended_size }}) →
+        </button>
+        }
+      </div>
       }
+
+      <!-- CARD 2: KẾT QUẢ ĐÁNH GIÁ ĐỘ CĂNG ÉP VẢI 3D (FIT DIAGNOSTIC) -->
+      @if (fitDiagnostic(); as diag) {
+      <div class="fit-diagnostic-card fade-in" [class.tight]="diag.is_tight" [class.perfect]="!diag.is_tight">
+        <div class="diag-header">
+          <span class="diag-icon">{{ diag.is_tight ? '⚠️' : '✓' }}</span>
+          <strong>{{ diag.is_tight ? 'CẢNH BÁO BÓ SÁT' : 'PHOM DÁNG VỪA VẶN' }}</strong>
+          @if (diag.overpressure_percentage > 0) {
+          <span class="overpressure-pill">Áp lực căng: {{ diag.overpressure_percentage }}%</span>
+          }
+        </div>
+        <p class="diag-text">{{ diag.explanation }}</p>
+      </div>
+      }
+
+      <!-- Nút Thêm vào giỏ hàng thực tế -->
+      <div class="cart-action-section">
+        <button type="button" class="add-to-cart-action-btn" (click)="addToCart()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          Thêm vào giỏ hàng (Size {{ selectedSize() }})
+        </button>
+      </div>
     </div>
 
-    <!-- Step 3: Result & Comparison Column -->
-    <div class="studio-card result-column">
-      <div class="step-badge">BƯỚC 3</div>
-      <h3 class="card-title">KẾT QUẢ THỬ ĐỒ AI 3D</h3>
-      <p class="card-sub">Hình ảnh mô phỏng nếp gấp & ánh sáng thực tế:</p>
+  </div>
+  }
 
-      @if (isProcessing()) {
-        <!-- Animated Processing Pipeline State -->
-        <div class="processing-state-box">
-          <div class="spinner-ring"></div>
-          <h4 class="proc-step-text">{{ processingStep() }}</h4>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar-fill" [style.width.%]="processingPercent()"></div>
-          </div>
-          <div class="proc-note">
-            Đang chạy mô hình khuếch tán IDM-VTON trên cụm GPU AI...
-          </div>
-        </div>
-      } @else if (resultImageUrl()) {
-        <!-- Generated Result View -->
-        <div class="result-display-box fade-in">
-          <div class="result-img-wrap">
-            <img [src]="resultImageUrl()" alt="Virtual Try-On Result" class="result-img" />
-            <div class="confidence-tag">✓ Độ chân thực 98.6%</div>
-          </div>
+  <!-- ==================== CHẾ ĐỘ 2: THỬ ĐỒ AI 2D (IMAGE-BASED VTON) ==================== -->
+  @if (activeMode() === '2d_vton') {
+  <div class="vton-2d-container fade-in">
+    <div class="vton-2d-header">
+      <div class="vton-2d-badge">CÔNG NGHỆ 2D DIFFUSION VTON (IDM-VTON)</div>
+      <h2>THỬ ĐỒ ẢO QUA HÌNH ẢNH CHỤP TOÀN THÂN</h2>
+      <p>Tải lên ảnh chụp người thật và ghép mẫu trang phục tự động bằng mạng nơ-ron khuếch tán 2D.</p>
+      <div class="vton-notice">
+        ℹ️ Lưu ý: Đây là hình ảnh 2D được sinh bởi mô hình AI (IDM-VTON) - Không phải mô phỏng vật lý 3D.
+      </div>
+    </div>
 
-          <div class="result-actions">
-            <button type="button" class="btn-uniqlo-primary buy-this-btn" (click)="addToCartFromTryOn()">
-              🛍️ Thêm Mẫu Vừa Thử Vào Giỏ ({{ selectedProduct().basePrice | number }}₫)
-            </button>
-            <a [href]="resultImageUrl()" download="fashion-ai-tryon.jpg" target="_blank" class="btn-uniqlo-outline download-btn">
-              ⬇️ Tải Ảnh HD
-            </a>
+    <div class="vton-2d-grid">
+      <!-- Cột 1: Tải ảnh người -->
+      <div class="vton-card">
+        <h3>1. ẢNH NGƯỜI CHỤP TOÀN THÂN</h3>
+        <p class="vton-sub">Yêu cầu đứng thẳng, toàn thân hoặc bán thân rõ nét:</p>
+
+        <div class="vton-upload-area">
+          <input type="file" id="person2d" accept="image/jpeg,image/png" (change)="on2dPersonPhotoSelected($event)" class="file-input" />
+          <label for="person2d" class="vton-upload-label">
+            @if (vtonPersonPreview()) {
+            <img [src]="vtonPersonPreview()" alt="Person Preview" class="vton-preview-img" />
+            } @else {
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <strong>Tải ảnh toàn thân của bạn</strong>
+            <span>(Hỗ trợ JPG/PNG tối đa 5MB)</span>
+            }
+          </label>
+        </div>
+      </div>
+
+      <!-- Cột 2: Chọn trang phục mẫu -->
+      <div class="vton-card">
+        <h3>2. TRANG PHỤC MUỐN THỬ</h3>
+        <p class="vton-sub">Đang chọn từ danh mục sản phẩm LifeWear:</p>
+
+        <div class="vton-selected-garment">
+          <img [src]="selectedProduct().thumbnailUrl" [alt]="selectedProduct().name" class="vton-garment-img" />
+          <h4>{{ selectedProduct().name }}</h4>
+          <span class="vton-price">{{ selectedProduct().basePrice | number:'1.0-0' }}đ</span>
+        </div>
+
+        <button type="button" class="run-vton-btn" [class.loading]="isProcessing2DVton()" (click)="run2dVirtualTryOn()">
+          {{ isProcessing2DVton() ? 'Đang thực thi mô hình IDM-VTON...' : 'Bắt đầu thử đồ ảo 2D' }}
+        </button>
+
+        @if (vtonError()) {
+        <div class="vton-error-banner fade-in">
+          ⚠️ {{ vtonError() }}
+        </div>
+        }
+      </div>
+
+      <!-- Cột 3: Kết quả thử đồ 2D -->
+      <div class="vton-card result-card">
+        <h3>3. KẾT QUẢ THỬ ĐỒ 2D</h3>
+        <p class="vton-sub">Hình ảnh kết xuất từ mô hình AI:</p>
+
+        <div class="vton-result-display">
+          @if (isProcessing2DVton()) {
+          <div class="vton-loading-box">
+            <div class="spinner"></div>
+            <p>Đang tách tư thế OpenPose và sinh ảnh khuếch tán...</p>
           </div>
+          } @else if (vtonResult()?.output_image_url) {
+          <div class="vton-result-success fade-in">
+            <img [src]="vtonResult()!.output_image_url" alt="VTON Result" class="vton-final-image" />
+            <div class="vton-ai-badge">✓ AI SYNTHESIZED 2D IMAGE</div>
+          </div>
+          } @else {
+          <div class="vton-empty-state">
+            <span class="empty-icon">🖼️</span>
+            <p>Chưa có kết quả. Vui lòng tải ảnh và nhấn nút bắt đầu thử đồ.</p>
+          </div>
+          }
         </div>
-      } @else {
-        <!-- Default Empty / Ready State -->
-        <div class="ready-state-box">
-          <div class="ready-icon">🪄</div>
-          <h4>Sẵn Sàng Mô Phỏng</h4>
-          <p>
-            Chọn người mẫu bên trái, trang phục ở giữa và nhấn <strong>Bắt đầu thử đồ ảo</strong> để tạo ảnh.
-          </p>
-        </div>
-      }
+      </div>
     </div>
   </div>
-
-  <!-- Session Try-On History -->
-  @if (tryOnHistory().length > 0) {
-    <div class="history-section">
-      <h3 class="hist-title">LỊCH SỬ THỬ ĐỒ TRONG PHIÊN NÀY</h3>
-      <div class="history-cards">
-        @for (item of tryOnHistory(); track item.product.id) {
-          <div class="history-card">
-            <img [src]="item.resultUrl" [alt]="item.product.name" class="hist-thumb" />
-            <div class="hist-meta">
-              <strong>{{ item.product.name }}</strong>
-              <span>{{ item.product.basePrice | number }}₫</span>
-              <button type="button" class="btn-hist-select" (click)="selectProduct(item.product)">
-                Thử lại mẫu này
-              </button>
-            </div>
-          </div>
-        }
-      </div>
-    </div>
   }
+
 </div>

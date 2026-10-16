@@ -1,6 +1,8 @@
 <div class="access-denied-container container">
   <div class="denied-card fade-in">
-    <div class="lock-icon">🔒</div>
+    <div class="lock-icon">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#e60012" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+    </div>
     <div class="status-code">403 FORBIDDEN</div>
     <h1 class="denied-title">BẠN KHÔNG CÓ QUYỀN TRUY CẬP TRANG QUẢN TRỊ</h1>
     
@@ -16,29 +18,33 @@
     <div class="permissions-comparison">
       <div class="perm-col customer-perm">
         <div class="perm-header">
-          <span class="icon">👤</span>
+          <span class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </span>
           <h3>Quyền Của Người Xem (Hiện Tại)</h3>
         </div>
         <ul>
-          <li>✓ Xem danh mục và chi tiết sản phẩm thời trang</li>
-          <li>✓ Thêm sản phẩm vào giỏ hàng và điều chỉnh số lượng</li>
-          <li>✓ Đặt hàng và thanh toán trực tuyến</li>
-          <li>✓ Thử đồ ảo AI (IDM-VTON) & Tìm kiếm bằng ảnh</li>
-          <li>✗ Không thể can thiệp thêm, xóa, sửa sản phẩm của cửa hàng</li>
+          <li>• Xem danh mục và chi tiết sản phẩm thời trang</li>
+          <li>• Thêm sản phẩm vào giỏ hàng và điều chỉnh số lượng</li>
+          <li>• Đặt hàng và thanh toán trực tuyến</li>
+          <li>• Thử đồ ảo AI (IDM-VTON) & Tìm kiếm bằng ảnh</li>
+          <li>✕ Không thể can thiệp thêm, xóa, sửa sản phẩm của cửa hàng</li>
         </ul>
       </div>
 
       <div class="perm-col admin-perm">
         <div class="perm-header">
-          <span class="icon">👑</span>
+          <span class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </span>
           <h3>Quyền Quản Trị Viên (Admin)</h3>
         </div>
         <ul>
-          <li>✓ Toàn quyền thêm, xóa, sửa, setup sản phẩm & giá</li>
-          <li>✓ Quản lý danh mục hàng hóa & biến thể tồn kho (SKU)</li>
-          <li>✓ Duyệt và cập nhật trạng thái đơn hàng của khách</li>
-          <li>✓ Quản lý danh sách người dùng & phân bổ vai trò</li>
-          <li>✓ Xem Dashboard phân tích doanh số và AI Try-On</li>
+          <li>• Toàn quyền thêm, xóa, sửa, setup sản phẩm & giá</li>
+          <li>• Quản lý danh mục hàng hóa & biến thể tồn kho (SKU)</li>
+          <li>• Duyệt và cập nhật trạng thái đơn hàng của khách</li>
+          <li>• Quản lý danh sách người dùng & phân bổ vai trò</li>
+          <li>• Xem Dashboard phân tích doanh số và AI Try-On</li>
         </ul>
       </div>
     </div>
@@ -48,7 +54,7 @@
         ← Về Cửa Hàng Mua Sắm
       </a>
       <button type="button" class="btn-uniqlo-primary btn-demo-admin" (click)="switchToAdmin()">
-        👑 Chuyển Sang Quyền Admin (Thử Nghiệm Đồ Án)
+        Chuyển Sang Quyền Admin (Thử Nghiệm Đồ Án)
       </button>
     </div>
   </div>

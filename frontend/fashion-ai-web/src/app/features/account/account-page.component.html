@@ -17,6 +17,13 @@
     </div>
   }
 
+  @if (authError()) {
+    <div class="alert-error fade-in">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      <span>{{ authError() }}</span>
+    </div>
+  }
+
   @if (!authService.isAuthenticated()) {
     <!-- Login & Register Modal / Card -->
     <div class="auth-card fade-in">
@@ -25,7 +32,7 @@
           type="button"
           class="auth-tab-btn"
           [class.active]="authTab() === 'login'"
-          (click)="authTab.set('login')"
+          (click)="authTab.set('login'); authError.set(null)"
         >
           ĐĂNG NHẬP
         </button>
@@ -33,7 +40,7 @@
           type="button"
           class="auth-tab-btn"
           [class.active]="authTab() === 'register'"
-          (click)="authTab.set('register')"
+          (click)="authTab.set('register'); authError.set(null)"
         >
           TẠO TÀI KHOẢN MỚI
         </button>
@@ -41,59 +48,115 @@
 
       <!-- Quick Role Test Buttons for Demo -->
       <div class="demo-quick-auth">
-        <span class="demo-txt">Đăng nhập nhanh cho đồ án:</span>
+        <span class="demo-txt">Tài khoản thử nghiệm demo:</span>
         <div class="demo-auth-btns">
           <button type="button" class="btn-demo-auth admin" (click)="loginAsAdmin()">
-            👑 Đăng Nhập Với Quyền ADMIN (Toàn quyền)
+            ADMIN (Toàn quyền quản trị)
           </button>
           <button type="button" class="btn-demo-auth customer" (click)="loginAsCustomer()">
-            👤 Đăng Nhập Với Quyền NGƯỜI XEM (Mua hàng & Thêm giỏ)
+            KHÁCH HÀNG (Mua sắm & Thử đồ)
           </button>
         </div>
       </div>
 
       @if (authTab() === 'login') {
         <form class="auth-form" (ngSubmit)="handleLogin()">
-          <h2 class="form-title">Đăng Nhập Thành Viên</h2>
-          <p class="form-sub">Đăng nhập để xem lịch sử mua sắm, quản lý giỏ hàng và lưu kết quả thử đồ ảo AI.</p>
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <h2 class="form-title">Đăng Nhập Thành Viên</h2>
+            <span style="font-size: 11px; color: #10b981; font-weight: 700;">Supabase Auth</span>
+          </div>
+          <p class="form-sub">Đăng nhập bằng tài khoản Supabase của bạn để lưu kết quả thử đồ ảo AI và lịch sử đơn hàng.</p>
 
           <div class="form-group">
             <label>Địa chỉ Email</label>
-            <input type="email" [ngModel]="loginEmail()" (ngModelChange)="loginEmail.set($event)" name="email" required />
-            <span class="input-hint">Gợi ý: Nhập email chứa chữ "admin" để vào vai trò Quản Trị Viên</span>
+            <input
+              type="email"
+              [ngModel]="loginEmail()"
+              (ngModelChange)="loginEmail.set($event)"
+              name="email"
+              placeholder="name@example.com"
+              required
+            />
           </div>
 
           <div class="form-group">
             <label>Mật khẩu</label>
-            <input type="password" [ngModel]="loginPassword()" (ngModelChange)="loginPassword.set($event)" name="password" required />
+            <input
+              type="password"
+              [ngModel]="loginPassword()"
+              (ngModelChange)="loginPassword.set($event)"
+              name="password"
+              placeholder="Nhập mật khẩu..."
+              required
+            />
           </div>
 
-          <button type="submit" class="btn-uniqlo-primary auth-submit-btn">
-            ĐĂNG NHẬP NGAY
+          <button
+            type="submit"
+            class="btn-uniqlo-primary auth-submit-btn"
+            [disabled]="authService.isLoading()"
+          >
+            @if (authService.isLoading()) {
+              <span>Đang kết nối Supabase...</span>
+            } @else {
+              <span>ĐĂNG NHẬP VỚI SUPABASE</span>
+            }
           </button>
         </form>
       } @else {
-        <form class="auth-form" (ngSubmit)="handleLogin()">
-          <h2 class="form-title">Đăng Ký Thành Viên</h2>
-          <p class="form-sub">Nhận ngay voucher giảm 10% cho đơn hàng đầu tiên.</p>
+        <form class="auth-form" (ngSubmit)="handleRegister()">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <h2 class="form-title">Đăng Ký Thành Viên</h2>
+            <span style="font-size: 11px; color: #10b981; font-weight: 700;">Supabase Auth</span>
+          </div>
+          <p class="form-sub">Tài khoản mới sẽ được tự động đồng bộ vào bảng <code>profiles</code> trên cơ sở dữ liệu Supabase.</p>
 
           <div class="form-group">
             <label>Họ và tên</label>
-            <input type="text" [ngModel]="regFullName()" (ngModelChange)="regFullName.set($event)" name="regName" placeholder="Nguyễn Văn A" required />
+            <input
+              type="text"
+              [ngModel]="regFullName()"
+              (ngModelChange)="regFullName.set($event)"
+              name="regName"
+              placeholder="Nguyễn Văn A"
+              required
+            />
           </div>
 
           <div class="form-group">
             <label>Địa chỉ Email</label>
-            <input type="email" [ngModel]="regEmail()" (ngModelChange)="regEmail.set($event)" name="regEmail" placeholder="name@domain.com" required />
+            <input
+              type="email"
+              [ngModel]="regEmail()"
+              (ngModelChange)="regEmail.set($event)"
+              name="regEmail"
+              placeholder="name@domain.com"
+              required
+            />
           </div>
 
           <div class="form-group">
             <label>Mật khẩu (tối thiểu 6 ký tự)</label>
-            <input type="password" [ngModel]="regPassword()" (ngModelChange)="regPassword.set($event)" name="regPassword" placeholder="••••••••" required />
+            <input
+              type="password"
+              [ngModel]="regPassword()"
+              (ngModelChange)="regPassword.set($event)"
+              name="regPassword"
+              placeholder="Tối thiểu 6 ký tự"
+              required
+            />
           </div>
 
-          <button type="submit" class="btn-uniqlo-primary auth-submit-btn">
-            TẠO TÀI KHOẢN
+          <button
+            type="submit"
+            class="btn-uniqlo-primary auth-submit-btn"
+            [disabled]="authService.isLoading()"
+          >
+            @if (authService.isLoading()) {
+              <span>Đang tạo tài khoản Supabase...</span>
+            } @else {
+              <span>TẠO TÀI KHOẢN VỚI SUPABASE</span>
+            }
           </button>
         </form>
       }
@@ -111,7 +174,7 @@
             <strong class="user-name">{{ authService.currentUser()?.fullName || authService.currentUser()?.username }}</strong>
             <span class="user-email">{{ authService.currentUser()?.email }}</span>
             <div class="role-indicator-tag" [class.admin]="authService.isAdmin()">
-              {{ authService.isAdmin() ? '👑 VAI TRÒ: ADMIN' : '👤 VAI TRÒ: NGƯỜI XEM (CUSTOMER)' }}
+              {{ authService.isAdmin() ? 'VAI TRÒ: ADMIN' : 'VAI TRÒ: KHÁCH HÀNG (CUSTOMER)' }}
             </div>
           </div>
         </div>
@@ -120,14 +183,14 @@
         @if (authService.isAdmin()) {
           <div class="admin-gateway-box">
             <a routerLink="/admin" class="btn-admin-gateway">
-              ⚙️ VÀO TRANG QUẢN TRỊ ADMIN →
+              VÀO TRANG QUẢN TRỊ ADMIN →
             </a>
           </div>
         } @else {
           <div class="customer-info-box">
             <span class="role-privilege-label">Quyền hạn tài khoản:</span>
-            <p>✓ Được phép thêm sản phẩm vào giỏ hàng, mua sắm và thử đồ ảo AI.</p>
-            <p class="role-restricted-txt">✗ Không có quyền truy cập Backoffice Quản Trị.</p>
+            <p>Được phép thêm sản phẩm vào giỏ hàng, mua sắm và thử đồ ảo AI.</p>
+            <p class="role-restricted-txt">Không có quyền truy cập Backoffice Quản Trị.</p>
           </div>
         }
 
@@ -136,11 +199,11 @@
           <span class="sw-title">Đổi vai trò để thử nghiệm:</span>
           @if (authService.isAdmin()) {
             <button type="button" class="btn-sw-pill" (click)="loginAsCustomer()">
-              Đổi sang: Người Xem (Customer)
+              Đổi sang: Khách Hàng (Customer)
             </button>
           } @else {
             <button type="button" class="btn-sw-pill admin" (click)="loginAsAdmin()">
-              👑 Đổi sang: Quản Trị Viên (Admin)
+              Đổi sang: Quản Trị Viên (Admin)
             </button>
           }
         </div>
@@ -152,7 +215,7 @@
             [class.active]="accountActiveTab() === 'profile'"
             (click)="accountActiveTab.set('profile')"
           >
-            📋 Thông tin & Số đo AI
+            Thông tin & Số đo AI
           </button>
           <button
             type="button"
@@ -160,7 +223,7 @@
             [class.active]="accountActiveTab() === 'orders'"
             (click)="accountActiveTab.set('orders')"
           >
-            📦 Đơn hàng của tôi ({{ productState.orders().length }})
+            Đơn hàng của tôi ({{ productState.orders().length }})
           </button>
           <button
             type="button"
@@ -168,10 +231,10 @@
             [class.active]="accountActiveTab() === 'ai-history'"
             (click)="accountActiveTab.set('ai-history')"
           >
-            ✨ Lịch sử thử đồ ảo (AI)
+            Lịch sử thử đồ ảo (AI)
           </button>
           <button type="button" class="menu-btn logout-btn" (click)="handleLogout()">
-            🚪 Đăng xuất
+            Đăng xuất
           </button>
         </nav>
       </aside>
@@ -204,7 +267,7 @@
               </div>
 
               <div class="measurements-section">
-                <h3 class="meas-heading">📏 Số Đo Vóc Dáng Phục Vụ Virtual Try-On</h3>
+                <h3 class="meas-heading">Số Đo Vóc Dáng Phục Vụ Virtual Try-On</h3>
                 <div class="form-row">
                   <div class="form-group">
                     <label>Chiều cao (cm)</label>

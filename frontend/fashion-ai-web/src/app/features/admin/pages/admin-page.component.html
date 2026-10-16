@@ -3,7 +3,7 @@
   <header class="admin-header">
     <div class="container admin-header-content">
       <div class="admin-brand">
-        <span class="badge-role-admin">👑 SUPER ADMIN</span>
+        <span class="badge-role-admin">SUPER ADMIN</span>
         <div class="brand-title-wrap">
           <h1 class="brand-title">FASHION AI • BACKOFFICE PORTAL</h1>
           <span class="brand-subtitle">Hệ Thống Quản Trị Trung Tâm & Phân Quyền Vai Trò</span>
@@ -15,16 +15,16 @@
         <div class="role-simulator-box" title="Thử nghiệm phân quyền: Chuyển sang vai trò Người Xem để kiểm tra rào cản truy cập">
           <span class="sim-label">Kiểm tra phân quyền:</span>
           <button type="button" class="btn-sim-customer" (click)="simulateSwitchToCustomer()">
-            👤 Đổi Sang Vai Trò Người Xem
+            Đổi Sang Khách Hàng
           </button>
         </div>
 
         <a routerLink="/" class="btn-top-link">
-          🛍️ Về Cửa Hàng
+          Về Cửa Hàng
         </a>
 
         <button type="button" class="btn-top-logout" (click)="simulateLogout()" title="Đăng xuất khỏi hệ thống">
-          🚪 Đăng Xuất
+          Đăng Xuất
         </button>
       </div>
     </div>
@@ -47,7 +47,7 @@
         [class.active]="activeTab() === 'dashboard'"
         (click)="activeTab.set('dashboard')"
       >
-        📊 Tổng Quan
+        Tổng Quan
       </button>
       <button
         type="button"
@@ -55,7 +55,7 @@
         [class.active]="activeTab() === 'products'"
         (click)="activeTab.set('products')"
       >
-        👗 Quản Lý Sản Phẩm ({{ productState.products().length }})
+        Quản Lý Sản Phẩm ({{ productState.products().length }})
       </button>
       <button
         type="button"
@@ -63,7 +63,7 @@
         [class.active]="activeTab() === 'categories'"
         (click)="activeTab.set('categories')"
       >
-        📁 Danh Mục Hàng Hóa ({{ productState.categories().length }})
+        Danh Mục Hàng Hóa ({{ productState.categories().length }})
       </button>
       <button
         type="button"
@@ -71,7 +71,7 @@
         [class.active]="activeTab() === 'inventory'"
         (click)="activeTab.set('inventory')"
       >
-        📊 Biến Thể & Tồn Kho
+        Biến Thể & Tồn Kho
         @if (productState.lowStockVariantsCount() > 0) {
           <span class="tab-warn-badge">{{ productState.lowStockVariantsCount() }}</span>
         }
@@ -82,7 +82,7 @@
         [class.active]="activeTab() === 'orders'"
         (click)="activeTab.set('orders')"
       >
-        📦 Quản Lý Đơn Hàng ({{ productState.orders().length }})
+        Quản Lý Đơn Hàng ({{ productState.orders().length }})
       </button>
       <button
         type="button"
@@ -90,7 +90,7 @@
         [class.active]="activeTab() === 'users'"
         (click)="activeTab.set('users')"
       >
-        👥 Người Dùng & Phân Quyền ({{ authService.allUsers().length }})
+        Người Dùng & Phân Quyền ({{ authService.allUsers().length }})
       </button>
     </nav>
 
@@ -102,7 +102,9 @@
         <!-- 4 KPI Summary Cards -->
         <div class="kpi-grid">
           <div class="kpi-card">
-            <div class="kpi-icon">💰</div>
+            <div class="kpi-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            </div>
             <div class="kpi-data">
               <span class="kpi-value">{{ productState.totalRevenue() | number }}₫</span>
               <span class="kpi-title">Tổng Doanh Thu Đơn Hàng</span>
@@ -111,7 +113,9 @@
           </div>
 
           <div class="kpi-card">
-            <div class="kpi-icon">📦</div>
+            <div class="kpi-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </div>
             <div class="kpi-data">
               <span class="kpi-value">{{ productState.totalOrdersCount() }}</span>
               <span class="kpi-title">Đơn Hàng Cần Xử Lý</span>
@@ -120,7 +124,9 @@
           </div>
 
           <div class="kpi-card">
-            <div class="kpi-icon">👗</div>
+            <div class="kpi-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+            </div>
             <div class="kpi-data">
               <span class="kpi-value">{{ productState.totalProductsCount() }}</span>
               <span class="kpi-title">Mặt Hàng Đang Kinh Doanh</span>
@@ -129,7 +135,9 @@
           </div>
 
           <div class="kpi-card">
-            <div class="kpi-icon">✨</div>
+            <div class="kpi-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </div>
             <div class="kpi-data">
               <span class="kpi-value">{{ productState.tryOnCount() }}</span>
               <span class="kpi-title">Lượt AI Virtual Try-On</span>
@@ -200,7 +208,7 @@
           <div class="search-filter-group">
             <input
               type="text"
-              placeholder="🔍 Tìm theo tên hoặc slug sản phẩm..."
+              placeholder="Tìm theo tên hoặc slug sản phẩm..."
               [ngModel]="productSearch()"
               (ngModelChange)="productSearch.set($event)"
               class="admin-search-input"
@@ -272,7 +280,7 @@
                       </button>
                     </td>
                     <td>
-                      <span class="badge-tryon-ready">✨ Sẵn Sàng (IDM-VTON)</span>
+                      <span class="badge-tryon-ready">● Sẵn Sàng (IDM-VTON)</span>
                     </td>
                     <td>
                       <div class="action-btn-group">
@@ -387,9 +395,9 @@
                       </td>
                       <td>
                         @if (v.stockQuantity < 15) {
-                          <span class="badge-warn">⚠️ Sắp hết hàng</span>
+                          <span class="badge-warn">Sắp hết hàng</span>
                         } @else {
-                          <span class="badge-ok">✓ Tồn kho dồi dào</span>
+                          <span class="badge-ok">Tồn kho dồi dào</span>
                         }
                       </td>
                       <td>
@@ -542,9 +550,9 @@
                     <td>{{ u.email }}</td>
                     <td>
                       @if (u.role === 'admin') {
-                        <span class="badge-role-tag admin">👑 ADMIN (TOÀN QUYỀN)</span>
+                        <span class="badge-role-tag admin">ADMIN (TOÀN QUYỀN)</span>
                       } @else {
-                        <span class="badge-role-tag customer">👤 NGƯỜI XEM (CUSTOMER)</span>
+                        <span class="badge-role-tag customer">KHÁCH HÀNG (CUSTOMER)</span>
                       }
                     </td>
                     <td>
@@ -995,8 +1003,8 @@
                 (ngModelChange)="newUserRole.set($event)"
                 class="modal-select"
               >
-                <option value="customer">👤 Người Xem / Khách Hàng (Customer - Mua sắm, thử đồ)</option>
-                <option value="admin">👑 Quản Trị Viên (Admin - Toàn quyền Backoffice)</option>
+                <option value="customer">Khách Hàng (Customer - Mua sắm, thử đồ)</option>
+                <option value="admin">Quản Trị Viên (Admin - Toàn quyền Backoffice)</option>
               </select>
             </div>
           </div>

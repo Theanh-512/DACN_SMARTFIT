@@ -16,3 +16,4 @@ export * from './auth/auth.guard';
 
 // Services
 export * from './services/seo.service';
+export * from './services/supabase.service';

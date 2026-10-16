@@ -49,7 +49,7 @@
   --header-height: 72px;
 
   /* Typography */
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 *, *::before, *::after {
@@ -185,21 +185,21 @@ img {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  background: #111111;
   color: #ffffff;
   padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  border: 1px solid #4338ca;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  border: 1px solid #111111;
   border-radius: var(--radius-xs);
-  box-shadow: 0 4px 14px rgba(67, 56, 202, 0.25);
   transition: all 0.2s ease;
 }
 
 .btn-ai-tryon:hover {
-  background: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
-  box-shadow: 0 6px 18px rgba(67, 56, 202, 0.35);
+  background: #e60012;
+  border-color: #e60012;
+  color: #ffffff;
   transform: translateY(-1px);
 }
 

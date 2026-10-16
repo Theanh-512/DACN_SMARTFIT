@@ -48,3 +48,28 @@ appsettings.Development.json
 # OS files
 .DS_Store
 Thumbs.db
+
+# Generated AI outputs (large binary artifacts - not source code)
+ai-service/data/results/
+ai-service/data/index/
+ai-service/data/catalog_index*
+
+# Cloned external repos (managed separately, not part of this source)
+ai-service/IDM-VTON-main/
+ai-service/Focused-human-body-measurement/
+ai-service/smplx/
+
+# HTML export folder with extremely long filenames (cannot commit on Windows)
+docs/supabase_vton_schema/AI vitual try on_files/
+
+# Large binary / generated files
+*.glb
+*.gltf
+*.jpg
+*.jpeg
+*.png
+*.webp
+# Exception: keep source assets that are committed intentionally
+!frontend/fashion-ai-web/public/assets/**
+!docs/**/*.png
+!docs/**/*.jpg

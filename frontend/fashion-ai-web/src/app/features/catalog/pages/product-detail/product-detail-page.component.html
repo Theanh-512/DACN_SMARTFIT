@@ -7,9 +7,9 @@
 }
 
 @if (product(); as prod) {
-  <div class="pdp-wrapper container">
-    <!-- Breadcrumbs -->
-    <div class="breadcrumbs">
+  <div class="uniqlo-pdp-container container">
+    <!-- 1. Breadcrumbs -->
+    <div class="breadcrumbs-bar">
       <a routerLink="/">Trang chủ</a>
       <span class="sep">/</span>
       <a routerLink="/catalog">Bộ sưu tập</a>
@@ -19,250 +19,554 @@
       <span class="current">{{ prod.name }}</span>
     </div>
 
-    <!-- Main Two-Column Layout -->
-    <div class="pdp-layout">
-      <!-- Left Column: Gallery -->
-      <div class="gallery-column">
-        <!-- Vertical Thumbnails -->
-        <div class="thumbnails-list">
-          @for (img of prod.images; track img) {
-            <button
-              type="button"
-              class="thumb-btn"
-              [class.active]="selectedImage() === img"
-              (click)="selectedImage.set(img)"
-            >
-              <img [src]="img" [alt]="prod.name" class="thumb-img" />
-            </button>
-          }
+    <!-- 2. Main Two-Column Layout (Matching Screenshot 1) -->
+    <div class="pdp-columns-layout">
+      <!-- Left Column: Multi-Photo Grid / Video Stream -->
+      <div class="left-gallery-stream">
+        <!-- Media Type Selector Switch -->
+        <div class="media-tabs-toggle">
+          <button
+            type="button"
+            class="media-tab-btn"
+            [class.active]="activeMediaTab() === 'photos'"
+            (click)="activeMediaTab.set('photos')"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            <span>ẢNH CHI TIẾT ({{ prod.images.length }})</span>
+          </button>
+          <button
+            type="button"
+            class="media-tab-btn"
+            [class.active]="activeMediaTab() === 'video'"
+            (click)="activeMediaTab.set('video')"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>VIDEO TRẢI NGHIỆM</span>
+          </button>
         </div>
 
-        <!-- Main Big Image -->
-        <div class="main-image-box">
-          <img [src]="selectedImage()" [alt]="prod.name" class="main-img" />
-          <div class="image-ai-pill">
-            <span>✨ Sẵn sàng mô phỏng IDM-VTON 3D</span>
+        @if (activeMediaTab() === 'photos') {
+          <!-- Uniqlo Style 2-Column Photo Stream -->
+          <div class="photo-stream-grid">
+            @for (img of prod.images; track img; let idx = $index) {
+              <div
+                class="stream-photo-item"
+                [class.featured-big]="idx === 0"
+                (click)="selectedImage.set(img)"
+              >
+                <img
+                  [src]="img"
+                  [alt]="prod.name + ' - Góc nhìn ' + (idx + 1)"
+                  class="stream-img"
+                  loading="lazy"
+                />
+                <span class="photo-index-tag">Góc {{ idx + 1 }}</span>
+              </div>
+            }
+
+            <!-- AI 3D Model Visualization Card -->
+            <div class="stream-photo-item ai-simulation-card" (click)="onTryOnWithAi()">
+              <div class="ai-card-content">
+                <span class="ai-text-pill">AI VTON</span>
+                <strong>Mô Phỏng 3D Cùng AI</strong>
+                <p>Xem trang phục chuyển động trên cơ thể bạn qua mô hình IDM-VTON</p>
+                <span class="ai-pill-btn">THỬ ĐỒ NGAY →</span>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <!-- Video Player Tab for MP4 Demonstration -->
+          <div class="video-player-box">
+            <video
+              controls
+              autoplay
+              loop
+              muted
+              playsinline
+              class="product-mp4-video"
+              poster="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80"
+            >
+              <source
+                [src]="prod.videoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'"
+                type="video/mp4"
+              />
+              Trình duyệt của bạn không hỗ trợ thẻ video.
+            </video>
+            <div class="video-caption-bar">
+              <span class="video-badge">VIDEO TRẢI NGHIỆM</span>
+              <span>Quay thực tế chất liệu vải và độ co giãn của trang phục</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Right Column: Sticky Buy Box -->
+      <div class="right-purchase-box">
+        <div class="sticky-inner-panel">
+          <div class="product-header-meta">
+            <span class="category-name-badge">{{ prod.categoryName }}</span>
+            <h1 class="product-title-h1">{{ prod.name }}</h1>
+            
+            <div class="rating-and-sku-row">
+              <a href="#customerReviewsSection" class="rating-link" title="Xem đánh giá từ khách hàng">
+                <span class="stars">★★★★★</span>
+                <span class="score">{{ prod.rating || 4.8 }}</span>
+                <span class="count">({{ prod.reviewCount || 142 }} Đánh giá)</span>
+              </a>
+              <span class="sku-code">Mã SP: {{ prod.productCode || prod.id }}</span>
+            </div>
+          </div>
+
+          <!-- Price Strip -->
+          <div class="price-display-box">
+            <span class="price-main">
+              {{ prod.basePrice | number }}₫
+            </span>
+          </div>
+
+          <p class="product-short-desc">{{ prod.description }}</p>
+
+          <div class="pdp-divider"></div>
+
+          <!-- Color Selector with Uniqlo Codes (e.g. 09 BLACK) -->
+          <div class="option-block color-block">
+            <div class="option-title-row">
+              <span class="option-label">MÀU SẮC:</span>
+              <strong class="option-chosen-val">{{ selectedColor() }}</strong>
+            </div>
+            <div class="color-swatches-grid">
+              @for (c of availableColors(); track c.name) {
+                <button
+                  type="button"
+                  class="color-swatch-chip"
+                  [class.active]="selectedColor() === c.name"
+                  [style.background-color]="c.hex"
+                  [title]="c.colorCode"
+                  (click)="selectColor(c)"
+                ></button>
+              }
+            </div>
+          </div>
+
+          <!-- Size Selector with Size Guide Link -->
+          <div class="option-block size-block">
+            <div class="option-title-row">
+              <span class="option-label">KÍCH CỠ:</span>
+              <strong class="option-chosen-val">{{ selectedSize() }}</strong>
+              <button type="button" class="btn-size-chart" (click)="isSizeGuideOpen.set(true)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.3 8.7l-6-6a1 1 0 0 0-1.4 0l-11.2 11.2a1 1 0 0 0 0 1.4l6 6a1 1 0 0 0 1.4 0l11.2-11.2a1 1 0 0 0 0-1.4z"></path><path d="m7.5 13.5 2 2"></path><path d="m10.5 10.5 2 2"></path><path d="m13.5 7.5 2 2"></path></svg>
+                <span>Hướng dẫn chọn size</span>
+              </button>
+            </div>
+            <div class="sizes-row">
+              @for (s of availableSizes(); track s) {
+                <button
+                  type="button"
+                  class="size-button"
+                  [class.active]="selectedSize() === s"
+                  (click)="selectSize(s)"
+                >
+                  {{ s }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Quantity Selector -->
+          <div class="option-block quantity-block">
+            <div class="option-title-row">
+              <span class="option-label">SỐ LƯỢNG:</span>
+            </div>
+            <div class="quantity-control-row">
+              <div class="stepper-box">
+                <button type="button" class="step-btn" (click)="adjustQuantity(-1)" [disabled]="quantity() <= 1">-</button>
+                <span class="qty-num">{{ quantity() }}</span>
+                <button type="button" class="step-btn" (click)="adjustQuantity(1)">+</button>
+              </div>
+              <div class="stock-status-notice">
+                <span class="green-dot">●</span>
+                <span>Còn hàng tại kho online & 12 showroom</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Primary Actions -->
+          <div class="pdp-actions-container">
+            <!-- Solid Black Uniqlo Primary Button -->
+            <button type="button" class="btn-add-to-cart-primary" (click)="onAddToCart()">
+              THÊM VÀO GIỎ HÀNG
+            </button>
+
+            <!-- Prominent AI Virtual Try-On Button (Clean Minimalist LifeWear Style) -->
+            <button type="button" class="btn-tryon-ai-prominent" (click)="onTryOnWithAi()">
+              <div class="ai-btn-inner">
+                <span class="ai-badge-icon">AI</span>
+                <div class="ai-text-lines">
+                  <span class="ai-headline">THỬ ĐỒ ẢO VỚI AI (IDM-VTON)</span>
+                  <span class="ai-sub">Mô phỏng phom dáng trên người bạn trong 3 giây</span>
+                </div>
+              </div>
+            </button>
+
+            <!-- Buy Now & Wishlist Row -->
+            <div class="secondary-actions-row">
+              <button type="button" class="btn-buy-now-sub" (click)="onBuyNow()">
+                MUA NGAY
+              </button>
+              <button type="button" class="btn-wishlist-icon" title="Thêm vào danh sách yêu thích">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <span>YÊU THÍCH</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Accordion Information Tabs -->
+          <div class="accordions-wrap">
+            <!-- Accordion 1 -->
+            <div class="accordion-item">
+              <button
+                type="button"
+                class="acc-header"
+                (click)="toggleAccordion('details')"
+                [attr.aria-expanded]="activeAccordion() === 'details'"
+              >
+                <span>CHI TIẾT CHẤT LIỆU & THIẾT KẾ</span>
+                <span class="acc-arrow">{{ activeAccordion() === 'details' ? '−' : '+' }}</span>
+              </button>
+              @if (activeAccordion() === 'details') {
+                <div class="acc-body">
+                  <p>• <strong>Chất liệu:</strong> 100% sợi dệt tự nhiên theo chuẩn công nghệ LifeWear, êm ái, bền đẹp và thân thiện với làn da.</p>
+                  <p>• <strong>Phom dáng:</strong> Thiết kế vừa vặn tiêu chuẩn (Regular Fit), giữ phom sau nhiều lần giặt.</p>
+                  <p>• <strong>Mô hình AI:</strong> Đã được số hóa chuẩn 3D phục vụ mô phỏng thử đồ ảo IDM-VTON.</p>
+                </div>
+              }
+            </div>
+
+            <!-- Accordion 2 -->
+            <div class="accordion-item">
+              <button
+                type="button"
+                class="acc-header"
+                (click)="toggleAccordion('care')"
+                [attr.aria-expanded]="activeAccordion() === 'care'"
+              >
+                <span>HƯỚNG DẪN GIẶT & BẢO QUẢN</span>
+                <span class="acc-arrow">{{ activeAccordion() === 'care' ? '−' : '+' }}</span>
+              </button>
+              @if (activeAccordion() === 'care') {
+                <div class="acc-body">
+                  <p>• Giặt máy ở chế độ nhẹ nhàng với nước lạnh (dưới 30°C).</p>
+                  <p>• Không sử dụng chất tẩy chứa clo; không sấy ở nhiệt độ cao.</p>
+                  <p>• Phơi nơi râm mát, tránh ánh nắng gắt trực tiếp.</p>
+                </div>
+              }
+            </div>
+
+            <!-- Accordion 3 -->
+            <div class="accordion-item">
+              <button
+                type="button"
+                class="acc-header"
+                (click)="toggleAccordion('shipping')"
+                [attr.aria-expanded]="activeAccordion() === 'shipping'"
+              >
+                <span>CHÍNH SÁCH ĐỔI TRẢ & GIAO HÀNG</span>
+                <span class="acc-arrow">{{ activeAccordion() === 'shipping' ? '−' : '+' }}</span>
+              </button>
+              @if (activeAccordion() === 'shipping') {
+                <div class="acc-body">
+                  <p>• Miễn phí giao hàng tiêu chuẩn toàn quốc cho đơn hàng từ 499.000₫.</p>
+                  <p>• Hỗ trợ đổi size hoặc đổi mẫu tận nơi trong vòng 7 ngày kể từ khi nhận hàng.</p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Style Hint / Lookbook Styling Inspiration (Matching Screenshot 1) -->
+    <section class="style-hint-section">
+      <div class="section-title-bar">
+        <h2 class="section-title-text">GỢI Ý PHỐI ĐỒ (STYLE HINT)</h2>
+        <span class="section-subtitle">Xem cách các người mẫu & người mua thực tế phối đồ với sản phẩm này</span>
+      </div>
+
+      <div class="style-hint-grid">
+        @for (hintImg of styleHintList(); track hintImg; let hIdx = $index) {
+          <div class="style-hint-card">
+            <div class="hint-img-wrapper">
+              <img [src]="hintImg" [alt]="'Gợi ý phối đồ ' + (hIdx + 1)" class="hint-img" loading="lazy" />
+              <span class="hint-tag">Lookbook {{ hIdx + 1 }}</span>
+            </div>
+            <div class="hint-info">
+              <span class="hint-model">Mẫu cao: 1m68 • Size M</span>
+              <p class="hint-desc">Phối cùng quần jeans ống suông và giày sneaker năng động</p>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- 4. Customer Reviews Breakdown (Matching Screenshot 1) -->
+    <section id="customerReviewsSection" class="customer-reviews-section">
+      <div class="reviews-header-block">
+        <h2 class="section-title-text">ĐÁNH GIÁ TỪ KHÁCH HÀNG</h2>
+        
+        <div class="rating-overview-grid">
+          <!-- Total Score Box -->
+          <div class="score-summary-box">
+            <span class="big-score">{{ prod.rating || 4.8 }}</span>
+            <div class="stars-big">★★★★★</div>
+            <span class="total-reviews-count">{{ prod.reviewCount || 142 }} nhận xét đã xác thực</span>
+          </div>
+
+          <!-- Fit Assessment Gauge -->
+          <div class="fit-gauge-box">
+            <strong class="fit-title">ĐỘ VỪA VẶN THEO ĐÁNH GIÁ:</strong>
+            <div class="fit-bar-wrap">
+              <div class="fit-labels">
+                <span>Hơi chật (3%)</span>
+                <strong>Vừa vặn hoàn hảo (92%)</strong>
+                <span>Hơi rộng (5%)</span>
+              </div>
+              <div class="fit-progress-bar">
+                <div class="progress-fill" style="width: 92%;"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Purchase Details -->
-      <div class="details-column">
-        <div class="meta-tag">{{ prod.categoryName }}</div>
-        <h1 class="product-title">{{ prod.name }}</h1>
+      <!-- Reviews Feed -->
+      <div class="reviews-feed">
+        @for (rev of reviewsList(); track rev.id) {
+          <div class="review-item-card">
+            <div class="review-top-meta">
+              <div class="stars-rating">★★★★★</div>
+              <strong class="reviewer-name">{{ rev.author }}</strong>
+              <span class="review-date">{{ rev.date }}</span>
+              <span class="verified-badge">✓ Đã mua hàng</span>
+            </div>
+            <div class="review-spec-pills">
+              <span class="spec-pill">{{ rev.sizeBought }}</span>
+              <span class="spec-pill fit-pill">Độ vừa: {{ rev.fitAssessment }}</span>
+            </div>
+            <p class="review-comment-text">{{ rev.comment }}</p>
+          </div>
+        }
+      </div>
+    </section>
 
-        <!-- Rating & SKU -->
-        <div class="rating-sku">
-          <div class="stars">★★★★★ <span class="review-count">(4.9 • 128 đánh giá)</span></div>
-          <span class="sku-text">Mã SP: {{ prod.id }}</span>
+    <!-- 5. Related Products Carousel -->
+    <section class="related-products-section">
+      <div class="section-title-bar">
+        <h2 class="section-title-text">CÓ THỂ BẠN CŨNG THÍCH</h2>
+      </div>
+      <app-product-grid [products]="relatedProducts()" [columns]="4" />
+    </section>
+  </div>
+
+  <!-- Intelligent AI Size Guide Modal -->
+  <app-ui-modal
+    [isOpen]="isSizeGuideOpen()"
+    title="TRỢ LÝ TƯ VẤN KÍCH CỠ THÔNG MINH (AI SIZE RECOMMENDER)"
+    (closed)="isSizeGuideOpen.set(false)"
+  >
+    <div class="ai-size-recommender-container">
+      <div class="size-assistant-header">
+        <span class="assistant-pill">AI FIT SCORING</span>
+        <p class="assistant-subtitle">
+          Thuật toán so khớp số đo nhân trắc học với thông số may đo thành phẩm của {{ prod.categoryName }},
+          tính toán độ cử động (ease allowance) theo sở thích vóc dáng của bạn.
+        </p>
+      </div>
+
+      <!-- Measurement Form -->
+      <div class="measurements-input-grid">
+        <div class="form-group-field">
+          <label>Chiều cao (cm) <span class="req">*</span></label>
+          <input
+            type="number"
+            class="size-input"
+            [ngModel]="userHeight()"
+            (ngModelChange)="userHeight.set($event)"
+            min="130"
+            max="220"
+          />
         </div>
+        <div class="form-group-field">
+          <label>Cân nặng (kg) <span class="req">*</span></label>
+          <input
+            type="number"
+            class="size-input"
+            [ngModel]="userWeight()"
+            (ngModelChange)="userWeight.set($event)"
+            min="35"
+            max="180"
+          />
+        </div>
+        <div class="form-group-field">
+          <label>Vòng ngực (cm)</label>
+          <input
+            type="number"
+            class="size-input"
+            [ngModel]="userChest()"
+            (ngModelChange)="userChest.set($event)"
+            placeholder="Tự động ước tính"
+          />
+        </div>
+        <div class="form-group-field">
+          <label>Vòng eo (cm)</label>
+          <input
+            type="number"
+            class="size-input"
+            [ngModel]="userWaist()"
+            (ngModelChange)="userWaist.set($event)"
+            placeholder="Tự động ước tính"
+          />
+        </div>
+      </div>
 
-        <!-- Pricing -->
-        <div class="price-strip">
-          <span class="current-price">{{ prod.basePrice | number }}₫</span>
-          @if (prod.originalPrice && prod.originalPrice > prod.basePrice) {
-            <span class="original-price">{{ prod.originalPrice | number }}₫</span>
-            @if (discountPercentage()) {
-              <span class="badge-sale">-{{ discountPercentage() }}%</span>
-            }
+      <!-- Fit Preference Selector -->
+      <div class="fit-pref-selector">
+        <span class="pref-label">SỞ THÍCH PHOM DÁNG:</span>
+        <div class="pref-chips-row">
+          <button
+            type="button"
+            class="pref-chip"
+            [class.active]="userFitPref() === 'slim'"
+            (click)="userFitPref.set('slim')"
+          >
+            Ôm gọn (Slim)
+          </button>
+          <button
+            type="button"
+            class="pref-chip"
+            [class.active]="userFitPref() === 'regular'"
+            (click)="userFitPref.set('regular')"
+          >
+            Tiêu chuẩn (Regular)
+          </button>
+          <button
+            type="button"
+            class="pref-chip"
+            [class.active]="userFitPref() === 'relaxed'"
+            (click)="userFitPref.set('relaxed')"
+          >
+            Rộng rãi (Relaxed)
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <button
+        type="button"
+        class="btn-analyze-size"
+        (click)="calculateSizeRecommendation()"
+        [disabled]="isCalculatingSize()"
+      >
+        @if (isCalculatingSize()) {
+          <span>Đang tính toán nhân trắc học...</span>
+        } @else {
+          <span>PHÂN TÍCH VÓC DÁNG VỚI AI →</span>
+        }
+      </button>
+
+      <!-- AI Recommendation Result Card -->
+      @if (sizeRecommendation(); as rec) {
+        <div class="ai-recommendation-card fade-in">
+          <div class="rec-headline-row">
+            <div class="rec-best-size">
+              <span class="rec-sub">KÍCH CỠ TỐI ƯU</span>
+              <strong class="rec-size-badge">{{ rec.recommendedSize }}</strong>
+            </div>
+            <div class="rec-score-pill">
+              <span class="score-val">{{ rec.confidenceScore }}%</span>
+              <span class="score-lbl">Độ tương thích</span>
+            </div>
+          </div>
+
+          <p class="rec-explanation-text">
+            {{ rec.explanation }}
+          </p>
+
+          <!-- Measurement Breakdown Table -->
+          @if (rec.measurementBreakdown.length > 0) {
+            <div class="rec-breakdown-box">
+              <table class="mini-breakdown-table">
+                <thead>
+                  <tr>
+                    <th>Chỉ số</th>
+                    <th>Số đo bạn</th>
+                    <th>Số đo áo</th>
+                    <th>Độ dư cử động</th>
+                    <th>Đánh giá</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (b of rec.measurementBreakdown; track b.measurementName) {
+                    <tr>
+                      <td><strong>{{ b.measurementName }}</strong></td>
+                      <td>{{ b.bodyVal }}cm</td>
+                      <td>{{ b.garmentVal }}cm</td>
+                      <td><strong>+{{ b.actualEase }}cm</strong></td>
+                      <td>
+                        <span class="status-tag" [class.perfect]="b.status === 'perfect'">
+                          {{ b.status === 'perfect' ? 'Hoàn hảo' : (b.status === 'tight' ? 'Hơi chật' : 'Thoải mái') }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           }
-        </div>
 
-        <p class="description-summary">{{ prod.description }}</p>
-
-        <div class="divider"></div>
-
-        <!-- Color Selection -->
-        <div class="selection-section">
-          <div class="section-label">
-            MÀU SẮC: <strong>{{ selectedColor() }}</strong>
-          </div>
-          <div class="color-options">
-            @for (c of availableColors(); track c.name) {
-              <button
-                type="button"
-                class="color-circle"
-                [class.active]="selectedColor() === c.name"
-                [style.background-color]="c.hex"
-                [title]="c.name"
-                (click)="selectColor(c)"
-              ></button>
-            }
-          </div>
-        </div>
-
-        <!-- Size Selection -->
-        <div class="selection-section">
-          <div class="size-header">
-            <span class="section-label">KÍCH CỠ: <strong>{{ selectedSize() }}</strong></span>
-            <button type="button" class="size-guide-btn" (click)="isSizeGuideOpen.set(true)">
-              📐 Bảng hướng dẫn chọn size
+          <!-- Apply Button -->
+          <div class="rec-actions-footer">
+            <button
+              type="button"
+              class="btn-apply-recommended-size"
+              (click)="applyRecommendedSize(rec.recommendedSize)"
+            >
+              ÁP DỤNG SIZE {{ rec.recommendedSize }} CHO SẢN PHẨM
             </button>
-          </div>
-          <div class="size-options">
-            @for (s of availableSizes(); track s) {
+            @if (rec.alternativeSize) {
               <button
                 type="button"
-                class="size-box"
-                [class.active]="selectedSize() === s"
-                (click)="selectSize(s)"
+                class="btn-apply-alt-size"
+                (click)="applyRecommendedSize(rec.alternativeSize)"
               >
-                {{ s }}
+                Chọn size thay thế ({{ rec.alternativeSize }})
               </button>
             }
           </div>
         </div>
+      }
 
-        <!-- Quantity Selector -->
-        <div class="quantity-section">
-          <span class="section-label">SỐ LƯỢNG:</span>
-          <div class="stepper">
-            <button type="button" (click)="adjustQuantity(-1)" [disabled]="quantity() <= 1">-</button>
-            <span class="qty-val">{{ quantity() }}</span>
-            <button type="button" (click)="adjustQuantity(1)">+</button>
-          </div>
-          <span class="stock-status">✓ Còn hàng (Giao nhanh 1-2 ngày)</span>
+      <!-- Fallback Reference Size Table -->
+      <details class="standard-table-accordion">
+        <summary>Xem bảng số đo tham khảo tiêu chuẩn LifeWear</summary>
+        <div class="size-table-wrapper" style="margin-top: 12px;">
+          <table class="size-table">
+            <thead>
+              <tr>
+                <th>Kích cỡ</th>
+                <th>Chiều cao (cm)</th>
+                <th>Cân nặng (kg)</th>
+                <th>Vòng ngực (cm)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>S</strong></td><td>155 - 165</td><td>48 - 55</td><td>82 - 88</td></tr>
+              <tr><td><strong>M</strong></td><td>165 - 172</td><td>56 - 65</td><td>88 - 94</td></tr>
+              <tr><td><strong>L</strong></td><td>170 - 178</td><td>66 - 75</td><td>94 - 100</td></tr>
+              <tr><td><strong>XL</strong></td><td>175 - 185</td><td>75 - 85</td><td>100 - 106</td></tr>
+            </tbody>
+          </table>
         </div>
-
-        <!-- Action CTAs -->
-        <div class="action-buttons">
-          <!-- AI Try-On Highlight CTA -->
-          <button type="button" class="btn-ai-tryon-big" (click)="onTryOnWithAi()">
-            <span class="ai-sparkle">✨</span>
-            <span class="ai-btn-text">
-              <strong>THỬ ĐỒ ẢO VỚI AI (IDM-VTON)</strong>
-              <small>Xem dáng người & nếp gấp trang phục trước khi đặt mua</small>
-            </span>
-          </button>
-
-          <!-- Standard Cart Buttons -->
-          <div class="cart-buttons-row">
-            <button type="button" class="btn-uniqlo-outline add-cart-btn" (click)="onAddToCart()">
-              🛍️ THÊM VÀO GIỎ HÀNG
-            </button>
-            <button type="button" class="btn-uniqlo-primary buy-now-btn" (click)="onBuyNow()">
-              MUA NGAY
-            </button>
-          </div>
-        </div>
-
-        <!-- Feature Accordions -->
-        <div class="accordions-container">
-          <!-- Accordion 1 -->
-          <div class="accordion-item">
-            <button
-              type="button"
-              class="accordion-trigger"
-              (click)="toggleAccordion('details')"
-              [attr.aria-expanded]="activeAccordion() === 'details'"
-            >
-              <span>CHI TIẾT CHẤT LIỆU & KIỂU DÁNG</span>
-              <span class="arrow">{{ activeAccordion() === 'details' ? '−' : '+' }}</span>
-            </button>
-            @if (activeAccordion() === 'details') {
-              <div class="accordion-content">
-                <p>• <strong>Chất liệu:</strong> Vải cao cấp dệt theo tiêu chuẩn LifeWear tự nhiên, mềm mại và thoáng khí.</p>
-                <p>• <strong>Phom dáng:</strong> Thiết kế vừa vặn (Regular Fit) tôn vóc dáng người châu Á.</p>
-                <p>• <strong>Xuất xứ:</strong> Gia công chất lượng cao tại Việt Nam.</p>
-              </div>
-            }
-          </div>
-
-          <!-- Accordion 2 -->
-          <div class="accordion-item">
-            <button
-              type="button"
-              class="accordion-trigger"
-              (click)="toggleAccordion('care')"
-              [attr.aria-expanded]="activeAccordion() === 'care'"
-            >
-              <span>HƯỚNG DẪN GIẶT & BẢO QUẢN</span>
-              <span class="arrow">{{ activeAccordion() === 'care' ? '−' : '+' }}</span>
-            </button>
-            @if (activeAccordion() === 'care') {
-              <div class="accordion-content">
-                <p>• Giặt máy ở chế độ nhẹ nhàng với nước lạnh (dưới 30°C).</p>
-                <p>• Không sử dụng thuốc tẩy có clo hoặc sấy nhiệt độ cao.</p>
-                <p>• Ủi ở nhiệt độ trung bình (tối đa 150°C).</p>
-              </div>
-            }
-          </div>
-
-          <!-- Accordion 3 -->
-          <div class="accordion-item">
-            <button
-              type="button"
-              class="accordion-trigger"
-              (click)="toggleAccordion('shipping')"
-              [attr.aria-expanded]="activeAccordion() === 'shipping'"
-            >
-              <span>CHÍNH SÁCH GIAO HÀNG & ĐỔI TRẢ 7 NGÀY</span>
-              <span class="arrow">{{ activeAccordion() === 'shipping' ? '−' : '+' }}</span>
-            </button>
-            @if (activeAccordion() === 'shipping') {
-              <div class="accordion-content">
-                <p>• Miễn phí giao hàng tiêu chuẩn cho mọi đơn hàng từ 499.000₫.</p>
-                <p>• Hỗ trợ đổi size hoặc đổi màu miễn phí tận nhà trong vòng 7 ngày kể từ ngày nhận hàng.</p>
-              </div>
-            }
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Related Products -->
-    <div class="related-section">
-      <h2 class="related-title">GỢI Ý PHỐI ĐỒ & SẢN PHẨM TƯƠNG TỰ</h2>
-      <app-product-grid [products]="relatedProducts()" [columns]="4" />
-    </div>
-  </div>
-
-  <!-- Size Guide Modal -->
-  <app-ui-modal
-    [isOpen]="isSizeGuideOpen()"
-    title="BẢNG HƯỚNG DẪN CHỌN SIZE TIÊU CHUẨN"
-    (closed)="isSizeGuideOpen.set(false)"
-  >
-    <div class="size-table-wrapper">
-      <table class="size-table">
-        <thead>
-          <tr>
-            <th>Kích cỡ</th>
-            <th>Chiều cao (cm)</th>
-            <th>Cân nặng (kg)</th>
-            <th>Vòng ngực (cm)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>S</strong></td>
-            <td>155 - 165</td>
-            <td>48 - 55</td>
-            <td>82 - 88</td>
-          </tr>
-          <tr>
-            <td><strong>M</strong></td>
-            <td>165 - 172</td>
-            <td>56 - 65</td>
-            <td>88 - 94</td>
-          </tr>
-          <tr>
-            <td><strong>L</strong></td>
-            <td>170 - 178</td>
-            <td>66 - 75</td>
-            <td>94 - 100</td>
-          </tr>
-          <tr>
-            <td><strong>XL</strong></td>
-            <td>175 - 185</td>
-            <td>75 - 85</td>
-            <td>100 - 106</td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="size-note">
-        * Lưu ý: Nếu số đo của bạn nằm giữa hai kích cỡ, bạn có thể sử dụng tính năng <strong>Virtual Try-On</strong> để xem mô phỏng độ ôm của áo trước khi chọn.
-      </p>
+      </details>
     </div>
   </app-ui-modal>
 }

@@ -6,234 +6,162 @@
   </div>
 }
 
-<div class="catalog-page container">
-  <!-- Breadcrumb & Header -->
-  <div class="catalog-top-bar">
-    <div class="breadcrumbs">
-      <a routerLink="/">Trang chủ</a>
-      <span class="sep">/</span>
-      <span>Bộ sưu tập thời trang</span>
-    </div>
-    <h1 class="page-title">TẤT CẢ SẢN PHẨM</h1>
+<div class="uniqlo-catalog-container container">
+  <!-- 1. Breadcrumbs -->
+  <div class="breadcrumbs-bar">
+    <a routerLink="/">Trang chủ</a>
+    <span class="sep">/</span>
+    <a routerLink="/catalog">Bộ sưu tập</a>
+    <span class="sep">/</span>
+    <span class="current">{{ currentCategoryName() }}</span>
   </div>
 
-  <!-- Layout: Sidebar Filters + Main Product Section -->
-  <div class="catalog-layout">
-    <!-- Desktop Sidebar Filters -->
-    <aside class="filter-sidebar" [class.mobile-open]="isMobileFilterOpen()">
-      <div class="sidebar-header">
-        <h3 class="sidebar-title">BỘ LỌC TÌM KIẾM</h3>
-        <button class="btn-reset" (click)="resetFilters()">Đặt lại</button>
-        <button class="mobile-close-btn" (click)="toggleMobileFilter()">✕</button>
-      </div>
-
-      <!-- AI Features Quick Toggle -->
-      <div class="filter-group ai-filter-box">
-        <label class="checkbox-label">
-          <input
-            type="checkbox"
-            [checked]="onlyAiSupported()"
-            (change)="onlyAiSupported.set(!onlyAiSupported())"
-          />
-          <span class="custom-check"></span>
-          <span class="label-text">✨ Chỉ hiện đồ hỗ trợ Thử AI</span>
-        </label>
-      </div>
-
-      <!-- Gender Filter -->
-      <div class="filter-group">
-        <h4 class="group-title">GIỚI TÍNH</h4>
-        <div class="filter-options">
-          <button
-            type="button"
-            class="filter-pill"
-            [class.active]="selectedGender() === 'all'"
-            (click)="selectedGender.set('all')"
-          >
-            Tất cả
-          </button>
-          <button
-            type="button"
-            class="filter-pill"
-            [class.active]="selectedGender() === 'women'"
-            (click)="selectedGender.set('women')"
-          >
-            Nữ
-          </button>
-          <button
-            type="button"
-            class="filter-pill"
-            [class.active]="selectedGender() === 'men'"
-            (click)="selectedGender.set('men')"
-          >
-            Nam
-          </button>
+  <!-- 2. Subcategory Visual Carousel Strip (Matching Screenshot 2 1:1) -->
+  <section class="subcategory-chips-bar">
+    <div class="chips-scroll-wrap">
+      <button
+        type="button"
+        class="subcat-chip"
+        [class.active]="selectedCategory() === 'all'"
+        (click)="selectedCategory.set('all')"
+      >
+        <div class="chip-avatar all-avatar">
+          <span>ALL</span>
         </div>
-      </div>
+        <span class="chip-name">Tất cả mẫu</span>
+      </button>
 
-      <!-- Category Filter -->
-      <div class="filter-group">
-        <h4 class="group-title">DANH MỤC</h4>
-        <div class="category-list">
-          <button
-            type="button"
-            class="cat-link"
-            [class.active]="selectedCategory() === 'all'"
-            (click)="selectedCategory.set('all')"
-          >
-            Tất cả danh mục
-          </button>
-          @for (cat of categories(); track cat.id) {
-            <button
-              type="button"
-              class="cat-link"
-              [class.active]="selectedCategory() === cat.id"
-              (click)="selectedCategory.set(cat.id)"
-            >
-              {{ cat.name }} ({{ cat.itemCount }})
-            </button>
-          }
-        </div>
-      </div>
-
-      <!-- Size Filter -->
-      <div class="filter-group">
-        <h4 class="group-title">KÍCH CỠ</h4>
-        <div class="size-grid">
-          <button
-            type="button"
-            class="size-chip"
-            [class.active]="selectedSize() === 'all'"
-            (click)="selectedSize.set('all')"
-          >
-            Tất cả
-          </button>
-          @for (s of availableSizes; track s) {
-            <button
-              type="button"
-              class="size-chip"
-              [class.active]="selectedSize() === s"
-              (click)="selectedSize.set(s)"
-            >
-              {{ s }}
-            </button>
-          }
-        </div>
-      </div>
-
-      <!-- Color Filter -->
-      <div class="filter-group">
-        <h4 class="group-title">MÀU SẮC</h4>
-        <div class="color-chips">
-          <button
-            type="button"
-            class="color-btn all-color"
-            [class.active]="selectedColor() === 'all'"
-            (click)="selectedColor.set('all')"
-            title="Tất cả màu"
-          >
-            All
-          </button>
-          @for (c of availableColors; track c.name) {
-            <button
-              type="button"
-              class="color-btn"
-              [class.active]="selectedColor() === c.name"
-              [style.background-color]="c.hex"
-              [title]="c.name"
-              (click)="selectedColor.set(c.name)"
-            ></button>
-          }
-        </div>
-      </div>
-
-      <!-- Price Range Filter -->
-      <div class="filter-group">
-        <h4 class="group-title">KHOẢNG GIÁ</h4>
-        <div class="radio-options">
-          <label class="radio-label">
-            <input
-              type="radio"
-              name="price"
-              value="all"
-              [checked]="selectedPriceRange() === 'all'"
-              (change)="selectedPriceRange.set('all')"
-            />
-            <span>Tất cả mức giá</span>
-          </label>
-          <label class="radio-label">
-            <input
-              type="radio"
-              name="price"
-              value="under500"
-              [checked]="selectedPriceRange() === 'under500'"
-              (change)="selectedPriceRange.set('under500')"
-            />
-            <span>Dưới 500.000₫</span>
-          </label>
-          <label class="radio-label">
-            <input
-              type="radio"
-              name="price"
-              value="500to1000"
-              [checked]="selectedPriceRange() === '500to1000'"
-              (change)="selectedPriceRange.set('500to1000')"
-            />
-            <span>500.000₫ - 1.000.000₫</span>
-          </label>
-          <label class="radio-label">
-            <input
-              type="radio"
-              name="price"
-              value="above1000"
-              [checked]="selectedPriceRange() === 'above1000'"
-              (change)="selectedPriceRange.set('above1000')"
-            />
-            <span>Trên 1.000.000₫</span>
-          </label>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <main class="catalog-content">
-      <!-- Toolbar: Count + Mobile Filter Trigger + Sorter -->
-      <div class="catalog-toolbar">
-        <button type="button" class="mobile-filter-btn" (click)="toggleMobileFilter()">
-          ⚙️ Bộ lọc & Tìm kiếm
+      @for (cat of categories(); track cat.id) {
+        <button
+          type="button"
+          class="subcat-chip"
+          [class.active]="selectedCategory() === cat.id"
+          (click)="selectedCategory.set(cat.id)"
+        >
+          <div class="chip-avatar">
+            <img [src]="cat.imageUrl" [alt]="cat.name" class="chip-img" loading="lazy" />
+          </div>
+          <span class="chip-name">{{ cat.name }}</span>
         </button>
+      }
+    </div>
+  </section>
 
-        <span class="product-count">
-          Hiển thị <strong>{{ filteredProducts().length }}</strong> sản phẩm
-        </span>
+  <!-- 3. Category Header & Product Count -->
+  <div class="catalog-heading-row">
+    <div class="heading-left">
+      <h1 class="catalog-main-title">{{ currentCategoryName() }}</h1>
+      <span class="catalog-count-pill">
+        {{ filteredProducts().length }} sản phẩm
+      </span>
+    </div>
 
-        <div class="sort-selector">
-          <label for="sortSelect">Sắp xếp:</label>
-          <select
-            id="sortSelect"
-            [value]="sortBy()"
-            (change)="sortBy.set($any($event.target).value)"
-            class="sort-dropdown"
-          >
-            <option value="newest">Mới nhất</option>
-            <option value="price-asc">Giá: Thấp đến cao</option>
-            <option value="price-desc">Giá: Cao đến thấp</option>
-            <option value="name-asc">Tên: A - Z</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Product Grid -->
-      <app-product-grid
-        [products]="filteredProducts()"
-        [columns]="3"
-        (tryOnClicked)="onTryOn($event)"
-        (addToCartClicked)="onAddToCart($event)"
-      />
-    </main>
+    <!-- Active Filter Reset Button if filters applied -->
+    @if (selectedGender() !== 'all' || selectedCategory() !== 'all' || selectedSize() !== 'all' || selectedColor() !== 'all' || selectedPriceRange() !== 'all' || onlyAiSupported()) {
+      <button type="button" class="btn-clear-all-filters" (click)="resetFilters()">
+        ✕ Xóa bộ lọc đang chọn
+      </button>
+    }
   </div>
-</div>
 
-@if (isMobileFilterOpen()) {
-  <div class="mobile-filter-backdrop" (click)="toggleMobileFilter()"></div>
-}
+  <!-- 4. Top Minimalist Filter Bar (Uniqlo Dropdown Style) -->
+  <div class="uniqlo-filter-toolbar">
+    <!-- Filter Dropdown 1: Gender -->
+    <div class="filter-dropdown-item">
+      <select
+        [value]="selectedGender()"
+        (change)="selectedGender.set($any($event.target).value)"
+        class="filter-select"
+        [class.has-val]="selectedGender() !== 'all'"
+      >
+        <option value="all">Giới tính: Tất cả</option>
+        <option value="women">Nữ</option>
+        <option value="men">Nam</option>
+        <option value="kids">Trẻ Em</option>
+      </select>
+    </div>
+
+    <!-- Filter Dropdown 2: Category -->
+    <div class="filter-dropdown-item">
+      <select
+        [value]="selectedCategory()"
+        (change)="selectedCategory.set($any($event.target).value)"
+        class="filter-select"
+        [class.has-val]="selectedCategory() !== 'all'"
+      >
+        <option value="all">Danh mục: Tất cả</option>
+        @for (c of categories(); track c.id) {
+          <option [value]="c.id">{{ c.name }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Filter Dropdown 3: Size -->
+    <div class="filter-dropdown-item">
+      <select
+        [value]="selectedSize()"
+        (change)="selectedSize.set($any($event.target).value)"
+        class="filter-select"
+        [class.has-val]="selectedSize() !== 'all'"
+      >
+        <option value="all">Kích cỡ: Tất cả</option>
+        @for (s of availableSizes; track s) {
+          <option [value]="s">{{ s }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Filter Dropdown 4: Price Range -->
+    <div class="filter-dropdown-item">
+      <select
+        [value]="selectedPriceRange()"
+        (change)="selectedPriceRange.set($any($event.target).value)"
+        class="filter-select"
+        [class.has-val]="selectedPriceRange() !== 'all'"
+      >
+        <option value="all">Mức giá: Tất cả</option>
+        <option value="under500">Dưới 500.000₫</option>
+        <option value="500to1000">500.000₫ - 1.000.000₫</option>
+        <option value="above1000">Trên 1.000.000₫</option>
+      </select>
+    </div>
+
+    <!-- Filter Pill 5: AI Try-On Toggle -->
+    <button
+      type="button"
+      class="filter-ai-pill-btn"
+      [class.active]="onlyAiSupported()"
+      (click)="onlyAiSupported.set(!onlyAiSupported())"
+      title="Lọc sản phẩm hỗ trợ phòng thử đồ ảo IDM-VTON"
+    >
+      <span class="pill-dot">●</span>
+      <span>HỖ TRỢ THỬ ĐỒ AI</span>
+    </button>
+
+    <!-- Right Sort Selector -->
+    <div class="sort-dropdown-box">
+      <label for="catalogSort">Sắp xếp:</label>
+      <select
+        id="catalogSort"
+        [value]="sortBy()"
+        (change)="sortBy.set($any($event.target).value)"
+        class="sort-select"
+      >
+        <option value="newest">Hàng mới về</option>
+        <option value="price-asc">Giá: Thấp đến cao</option>
+        <option value="price-desc">Giá: Cao đến thấp</option>
+        <option value="name-asc">Tên: A - Z</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 5. 4-Column Product Grid -->
+  <main class="catalog-grid-main">
+    <app-product-grid
+      [products]="filteredProducts()"
+      [columns]="4"
+      (tryOnClicked)="onTryOn($event)"
+      (addToCartClicked)="onAddToCart($event)"
+    />
+  </main>
+</div>

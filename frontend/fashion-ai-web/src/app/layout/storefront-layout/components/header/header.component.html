@@ -2,7 +2,7 @@
 <div class="announcement-bar">
   <div class="container announcement-content">
     <div class="announcement-text">
-      <span class="promo-text">Miễn phí giao hàng cho đơn từ 499.000₫ • Đổi trả trong 7 ngày</span>
+      <span class="promo-text">TẢI APP SMARTFIT ĐỂ NHẬN VOUCHER 100.000₫ • MIỄN PHÍ GIAO HÀNG ĐƠN TỪ 499.000₫</span>
       
       <!-- Role Switcher Simulator Bar for Quick Demo -->
       <div class="header-role-switcher" title="Chuyển đổi vai trò để thử nghiệm phân quyền hệ thống">
@@ -14,16 +14,16 @@
           (click)="switchRole('admin')"
           title="Đăng nhập tài khoản Quản trị viên (Toàn quyền)"
         >
-          👑 Admin
+          ADMIN
         </button>
         <button
           type="button"
           class="role-pill-btn"
           [class.active]="authService.isCustomer()"
           (click)="switchRole('customer')"
-          title="Đăng nhập tài khoản Người Xem / Khách Hàng (Thêm giỏ hàng, thử đồ, không vào được Admin)"
+          title="Đăng nhập tài khoản Khách Hàng"
         >
-          👤 Người Xem
+          KHÁCH HÀNG
         </button>
       </div>
     </div>
@@ -31,17 +31,17 @@
     <div class="announcement-links">
       <a routerLink="/content/faq">Trợ Giúp</a>
       <span class="sep">|</span>
-      <a routerLink="/account">Tra Cứu Đơn Hàng</a>
+      <a routerLink="/account">Đơn Hàng</a>
       <span class="sep">|</span>
       
       <!-- Admin Link with Role Status Badge -->
       @if (authService.isAdmin()) {
         <a routerLink="/admin" class="admin-link is-admin" title="Truy cập Backoffice Quản Trị Hệ Thống">
-          ⚙️ Quản Trị <span class="badge-admin-tag">ADMIN</span>
+          Quản Trị <span class="badge-admin-tag">ADMIN</span>
         </a>
       } @else {
-        <a routerLink="/admin" class="admin-link is-customer" title="Khu vực dành riêng cho Admin (Bấm để thử nghiệm bảo mật)">
-          🔒 Quản Trị (Chỉ Admin)
+        <a routerLink="/admin" class="admin-link is-customer" title="Khu vực dành riêng cho Admin">
+          Quản Trị
         </a>
       }
     </div>
@@ -51,26 +51,34 @@
 <!-- Main Header -->
 <header class="site-header">
   <div class="container header-container">
-    <!-- Brand Logo -->
+    <!-- Brand Logo in iconic Uniqlo Red Box Style -->
     <a routerLink="/" class="brand-logo" (click)="closeMenu()">
-      <span class="brand-badge">AI</span>
-      <span class="brand-name">FASHION<span class="brand-sub">STUDIO</span></span>
+      <div class="uniqlo-badge-box">
+        <span class="line-1">SMART</span>
+        <span class="line-2">FIT</span>
+      </div>
+      <div class="brand-name-group">
+        <span class="brand-name">SMARTFIT</span>
+        <span class="brand-sub">LifeWear × AI</span>
+      </div>
     </a>
 
     <!-- Desktop Navigation Links -->
     <nav class="desktop-nav">
-      <a routerLink="/catalog" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">TẤT CẢ</a>
       <a [routerLink]="['/catalog']" [queryParams]="{ gender: 'women' }" routerLinkActive="active">NỮ</a>
       <a [routerLink]="['/catalog']" [queryParams]="{ gender: 'men' }" routerLinkActive="active">NAM</a>
-      <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-women-dresses' }" routerLinkActive="active">ĐẦM & VÁY</a>
-      <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-men-jackets' }" routerLinkActive="active">ÁO KHOÁC</a>
+      <a [routerLink]="['/catalog']" [queryParams]="{ gender: 'kids' }" routerLinkActive="active">TRẺ EM</a>
+      <a routerLink="/catalog" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">TẤT CẢ</a>
+      <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-jackets' }" routerLinkActive="active" class="nav-sale-link">
+        ƯU ĐÃI ĐẶC BIỆT
+      </a>
       
       <!-- AI Highlights -->
       <a routerLink="/virtual-try-on" routerLinkActive="active" class="nav-ai-tryon">
-        ✨ THỬ ĐỒ ẢO
+        THỬ ĐỒ ẢO AI
       </a>
       <a routerLink="/visual-search" routerLinkActive="active" class="nav-visual-search">
-        📷 TÌM BẰNG ẢNH
+        TÌM BẰNG ẢNH
       </a>
     </nav>
 
@@ -81,7 +89,7 @@
         <form (ngSubmit)="onSearchSubmit()" class="search-form">
           <input
             type="text"
-            placeholder="Tìm áo, quần, đầm..."
+            placeholder="Tìm theo sản phẩm hoặc danh mục..."
             [ngModel]="searchQuery()"
             (ngModelChange)="searchQuery.set($event)"
             name="search"
@@ -91,29 +99,52 @@
             type="button"
             class="search-camera-btn"
             (click)="openVisualSearch()"
-            title="Tìm kiếm bằng hình ảnh (Visual Search)"
+            title="Tìm kiếm bằng hình ảnh (SigLIP Visual Search)"
+            aria-label="Tìm bằng ảnh"
           >
-            📷
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
           </button>
-          <button type="submit" class="search-submit-btn" title="Tìm kiếm">
-            🔍
+          <button type="submit" class="search-submit-btn" title="Tìm kiếm" aria-label="Tìm kiếm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
           </button>
         </form>
       </div>
 
-      <!-- Account Icon with Role Status -->
-      <a routerLink="/account" class="action-icon-btn user-btn" [title]="authService.isAdmin() ? 'Tài khoản: ADMIN' : 'Tài khoản: Người Xem / Khách Hàng'">
-        <span class="icon">👤</span>
-        @if (authService.isAdmin()) {
+      <!-- Wishlist Link with SVG Icon -->
+      <a routerLink="/catalog" class="action-icon-btn wishlist-btn" title="Danh sách yêu thích" aria-label="Yêu thích">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      </a>
+
+      <!-- Account Icon with SVG Icon -->
+      <a routerLink="/account" class="action-icon-btn user-btn" [title]="!authService.isAuthenticated() ? 'Đăng nhập / Đăng ký' : (authService.isAdmin() ? 'Tài khoản: ADMIN' : 'Tài khoản: ' + (authService.currentUser()?.fullName || 'Khách Hàng'))" aria-label="Tài khoản">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        @if (!authService.isAuthenticated()) {
+          <span class="user-role-badge customer">LOGIN</span>
+        } @else if (authService.isAdmin()) {
           <span class="user-role-badge admin">ADMIN</span>
         } @else {
           <span class="user-role-badge customer">USER</span>
         }
       </a>
 
-      <!-- Cart Icon with Live Badge -->
-      <a routerLink="/cart" class="action-icon-btn cart-btn" title="Giỏ hàng">
-        <span class="icon">🛍️</span>
+      <!-- Cart Icon with SVG Icon -->
+      <a routerLink="/cart" class="action-icon-btn cart-btn" title="Giỏ hàng" aria-label="Giỏ hàng">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
         @if (cartService.count() > 0) {
           <span class="cart-badge">{{ cartService.count() }}</span>
         }
@@ -150,7 +181,7 @@
         [class.active]="authService.isAdmin()"
         (click)="switchRole('admin'); closeMenu()"
       >
-        👑 Admin
+        ADMIN
       </button>
       <button
         type="button"
@@ -158,7 +189,7 @@
         [class.active]="authService.isCustomer()"
         (click)="switchRole('customer'); closeMenu()"
       >
-        👤 Người Xem
+        KHÁCH HÀNG
       </button>
     </div>
   </div>
@@ -168,26 +199,26 @@
     <a routerLink="/catalog" (click)="closeMenu()">Tất Cả Sản Phẩm</a>
     <a [routerLink]="['/catalog']" [queryParams]="{ gender: 'women' }" (click)="closeMenu()">Thời Trang Nữ</a>
     <a [routerLink]="['/catalog']" [queryParams]="{ gender: 'men' }" (click)="closeMenu()">Thời Trang Nam</a>
-    <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-women-dresses' }" (click)="closeMenu()">Đầm & Chân Váy</a>
-    <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-men-jackets' }" (click)="closeMenu()">Áo Khoác Nam</a>
+    <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-dresses' }" (click)="closeMenu()">Đầm & Chân Váy</a>
+    <a [routerLink]="['/catalog']" [queryParams]="{ category: 'cat-jackets' }" (click)="closeMenu()">Áo Khoác Nam Nữ</a>
 
     <div class="drawer-divider"></div>
 
     <a routerLink="/virtual-try-on" class="drawer-ai-item" (click)="closeMenu()">
-      ✨ Phòng Thử Đồ Ảo AI (IDM-VTON)
+      Phòng Thử Đồ Ảo AI (IDM-VTON)
     </a>
     <a routerLink="/visual-search" class="drawer-ai-item" (click)="closeMenu()">
-      📷 Tìm Kiếm Bằng Hình Ảnh (SigLIP)
+      Tìm Kiếm Bằng Hình Ảnh (SigLIP)
     </a>
 
     <div class="drawer-divider"></div>
 
-    <a routerLink="/account" (click)="closeMenu()">👤 Tài Khoản / Đăng Nhập</a>
-    <a routerLink="/cart" (click)="closeMenu()">🛍️ Giỏ Hàng ({{ cartService.count() }})</a>
-    <a routerLink="/content/about" (click)="closeMenu()">Về FashionAI</a>
+    <a routerLink="/account" (click)="closeMenu()">Tài Khoản / Đăng Nhập</a>
+    <a routerLink="/cart" (click)="closeMenu()">Giỏ Hàng ({{ cartService.count() }})</a>
+    <a routerLink="/content/about" (click)="closeMenu()">Về SmartFit</a>
     <a routerLink="/content/faq" (click)="closeMenu()">Câu Hỏi Thường Gặp</a>
-    <a routerLink="/content/contact" (click)="closeMenu()">Liên Hệ</a>
-    <a routerLink="/admin" (click)="closeMenu()">⚙️ Quản Trị Hệ Thống</a>
+    <a routerLink="/content/contact" (click)="closeMenu()">Hệ Thống Cửa Hàng</a>
+    <a routerLink="/admin" (click)="closeMenu()">Quản Trị Hệ Thống</a>
   </nav>
 </div>
 

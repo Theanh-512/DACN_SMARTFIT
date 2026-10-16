@@ -4,4 +4,6 @@ export interface Environment {
   apiBaseUrl: string;
   appBaseUrl: string;
   mediaCdnBaseUrl?: string;
+  supabaseUrl: string;
+  supabaseKey: string;
 }

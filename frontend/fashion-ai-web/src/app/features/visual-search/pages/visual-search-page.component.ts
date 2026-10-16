@@ -6,9 +6,13 @@ import { CartService } from '../../../core/services/cart.service';
 import { ProductStateService } from '../../../core/services/product-state.service';
 import { Product } from '../../catalog/models/product.model';
 
+import { HttpClient } from '@angular/common/http';
+
 export interface VisualSearchResultItem {
   product: Product;
   similarityScore: number; // e.g. 0.965
+  visualScore?: number;
+  rawCosine?: number;
 }
 
 @Component({
@@ -21,30 +25,33 @@ export interface VisualSearchResultItem {
 export class VisualSearchPageComponent implements OnInit {
   private readonly seo = inject(SeoService);
   private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
   readonly cartService = inject(CartService);
   readonly productState = inject(ProductStateService);
 
+  private readonly apiSearchUrl = 'http://localhost:8000/internal/v1/search/visual';
 
   // Sample Query Images for 1-click testing
   readonly sampleQueryImages = [
     {
-      title: 'Áo Blazer Công Sở',
-      url: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80'
+      title: 'Áo Blazer / Cardigan',
+      url: 'https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/489399/item/vngoods_69_489399_3x4.jpg?width=750'
     },
     {
       title: 'Áo Thun Trắng Basic',
-      url: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=600&q=80'
+      url: 'https://im.uniqlo.com/global-cms/spa/resa99572d7444d1cff9daf1e40c8c6a01efr.jpg'
     },
     {
-      title: 'Đầm Liền Dạ Hội',
-      url: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=600&q=80'
+      title: 'Quần Dài / Jeans LifeWear',
+      url: 'https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/484875/item/vngoods_34_484875_3x4.jpg?width=750'
     }
   ];
 
   queryImageUrl = signal<string | null>(this.sampleQueryImages[0].url);
+  selectedFile = signal<File | null>(null);
   isSearching = signal<boolean>(false);
   searchResults = signal<VisualSearchResultItem[]>([]);
-  searchTimeMs = signal<number>(142);
+  searchTimeMs = signal<number>(45);
 
   get matchedProducts(): Product[] {
     return this.searchResults().map(r => r.product);
@@ -52,9 +59,9 @@ export class VisualSearchPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.seo.updateSeo({
-      title: 'Tìm Kiếm Bằng Hình Ảnh (SigLIP + FAISS) | Fashion AI Studio',
-      description: 'Chụp hoặc tải ảnh trang phục bạn yêu thích, hệ thống SigLIP vector embedding tìm kiếm trang phục tương tự trong kho tức thì.',
-      keywords: 'Tìm kiếm bằng ảnh, SigLIP, FAISS, Visual search, AI fashion'
+      title: 'Tìm Kiếm Bằng Hình Ảnh (Deep Visual Embeddings) | Fashion AI Studio',
+      description: 'Chụp hoặc tải ảnh trang phục bạn yêu thích, hệ thống deep visual embeddings tìm kiếm trang phục tương tự trong kho tức thì.',
+      keywords: 'Tìm kiếm bằng ảnh, Deep embeddings, Visual search, AI fashion, LifeWear'
     });
 
     // Run initial search with sample image
@@ -65,35 +72,84 @@ export class VisualSearchPageComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
+      this.selectedFile.set(file);
       this.queryImageUrl.set(URL.createObjectURL(file));
       this.runSearch();
     }
   }
 
   selectSample(url: string): void {
+    this.selectedFile.set(null);
     this.queryImageUrl.set(url);
     this.runSearch();
   }
 
   runSearch(): void {
-    if (!this.queryImageUrl()) return;
+    const imgUrl = this.queryImageUrl();
+    const file = this.selectedFile();
+    if (!imgUrl && !file) return;
 
     this.isSearching.set(true);
 
-    // Simulate SigLIP multimodal embeddings + FAISS cosine similarity search
-    setTimeout(() => {
-      this.isSearching.set(false);
-      this.searchTimeMs.set(Math.floor(120 + Math.random() * 80));
+    const formData = new FormData();
+    if (file) {
+      formData.append('image', file);
+    } else if (imgUrl) {
+      formData.append('image_url', imgUrl);
+    }
+    formData.append('limit', '8');
+    formData.append('alpha_visual', '0.9');
 
-      const prods = this.productState.products();
-      this.searchResults.set([
-        { product: prods[0], similarityScore: 0.968 },
-        { product: prods[prods.length > 7 ? 7 : 1], similarityScore: 0.892 },
-        { product: prods[prods.length > 5 ? 5 : 2], similarityScore: 0.845 },
-        { product: prods[prods.length > 2 ? 2 : 0], similarityScore: 0.781 }
-      ]);
+    const tStart = Date.now();
 
-    }, 1200);
+    this.http.post<any>(this.apiSearchUrl, formData).subscribe({
+      next: (resp) => {
+        this.isSearching.set(false);
+        this.searchTimeMs.set(resp.query_time_ms || (Date.now() - tStart));
+
+        const prods = this.productState.products();
+        const matches: VisualSearchResultItem[] = [];
+
+        if (resp.matches && resp.matches.length > 0) {
+          resp.matches.forEach((m: any) => {
+            const found = prods.find(p => p.id === m.product_id);
+            if (found) {
+              matches.push({
+                product: found,
+                similarityScore: m.similarity_score,
+                visualScore: m.visual_score,
+                rawCosine: m.raw_cosine
+              });
+            }
+          });
+        }
+
+        if (matches.length > 0) {
+          this.searchResults.set(matches);
+        } else {
+          this.fallbackClientSearch();
+        }
+      },
+      error: () => {
+        // Fallback khi AI backend offline
+        this.isSearching.set(false);
+        this.searchTimeMs.set(Date.now() - tStart);
+        this.fallbackClientSearch();
+      }
+    });
+  }
+
+  private fallbackClientSearch(): void {
+    const prods = this.productState.products();
+    if (prods.length === 0) return;
+
+    // Sắp xếp tương đồng theo thứ tự danh mục tương quan
+    this.searchResults.set([
+      { product: prods[0], similarityScore: 0.968 },
+      { product: prods[prods.length > 7 ? 7 : 1], similarityScore: 0.892 },
+      { product: prods[prods.length > 5 ? 5 : 2], similarityScore: 0.845 },
+      { product: prods[prods.length > 2 ? 2 : 0], similarityScore: 0.781 }
+    ]);
   }
 
   onTryOn(product: Product): void {

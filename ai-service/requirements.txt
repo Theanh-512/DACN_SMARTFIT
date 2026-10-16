@@ -21,6 +21,10 @@ diffusers>=0.30.0
 # Vector Similarity Search
 faiss-cpu>=1.8.0
 
+# 3D Mesh & Anthropometry (SMPL-X & ISO 8559)
+trimesh>=4.0.0
+smplx>=0.1.28
+
 # Utilities & Testing
 pytest>=8.3.0
 pytest-asyncio>=0.24.0

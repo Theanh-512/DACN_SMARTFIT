@@ -11,7 +11,9 @@
   @if (orderSuccessCode()) {
     <!-- Order Placement Success View -->
     <div class="order-success-card fade-in">
-      <div class="success-icon">🎉</div>
+      <div class="success-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="16 9 10 15 7 12"></polyline></svg>
+      </div>
       <h1 class="success-title">ĐẶT HÀNG THÀNH CÔNG!</h1>
       <p class="success-desc">
         Cảm ơn bạn đã mua sắm tại <strong>Fashion AI Studio</strong>. Đơn hàng của bạn đã được ghi nhận và đang được đội ngũ chuẩn bị đóng gói.
@@ -196,7 +198,7 @@
                 (change)="paymentMethod.set('cod')"
               />
               <div class="option-info">
-                <strong>💵 Thanh toán khi nhận hàng (COD)</strong>
+                <strong>Thanh toán khi nhận hàng (COD)</strong>
                 <span>Kiểm tra hàng trước khi thanh toán tiền mặt cho shipper</span>
               </div>
             </label>
@@ -210,7 +212,7 @@
                 (change)="paymentMethod.set('momo')"
               />
               <div class="option-info">
-                <strong>📱 Ví điện tử MoMo</strong>
+                <strong>Ví điện tử MoMo</strong>
                 <span>Quét mã QR thanh toán tức thì qua ứng dụng MoMo</span>
               </div>
             </label>
@@ -224,7 +226,7 @@
                 (change)="paymentMethod.set('vnpay')"
               />
               <div class="option-info">
-                <strong>🏦 Cổng VNPAY-QR</strong>
+                <strong>Cổng VNPAY-QR</strong>
                 <span>Hỗ trợ hơn 30 ngân hàng số tại Việt Nam</span>
               </div>
             </label>
@@ -238,7 +240,7 @@
                 (change)="paymentMethod.set('card')"
               />
               <div class="option-info">
-                <strong>💳 Thẻ Quốc Tế (Visa / Mastercard / JCB)</strong>
+                <strong>Thẻ Quốc Tế (Visa / Mastercard / JCB)</strong>
                 <span>Thanh toán an toàn bảo mật qua cổng kết nối quốc tế</span>
               </div>
             </label>

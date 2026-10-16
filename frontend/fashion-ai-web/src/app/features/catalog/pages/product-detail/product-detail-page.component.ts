@@ -9,10 +9,13 @@ import { ProductStateService } from '../../../../core/services/product-state.ser
 import { ProductGridComponent } from '../../../../shared/ui/product-grid/product-grid.component';
 import { ModalComponent } from '../../../../shared/ui/modal/modal.component';
 
+import { FormsModule } from '@angular/forms';
+import { SizeRecommendationService, SizeRecommendationResult } from '../../../../core/services/size-recommendation.service';
+
 @Component({
   selector: 'app-product-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, ProductGridComponent, ModalComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ProductGridComponent, ModalComponent],
   templateUrl: './product-detail-page.component.html',
   styleUrls: ['./product-detail-page.component.scss']
 })
@@ -20,6 +23,7 @@ export class ProductDetailPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly seo = inject(SeoService);
+  private readonly sizeService = inject(SizeRecommendationService);
   readonly cartService = inject(CartService);
   readonly productState = inject(ProductStateService);
 
@@ -32,6 +36,15 @@ export class ProductDetailPageComponent implements OnInit {
   isSizeGuideOpen = signal<boolean>(false);
   activeAccordion = signal<string>('details');
   addedMessage = signal<string | null>(null);
+
+  // Size Recommendation State
+  userHeight = signal<number>(170);
+  userWeight = signal<number>(65);
+  userChest = signal<number | null>(null);
+  userWaist = signal<number | null>(null);
+  userFitPref = signal<'slim' | 'regular' | 'relaxed'>('regular');
+  sizeRecommendation = signal<SizeRecommendationResult | null>(null);
+  isCalculatingSize = signal<boolean>(false);
 
   readonly relatedProducts = computed(() => {
     const current = this.product();
@@ -48,6 +61,24 @@ export class ProductDetailPageComponent implements OnInit {
     return null;
   });
 
+  activeMediaTab = signal<'photos' | 'video'>('photos');
+
+  readonly reviewsList = computed(() => {
+    return this.product()?.reviews || [];
+  });
+
+  readonly styleHintList = computed(() => {
+    const p = this.product();
+    if (p?.styleHintImages && p.styleHintImages.length > 0) {
+      return p.styleHintImages;
+    }
+    return [
+      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=600&q=80'
+    ];
+  });
+
   readonly availableColors = computed(() => {
     const p = this.product();
     if (!p) return [];
@@ -60,18 +91,31 @@ export class ProductDetailPageComponent implements OnInit {
       'Xanh Da Trời': '#60a5fa',
       'Navy': '#1e293b',
       'Đen Than': '#1f2421',
-      'Kem Trắng': '#faf6ee'
+      'Kem Trắng': '#faf6ee',
+      '09 BLACK': '#111111',
+      '01 OFF WHITE': '#f8fafc',
+      '57 OLIVE': '#4d5d53',
+      '69 NAVY': '#1e293b',
+      '31 BEIGE': '#e2d7c5',
+      '32 BEIGE': '#d4b996',
+      '00 WHITE': '#ffffff',
+      '64 BLUE LIGHT': '#93c5fd',
+      '68 BLUE DARK': '#1e3a8a',
+      '08 DARK GRAY': '#4b5563',
+      '60 LIGHT BLUE': '#bae6fd'
     };
 
     const seen = new Set<string>();
-    const colors: { name: string; hex: string; imgUrl: string }[] = [];
+    const colors: { name: string; hex: string; imgUrl: string; colorCode: string }[] = [];
 
     p.variants.forEach(v => {
-      if (!seen.has(v.color)) {
-        seen.add(v.color);
+      const code = v.colorCode || v.color;
+      if (!seen.has(code)) {
+        seen.add(code);
         colors.push({
-          name: v.color,
-          hex: colorMap[v.color] || '#888888',
+          name: code,
+          colorCode: code,
+          hex: v.colorHex || colorMap[code] || colorMap[v.color] || '#888888',
           imgUrl: v.garmentImageUrl
         });
       }
@@ -158,5 +202,39 @@ export class ProductDetailPageComponent implements OnInit {
         size: this.selectedSize()
       }
     });
+  }
+
+  calculateSizeRecommendation(): void {
+    const p = this.product();
+    if (!p) return;
+
+    this.isCalculatingSize.set(true);
+    this.sizeService.recommend(
+      p.categoryId,
+      this.userFitPref(),
+      {
+        heightCm: this.userHeight(),
+        weightKg: this.userWeight(),
+        chestCm: this.userChest() || undefined,
+        waistCm: this.userWaist() || undefined
+      }
+    ).subscribe({
+      next: (res) => {
+        this.sizeRecommendation.set(res);
+        this.isCalculatingSize.set(false);
+      },
+      error: () => {
+        this.isCalculatingSize.set(false);
+      }
+    });
+  }
+
+  applyRecommendedSize(size: string): void {
+    this.selectedSize.set(size);
+    this.isSizeGuideOpen.set(false);
+    this.addedMessage.set(`Đã chọn kích cỡ khuyến nghị ${size} theo số đo của bạn!`);
+    setTimeout(() => {
+      this.addedMessage.set(null);
+    }, 2500);
   }
 }

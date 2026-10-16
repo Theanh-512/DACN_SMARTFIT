@@ -1,11 +1,11 @@
-/* Top Announcement Bar */
+/* Top Announcement Bar - Uniqlo Iconic Red */
 .announcement-bar {
-  background-color: #111111;
+  background-color: #e60012;
   color: #ffffff;
   font-size: 12px;
   letter-spacing: 0.3px;
-  padding: 6px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 
   .announcement-content {
     display: flex;
@@ -22,7 +22,8 @@
     flex-wrap: wrap;
 
     .promo-text {
-      color: #e2e8f0;
+      color: #ffffff;
+      font-weight: 600;
     }
   }
 
@@ -30,36 +31,37 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: #1f2937;
+    background: rgba(0, 0, 0, 0.25);
     padding: 2px 8px;
     border-radius: 4px;
-    border: 1px solid #374151;
+    border: 1px solid rgba(255, 255, 255, 0.25);
 
     .role-sim-txt {
       font-size: 11px;
-      color: #9ca3af;
+      color: #fecaca;
+      font-weight: 500;
     }
 
     .role-pill-btn {
-      background: transparent;
-      border: 1px solid #4b5563;
-      color: #d1d5db;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #ffffff;
       font-size: 10px;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 2px 8px;
       border-radius: 3px;
       cursor: pointer;
       transition: all 0.15s ease;
 
       &:hover {
-        background: #374151;
+        background: rgba(255, 255, 255, 0.35);
         color: #ffffff;
       }
 
       &.active {
-        background: #e60012;
-        border-color: #e60012;
-        color: #ffffff;
+        background: #ffffff;
+        border-color: #ffffff;
+        color: #e60012;
       }
     }
   }
@@ -69,14 +71,14 @@
     align-items: center;
     gap: 12px;
     font-size: 11px;
-    color: #cccccc;
+    color: #ffffff;
 
     a:hover {
-      color: #ffffff;
+      text-decoration: underline;
     }
 
     .sep {
-      color: #444444;
+      color: rgba(255, 255, 255, 0.4);
     }
 
     .admin-link {
@@ -86,13 +88,10 @@
       gap: 4px;
 
       &.is-admin {
-        color: #fca5a5;
-        &:hover {
-          color: #ffffff;
-        }
+        color: #ffffff;
 
         .badge-admin-tag {
-          background: #e60012;
+          background: #111111;
           color: #ffffff;
           font-size: 9px;
           padding: 1px 4px;
@@ -101,10 +100,7 @@
       }
 
       &.is-customer {
-        color: #94a3b8;
-        &:hover {
-          color: #cbd5e1;
-        }
+        color: rgba(255, 255, 255, 0.8);
       }
     }
   }
@@ -120,7 +116,6 @@
     }
   }
 }
-
 
 /* Main Site Header */
 .site-header {
@@ -143,34 +138,53 @@
   }
 }
 
-/* Brand Logo */
+/* Brand Logo (Uniqlo Red Box Style) */
 .brand-logo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   text-decoration: none;
   color: var(--color-text-main);
 
-  .brand-badge {
-    background-color: var(--color-brand-red);
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: 800;
-    padding: 3px 6px;
-    border-radius: var(--radius-xs);
-    letter-spacing: 0.5px;
+  .uniqlo-badge-box {
+    width: 44px;
+    height: 44px;
+    background-color: #e60012;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.05;
+    padding: 3px;
+    box-shadow: 0 2px 4px rgba(230, 0, 18, 0.2);
+
+    .line-1,
+    .line-2 {
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
   }
 
-  .brand-name {
-    font-size: 19px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
+  .brand-name-group {
+    display: flex;
+    flex-direction: column;
+
+    .brand-name {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      line-height: 1.1;
+    }
 
     .brand-sub {
-      font-weight: 300;
+      font-size: 10px;
       color: var(--color-text-muted);
-      margin-left: 2px;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      text-transform: uppercase;
     }
   }
 }
@@ -234,6 +248,15 @@
         background: #bae6fd;
       }
     }
+
+    &.nav-sale-link {
+      color: #e60012;
+      font-weight: 700;
+
+      &::after {
+        background-color: #e60012;
+      }
+    }
   }
 
   @media (max-width: 1080px) {
@@ -282,10 +305,17 @@
 
   .search-camera-btn,
   .search-submit-btn {
-    font-size: 14px;
-    padding: 2px 4px;
-    opacity: 0.7;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 5px;
+    color: var(--color-text-main);
+    opacity: 0.75;
     transition: opacity 0.15s ease;
+
+    svg {
+      display: block;
+    }
 
     &:hover {
       opacity: 1;
@@ -301,12 +331,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   position: relative;
-  font-size: 18px;
-  border-radius: 50%;
+  color: var(--color-text-main);
+  border-radius: 2px;
   transition: background-color 0.15s ease;
+
+  svg {
+    display: block;
+    stroke: var(--color-text-main);
+  }
 
   &:hover {
     background-color: var(--color-bg-subtle);

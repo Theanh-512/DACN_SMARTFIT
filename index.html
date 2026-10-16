@@ -1,0 +1,1892 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>LTX — The world model</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --retake-ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --retake-slow-ease: cubic-bezier(0.65, 0, 0.35, 1);
+      --font-ui: 'Manrope', system-ui, sans-serif;
+      --color-white: #fff;
+      --color-ink: #0b1a26;
+      --glass-track: rgb(24 55 82 / 0.31);
+      --glass-capsule: rgb(246 251 255 / 0.24);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+    }
+
+    html {
+      background: #000;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      overflow-x: hidden;
+      background: #000;
+      color: var(--color-white);
+      font-family: var(--font-ui);
+      text-rendering: optimizeLegibility;
+    }
+
+    button,
+    a {
+      color: inherit;
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    ::selection {
+      background: rgb(255 255 255 / 0.2);
+    }
+
+    :focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+    }
+
+    .stage {
+      position: relative;
+      isolation: isolate;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .media {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .media.is-visible {
+      visibility: visible;
+    }
+
+    .hero {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hero h1 {
+      position: absolute;
+      top: 35.9%;
+      left: 50%;
+      width: min(901px, calc(100vw - 48px));
+      margin: 0;
+      transform: translateX(-50%);
+      color: #fff;
+      font-size: clamp(62px, 6.8vw, 100px);
+      font-weight: 500;
+      line-height: 0.8;
+      letter-spacing: -0.04em;
+      text-align: center;
+      white-space: nowrap;
+      text-shadow: 0 2px 12px rgb(0 0 0 / 0.14);
+    }
+
+    .hero h1 span {
+      display: inline-block;
+      transition: opacity 900ms var(--retake-ease), filter 900ms var(--retake-ease), transform 900ms var(--retake-ease);
+    }
+
+    .hero h1 span:nth-child(1) {
+      transition-delay: 0ms;
+    }
+
+    .hero h1 span:nth-child(2) {
+      transition-delay: 90ms;
+    }
+
+    .hero h1 span:nth-child(3) {
+      transition-delay: 180ms;
+    }
+
+    .stage.title-hidden .hero h1 span {
+      opacity: 0;
+      filter: blur(12px);
+      transform: translateY(-10px);
+    }
+
+    .hero p {
+      position: absolute;
+      top: calc(46.78% + 94px);
+      left: 50%;
+      width: min(734px, calc(100vw - 48px));
+      margin: 0;
+      transform: translateX(-50%);
+      color: #fff;
+      font-size: clamp(14px, 1.25vw, 18px);
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -0.04em;
+      text-align: center;
+      text-shadow: 0 1px 8px rgb(0 0 0 / 0.16);
+    }
+
+    .controller {
+      --cap-left: -5px;
+      --cap-width: calc(20% + 5px);
+      --glass-x: 24%;
+      --glass-y: 8%;
+      position: absolute;
+      top: 46.78%;
+      left: 50%;
+      z-index: 20;
+      width: min(880px, calc(100vw - 48px));
+      height: 72px;
+      transform: translateX(-50%);
+    }
+
+    .glass {
+      position: absolute;
+      isolation: isolate;
+      border: 1px solid rgb(255 255 255 / 0.2);
+      border-radius: 999px;
+      pointer-events: none;
+    }
+
+    .glass::before,
+    .glass::after {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: inherit;
+      content: "";
+      pointer-events: none;
+    }
+
+    .glass::before {
+      background:
+        radial-gradient(120% 150% at var(--glass-x, 24%) var(--glass-y, 8%), rgb(255 255 255 / 0.25), rgb(255 255 255 / 0) 53%),
+        linear-gradient(115deg, rgb(255 255 255 / 0.10), rgb(255 255 255 / 0) 42%);
+    }
+
+    .glass::after {
+      padding: 1px;
+      background: conic-gradient(from 225deg, #7fe3ff, rgb(255 255 255 / 0.35), #fff, #ffd7e6, rgb(255 255 255 / 0.35), #7fe3ff);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    .track {
+      top: 4px;
+      left: 0;
+      z-index: 0;
+      width: 100%;
+      height: 64px;
+      overflow: hidden;
+      background: var(--glass-track);
+      border: 1px solid rgb(255 255 255 / 0.2);
+      -webkit-backdrop-filter: blur(9px) saturate(126%) contrast(108%) brightness(103%);
+      backdrop-filter: blur(9px) saturate(126%) contrast(108%) brightness(103%);
+      box-shadow:
+        0 14px 38px rgb(4 24 43 / 0.16),
+        0 2px 7px rgb(4 24 43 / 0.1),
+        inset 1px 1px 0 rgb(255 255 255 / 0.48),
+        inset -1px -1px 0 rgb(21 49 73 / 0.14),
+        inset 0 0 0 0.5px rgb(255 255 255 / 0.16);
+      transition: left 980ms var(--retake-slow-ease), width 980ms var(--retake-slow-ease), opacity 400ms linear 650ms;
+    }
+
+    .track::after {
+      opacity: 0.27;
+    }
+
+    .capsule {
+      top: -1px;
+      left: var(--cap-left, -5px);
+      z-index: 1;
+      width: var(--cap-width, calc(20% + 5px));
+      height: 72px;
+      overflow: hidden;
+      background: var(--glass-capsule);
+      border-color: rgb(255 255 255 / 0.28);
+      -webkit-backdrop-filter: blur(13px) saturate(128%) contrast(107%) brightness(105%);
+      backdrop-filter: blur(13px) saturate(128%) contrast(107%) brightness(105%);
+      box-shadow:
+        0 11px 28px rgb(4 24 43 / 0.17),
+        0 2px 6px rgb(4 24 43 / 0.1),
+        inset 1px 1px 0 rgb(255 255 255 / 0.62),
+        inset -1px -1px 0 rgb(20 49 73 / 0.18),
+        inset 0 0 12px rgb(255 255 255 / 0.055);
+      transition: left 620ms var(--retake-ease), width 620ms var(--retake-ease), height 620ms var(--retake-ease), top 620ms var(--retake-ease), transform 620ms var(--retake-ease), opacity 300ms var(--retake-ease), background-color 620ms var(--retake-ease);
+    }
+
+    .capsule::after {
+      opacity: 0.30;
+    }
+
+    .cells {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: center;
+    }
+
+    .cell {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 0 14px;
+      color: #fff;
+      font-size: 23px;
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -0.04em;
+      text-align: center;
+      white-space: nowrap;
+      transition: opacity 420ms var(--retake-ease), filter 420ms var(--retake-ease), transform 980ms var(--retake-slow-ease);
+    }
+
+    .cell-intro {
+      cursor: default;
+    }
+
+    .cell-option {
+      min-width: 0;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .cell-option:disabled {
+      cursor: default;
+    }
+
+    .option-label,
+    .reset-label {
+      display: inline-block;
+      transition: opacity 420ms var(--retake-ease), filter 420ms var(--retake-ease);
+    }
+
+    .reset-label {
+      position: absolute;
+      opacity: 0;
+      filter: blur(10px);
+      pointer-events: none;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .controller.is-highlighted .cell-intro {
+      opacity: 0.5;
+      transition: opacity 300ms var(--retake-ease);
+    }
+
+    .controller.collapsed {
+      --cap-left: calc(50% - 100px);
+      --cap-width: 200px;
+    }
+
+    .controller.collapsed .track {
+      left: calc(50% - 96px);
+      width: 192px;
+      opacity: 0;
+    }
+
+    .controller.collapsed .capsule {
+      background: rgb(246 251 255 / 0.14);
+      transition: left 980ms var(--retake-slow-ease), width 980ms var(--retake-slow-ease), height 980ms var(--retake-slow-ease), top 980ms var(--retake-slow-ease), transform 980ms var(--retake-slow-ease), opacity 300ms var(--retake-ease), background-color 980ms var(--retake-slow-ease);
+    }
+
+    .controller.collapsed .cell-intro,
+    .controller.collapsed .cell-option.is-not-selected {
+      opacity: 0;
+      filter: blur(10px);
+      transform: scale(0.94);
+      pointer-events: none;
+    }
+
+    .controller.collapsed .cell-option.is-not-selected {
+      transition-delay: 0ms;
+    }
+
+    .controller.collapsed .selected-cell {
+      transform: translate(var(--travel-x, 0px), var(--travel-y, 0px));
+      pointer-events: none;
+    }
+
+    .controller.selected .selected-cell {
+      pointer-events: auto;
+    }
+
+    .controller.selected .selected-cell .option-label {
+      opacity: 0;
+      filter: blur(10px);
+    }
+
+    .controller.selected .selected-cell .reset-label {
+      animation: reset-reveal 520ms var(--retake-ease) both;
+    }
+
+    @keyframes reset-reveal {
+      from { opacity: 0; filter: blur(10px); }
+      to { opacity: 1; filter: blur(0); }
+    }
+
+    .controller.reversing .track {
+      transition-delay: 0ms;
+    }
+
+    .controller.reversing .selected-cell {
+      transform: translate(0, 0);
+      pointer-events: auto;
+    }
+
+    .controller.reversing .selected-cell .reset-label {
+      opacity: 0;
+      filter: blur(10px);
+      animation: none;
+      transition: opacity 760ms var(--retake-ease) 60ms, filter 760ms var(--retake-ease) 60ms;
+    }
+
+    .controller.reversing .selected-cell .option-label {
+      opacity: 1;
+      filter: blur(0);
+      transition: opacity 760ms var(--retake-ease) 60ms, filter 760ms var(--retake-ease) 60ms;
+    }
+
+    .controller.reversing .cell-intro,
+    .controller.reversing .cell-option.is-not-selected {
+      opacity: 1;
+      filter: blur(0);
+      transform: none;
+      transition-delay: 60ms;
+    }
+
+    .site-header {
+      position: absolute;
+      inset: 0 0 auto;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      width: 100%;
+      padding: calc(58px + env(safe-area-inset-top)) 40px 40px;
+      text-shadow: 0 1px 6px rgb(0 0 0 / 0.18);
+    }
+
+    .brandline {
+      grid-column: 1;
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .logo-link {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      height: 24px;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .logo-link svg {
+      display: block;
+      width: auto;
+      height: 24px;
+      fill: #fff;
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: clamp(28px, 3vw, 44px);
+      margin-left: clamp(48px, 5vw, 70px);
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+    }
+
+    .try-link {
+      position: relative;
+      grid-column: 3;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 152px;
+      height: 38px;
+      border: 1px solid rgb(255 255 255 / 0.75);
+      border-radius: 999px;
+      background: transparent;
+      color: #fff;
+      font-size: 18px;
+      line-height: 1;
+      text-decoration: none;
+      transition: color 300ms var(--retake-ease), background-color 300ms var(--retake-ease), border-color 300ms var(--retake-ease);
+    }
+
+    .try-link:hover,
+    .try-link:focus-visible {
+      border-color: #fff;
+      background: #fff;
+      color: var(--color-ink);
+    }
+
+    .notice {
+      position: absolute;
+      right: 20px;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      left: 20px;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      color: #fff;
+      font-size: 14px;
+      line-height: 1.4;
+      text-align: center;
+      text-shadow: 0 1px 8px rgb(0 0 0 / 0.35);
+      pointer-events: none;
+    }
+
+    .notice.is-visible {
+      display: flex;
+      pointer-events: auto;
+    }
+
+    .retry-button {
+      min-width: 88px;
+      min-height: 44px;
+      padding: 0 18px;
+      border: 1px solid rgb(255 255 255 / 0.75);
+      border-radius: 999px;
+      background: rgb(24 55 82 / 0.72);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    @media (max-width: 900px) {
+      .site-header {
+        padding: calc(24px + env(safe-area-inset-top)) 24px 24px;
+      }
+
+      .meta {
+        gap: 22px;
+        margin-left: 34px;
+        font-size: 14px;
+      }
+
+      .try-link {
+        width: 116px;
+        height: 36px;
+        font-size: 14px;
+      }
+
+      .cell {
+        font-size: clamp(17px, 2.5vw, 24px);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .site-header {
+        padding-right: 18px;
+        padding-left: 18px;
+      }
+
+      .logo-link,
+      .logo-link svg {
+        height: 21px;
+      }
+
+      .meta {
+        gap: 0;
+        margin-left: 22px;
+        font-size: 12px;
+      }
+
+      .meta span:nth-child(2) {
+        display: none;
+      }
+
+      .try-link {
+        width: 92px;
+        height: 34px;
+        font-size: 13px;
+      }
+
+      .try-link::after {
+        position: absolute;
+        inset: -6px -10px;
+        content: "";
+      }
+
+      .hero h1 {
+        top: 34%;
+        width: calc(100vw - 40px);
+        font-size: clamp(48px, 14vw, 64px);
+        line-height: 0.88;
+        white-space: normal;
+      }
+
+      .hero p {
+        top: 77%;
+        width: calc(100vw - 44px);
+        font-size: 14px;
+      }
+
+      .controller {
+        top: 53%;
+        width: calc(100vw - 40px);
+        height: 156px;
+      }
+
+      .track {
+        top: 0;
+        width: 100%;
+        height: 156px;
+        border-radius: 28px;
+      }
+
+      .cells {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: 48px 54px 54px;
+      }
+
+      .cell {
+        min-width: 0;
+        height: 100%;
+        padding: 0 8px;
+        font-size: 17px;
+        white-space: nowrap;
+      }
+
+      .cell-option:active,
+      .cell-option:focus-visible {
+        outline: 2px solid rgb(255 255 255 / 0.8);
+        outline-offset: -3px;
+      }
+
+      .cell-intro {
+        grid-column: 1 / -1;
+        border-bottom: 1px solid rgb(255 255 255 / 0.12);
+      }
+
+      .cell-scene,
+      .cell-lighting {
+        border-bottom: 1px solid rgb(255 255 255 / 0.12);
+      }
+
+      .cell-scene,
+      .cell-clothing {
+        border-right: 1px solid rgb(255 255 255 / 0.12);
+      }
+
+      .capsule {
+        top: 4px;
+        left: 50%;
+        width: 196px;
+        height: 64px;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .controller.collapsed .track {
+        left: 0;
+        width: 100%;
+      }
+
+      .controller.collapsed .capsule {
+        top: 4vh;
+        top: 4dvh;
+        left: 50%;
+        width: 196px;
+        height: 64px;
+        transform: translate(-50%, -50%);
+        opacity: 1;
+        background: rgb(246 251 255 / 0.18);
+      }
+
+      .controller.selected .track {
+        opacity: 0;
+      }
+
+      .controller.selected .capsule {
+        opacity: 1;
+      }
+
+      .controller.reversing .track {
+        opacity: 1;
+      }
+
+      .controller.reversing .capsule {
+        opacity: 0;
+      }
+
+      .controller.is-highlighted .cell-intro {
+        opacity: 1;
+      }
+
+      .notice {
+        right: 12px;
+        left: 12px;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 700px) and (max-height: 700px) {
+      .controller {
+        top: 50%;
+      }
+
+      .hero p {
+        top: calc(50% + 168px);
+        width: calc(100vw - 32px);
+        font-size: 13px;
+      }
+    }
+
+    @media (max-height: 520px) and (orientation: landscape) {
+      .hero h1 {
+        top: 20%;
+        font-size: clamp(34px, 8vh, 56px);
+      }
+
+      .controller {
+        top: 50%;
+      }
+
+      .hero p {
+        top: auto;
+        bottom: 8px;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 700px) and (max-height: 520px) and (orientation: landscape) {
+      .hero h1 {
+        top: 12%;
+        font-size: clamp(28px, 7vh, 44px);
+      }
+
+      .controller {
+        top: 46%;
+        height: 118px;
+      }
+
+      .track {
+        height: 118px;
+      }
+
+      .cells {
+        grid-template-rows: 36px 41px 41px;
+      }
+
+      .cell {
+        font-size: 15px;
+      }
+
+      .hero p {
+        top: auto;
+        bottom: 6px;
+        width: calc(100vw - 32px);
+        font-size: 12px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .capsule,
+      .track,
+      .cell,
+      .hero h1 span,
+      .try-link,
+      .option-label,
+      .reset-label {
+        transition-duration: 1ms !important;
+        transition-delay: 0ms !important;
+      }
+
+      .controller.selected .selected-cell .reset-label {
+        animation-duration: 1ms !important;
+      }
+
+      .hero h1 span,
+      .cell-option.is-not-selected,
+      .controller.reversing .selected-cell .reset-label,
+      .controller.reversing .selected-cell .option-label {
+        filter: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" id="stage">
+    <video class="media" id="video-clothing-forward" data-control="clothing" data-direction="forward" data-duration="2.08" muted playsinline preload="auto" aria-hidden="true" src="https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/designs/video-1.mp4"></video>
+    <video class="media" id="video-clothing-reverse" data-control="clothing" data-direction="reverse" data-duration="2.08" muted playsinline preload="auto" aria-hidden="true" src="https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/designs/video-1-reverse.mp4"></video>
+    <video class="media" id="video-scene-forward" data-control="scene" data-direction="forward" data-duration="2.08" muted playsinline preload="auto" aria-hidden="true" src="https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/designs/video-2.mp4"></video>
+    <video class="media" id="video-scene-reverse" data-control="scene" data-direction="reverse" data-duration="2.08" muted playsinline preload="auto" aria-hidden="true" src="https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/designs/video-2-reverse.mp4"></video>
+    <video class="media" id="video-lighting-forward" data-control="lighting" data-direction="forward" data-duration="2.08" muted playsinline preload="auto" aria-hidden="true" src="https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/designs/video-3.mp4"></video>
+    <video class="media" id="video-lighting-reverse" data-control="lighting" data-direction="reverse" data-duration="2.04" muted playsinline preload="auto" aria-hidden="true" src="https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/designs/video-3-reverse.mp4"></video>
+    <video class="media" id="video-cast-forward" data-control="cast" data-direction="forward" data-duration="3.00" muted playsinline preload="auto" aria-hidden="true" src="https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/designs/video-4.mp4"></video>
+    <video class="media" id="video-cast-reverse" data-control="cast" data-direction="reverse" data-duration="2.48" muted playsinline preload="auto" aria-hidden="true" src="https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/designs/video-4-reverse.mp4"></video>
+
+    <section class="hero" aria-labelledby="hero-title">
+      <h1 id="hero-title"><span>The</span> <span>world</span> <span>model</span></h1>
+      <p>LTX builds open world models that give you full control, from production-grade video to systems that understand and operate in the physical world.</p>
+    </section>
+
+    <div class="controller" id="controller" role="group" aria-label="Scene state controller">
+      <div class="track glass" aria-hidden="true"></div>
+      <div class="capsule glass" aria-hidden="true"></div>
+      <div class="cells">
+        <div class="cell cell-intro">Select state →</div>
+        <button class="cell cell-option cell-scene" type="button" data-branch="scene" data-index="1" aria-label="Change scene" disabled tabindex="-1"><span class="option-label">Scene</span><span class="reset-label" aria-hidden="true">Reset</span></button>
+        <button class="cell cell-option cell-lighting" type="button" data-branch="light" data-index="2" aria-label="Change lighting" disabled tabindex="-1"><span class="option-label">Lighting</span><span class="reset-label" aria-hidden="true">Reset</span></button>
+        <button class="cell cell-option cell-clothing" type="button" data-branch="colorway" data-index="3" aria-label="Change clothing" disabled tabindex="-1"><span class="option-label">Clothing</span><span class="reset-label" aria-hidden="true">Reset</span></button>
+        <button class="cell cell-option cell-cast" type="button" data-branch="fullLook" data-index="4" aria-label="Change cast" disabled tabindex="-1"><span class="option-label">Cast</span><span class="reset-label" aria-hidden="true">Reset</span></button>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="brandline">
+        <a class="logo-link" href="https://ltx.io/" aria-label="LTX home">
+          <svg viewBox="0 0 75 32" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 4h7v18h17v6H2z" />
+            <path d="M28 4h25v6h-9v18h-7V10h-9z" />
+            <path d="M56 4h8l4 7 4-7h8l-8 12 8 12h-8l-4-7-4 7h-8l8-12z" transform="translate(-3 0)" />
+          </svg>
+        </a>
+        <div class="meta" aria-label="LTX-2.5 is here, Smarter. Faster">
+          <span>LTX-2.5 is here</span>
+          <span>Smarter. Faster</span>
+        </div>
+      </div>
+      <a class="try-link" href="https://app.ltx.io/" target="_blank" rel="noopener noreferrer">Try now</a>
+    </header>
+
+    <div class="visually-hidden" id="live-region" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div class="notice" id="notice" aria-live="polite">
+      <span id="notice-message">The transition could not be loaded.</span>
+      <button class="retry-button" id="retry-button" type="button">Retry</button>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var stage = document.getElementById('stage');
+      var controller = document.getElementById('controller');
+      var capsule = controller.querySelector('.capsule');
+      var liveRegion = document.getElementById('live-region');
+      var notice = document.getElementById('notice');
+      var noticeMessage = document.getElementById('notice-message');
+      var retryButton = document.getElementById('retry-button');
+      var videoElements = document.querySelectorAll('.media');
+      var controls = controller.querySelectorAll('.cell-option');
+      var pairs = {
+        scene: { forward: document.getElementById('video-scene-forward'), reverse: document.getElementById('video-scene-reverse'), button: controller.querySelector('[data-branch="scene"]'), holdForward: 0.08, holdReverse: 0.08 },
+        light: { forward: document.getElementById('video-lighting-forward'), reverse: document.getElementById('video-lighting-reverse'), button: controller.querySelector('[data-branch="light"]'), holdForward: 0.08, holdReverse: 0.08 },
+        colorway: { forward: document.getElementById('video-clothing-forward'), reverse: document.getElementById('video-clothing-reverse'), button: controller.querySelector('[data-branch="colorway"]'), holdForward: 0.08, holdReverse: 0.08 },
+        fullLook: { forward: document.getElementById('video-cast-forward'), reverse: document.getElementById('video-cast-reverse'), button: controller.querySelector('[data-branch="fullLook"]'), holdForward: 0.08, holdReverse: 0.08 }
+      };
+      pairs.scene.holdReverse = 0.18;
+
+      var state = {
+        scene: 'base',
+        playback: 'loading',
+        direction: 'forward'
+      };
+      var visibleVideo = null;
+      var transitionToken = 0;
+      var pending = null;
+      var failedTransition = null;
+      var playbackLocked = false;
+      var selectedButton = null;
+      var selectedBranch = null;
+      var originHadFocus = false;
+      var returnFocusAfterReset = false;
+      var pointerBounds = null;
+      var firstFrameTimeoutMs = 12000;
+
+      function announce(message) {
+        liveRegion.textContent = '';
+        window.setTimeout(function () {
+          liveRegion.textContent = message;
+        }, 20);
+      }
+
+      function isCurrent(transition) {
+        return !!transition && pending === transition && transition.token === transitionToken;
+      }
+
+      function hasDecodedData(video) {
+        return !!video && video.readyState >= 2;
+      }
+
+      function pairReady(pair) {
+        return hasDecodedData(pair.forward) && hasDecodedData(pair.reverse);
+      }
+
+      function updateControlReadiness() {
+        var key;
+        for (key in pairs) {
+          if (Object.prototype.hasOwnProperty.call(pairs, key)) {
+            var pair = pairs[key];
+            if (failedTransition && failedTransition.direction === 'forward' && failedTransition.revealed && !selectedBranch) {
+              pair.button.disabled = true;
+              pair.button.tabIndex = -1;
+              pair.button.setAttribute('aria-hidden', 'true');
+              continue;
+            }
+            var enabled = pairReady(pair) && !playbackLocked && !selectedBranch && !!visibleVideo && state.scene === 'base' && state.playback === 'ready';
+            if (selectedBranch) {
+              enabled = pair.button === selectedButton && !playbackLocked && state.playback === 'ready';
+              if (pair.button === selectedButton) {
+                pair.button.removeAttribute('aria-hidden');
+              } else {
+                pair.button.setAttribute('aria-hidden', 'true');
+              }
+            } else {
+              pair.button.removeAttribute('aria-hidden');
+            }
+            pair.button.disabled = !enabled;
+            pair.button.tabIndex = enabled ? 0 : -1;
+            if (enabled && !selectedBranch) {
+              pair.button.setAttribute('aria-label', 'Change ' + pair.button.querySelector('.option-label').textContent.toLowerCase());
+            }
+          }
+        }
+      }
+
+      function setAllControlsDisabled(disabled, conceal) {
+        var i;
+        for (i = 0; i < controls.length; i += 1) {
+          controls[i].disabled = disabled;
+          controls[i].tabIndex = disabled ? -1 : 0;
+          if (conceal) {
+            controls[i].setAttribute('aria-hidden', 'true');
+          } else {
+            controls[i].removeAttribute('aria-hidden');
+          }
+        }
+      }
+
+      function setCapsuleIndex(index) {
+        var capLeft = ['-5px', '20%', '40%', '60%', '80%'];
+        var capWidth = ['calc(20% + 5px)', '20%', '20%', '20%', 'calc(20% + 5px)'];
+        controller.style.setProperty('--cap-left', capLeft[index]);
+        controller.style.setProperty('--cap-width', capWidth[index]);
+      }
+
+      function updatePointerBounds() {
+        pointerBounds = controller.getBoundingClientRect();
+      }
+
+      function activeOptionIndex() {
+        var focused = document.activeElement;
+        if (!focused || !focused.getAttribute) {
+          return -1;
+        }
+        var index = focused.getAttribute('data-index');
+        return index === null ? -1 : parseInt(index, 10);
+      }
+
+      function focusWithoutScroll(element) {
+        if (!element || typeof element.focus !== 'function') {
+          return;
+        }
+        try {
+          element.focus({ preventScroll: true });
+        } catch (error) {
+          element.focus();
+        }
+      }
+
+      function showError(message) {
+        noticeMessage.textContent = message;
+        notice.classList.add('is-visible');
+      }
+
+      function clearError() {
+        notice.classList.remove('is-visible');
+      }
+
+      function readyStateChanged() {
+        updateControlReadiness();
+        if (!visibleVideo && hasDecodedData(pairs.colorway.forward)) {
+          revealInitialBase();
+        }
+      }
+
+      function revealInitialBase() {
+        var base = pairs.colorway.forward;
+        if (visibleVideo || !hasDecodedData(base)) {
+          return;
+        }
+        base.pause();
+        if (base.currentTime > 0.001) {
+          try {
+            base.currentTime = 0;
+          } catch (error) {
+            return;
+          }
+        }
+        /* loadeddata means frame zero is decoded; do not wait for a new rVFC on a paused video. */
+        makeVisible(base, null);
+        state.playback = 'ready';
+        updateControlReadiness();
+        announce('The base scene is ready. Choose a scene state.');
+        updatePointerBounds();
+      }
+
+      function makeVisible(video, oldVideo) {
+        if (oldVideo && oldVideo !== video) {
+          oldVideo.classList.remove('is-visible');
+          oldVideo.pause();
+        }
+        video.classList.add('is-visible');
+        visibleVideo = video;
+      }
+
+      function setTravel(button) {
+        var rect = button.getBoundingClientRect();
+        var bounds = controller.getBoundingClientRect();
+        var mobile = window.matchMedia && window.matchMedia('(max-width: 700px)').matches;
+        var targetX = bounds.left + (bounds.width / 2);
+        var targetY = bounds.top + (mobile ? window.innerHeight * 0.04 : 35);
+        var dx = targetX - (rect.left + rect.width / 2);
+        var dy = targetY - (rect.top + rect.height / 2);
+        button.style.setProperty('--travel-x', dx + 'px');
+        button.style.setProperty('--travel-y', dy + 'px');
+      }
+
+      function clearFrameWork(transition) {
+        if (!transition) {
+          return;
+        }
+        var video = transition.target;
+        if (transition.frameCallbackId !== null && video && typeof video.cancelVideoFrameCallback === 'function') {
+          try {
+            video.cancelVideoFrameCallback(transition.frameCallbackId);
+          } catch (error) {
+            /* A callback may already have been delivered. */
+          }
+        }
+        transition.frameCallbackId = null;
+        if (transition.monitorFrameCallbackId !== null && video && typeof video.cancelVideoFrameCallback === 'function') {
+          try {
+            video.cancelVideoFrameCallback(transition.monitorFrameCallbackId);
+          } catch (error) {
+            /* A frame callback may already have been delivered. */
+          }
+        }
+        transition.monitorFrameCallbackId = null;
+        if (transition.frameReject) {
+          var cancelFramePromise = transition.frameReject;
+          transition.frameReject = null;
+          cancelFramePromise(new Error('Attempt cancelled'));
+        }
+        if (transition.seekCancel) {
+          var cancelSeek = transition.seekCancel;
+          transition.seekCancel = null;
+          cancelSeek();
+        }
+        if (transition.rafOne) {
+          window.cancelAnimationFrame(transition.rafOne);
+          transition.rafOne = 0;
+        }
+        if (transition.rafTwo) {
+          window.cancelAnimationFrame(transition.rafTwo);
+          transition.rafTwo = 0;
+        }
+        if (transition.playingHandler && video) {
+          video.removeEventListener('playing', transition.playingHandler);
+          transition.playingHandler = null;
+        }
+        if (transition.seekHandler && video) {
+          video.removeEventListener('seeked', transition.seekHandler);
+          video.removeEventListener('error', transition.seekErrorHandler);
+          transition.seekHandler = null;
+          transition.seekErrorHandler = null;
+        }
+      }
+
+      function clearDeadline(transition) {
+        if (!transition || !transition.timeoutId) {
+          return;
+        }
+        window.clearTimeout(transition.timeoutId);
+        transition.timeoutId = 0;
+        if (transition.timeoutStartedAt) {
+          transition.timeoutRemaining -= Date.now() - transition.timeoutStartedAt;
+          transition.timeoutStartedAt = 0;
+        }
+      }
+
+      function startDeadline(transition) {
+        if (!isCurrent(transition) || document.hidden || transition.decoded) {
+          return;
+        }
+        if (transition.timeoutRemaining <= 0) {
+          failTransition(transition, new Error('Video frame timed out'));
+          return;
+        }
+        transition.timeoutStartedAt = Date.now();
+        transition.timeoutId = window.setTimeout(function () {
+          transition.timeoutId = 0;
+          transition.timeoutStartedAt = 0;
+          if (isCurrent(transition) && !transition.decoded && !document.hidden) {
+            failTransition(transition, new Error('Video frame timed out'));
+          }
+        }, transition.timeoutRemaining);
+      }
+
+      function pauseDeadline(transition) {
+        if (!transition || !transition.timeoutId) {
+          return;
+        }
+        clearDeadline(transition);
+      }
+
+      function beginSeek(transition) {
+        var target = transition.target;
+        if (!isCurrent(transition)) {
+          return Promise.reject(new Error('Stale transition'));
+        }
+        if (transition.seekPromise) {
+          return transition.seekPromise;
+        }
+        if (target.currentTime <= 0.001 && !target.seeking) {
+          return Promise.resolve();
+        }
+        transition.seekPromise = new Promise(function (resolve, reject) {
+          function finishSeek(error) {
+            if (!isCurrent(transition)) {
+              return;
+            }
+            target.removeEventListener('seeked', transition.seekHandler);
+            target.removeEventListener('error', transition.seekErrorHandler);
+            transition.seekHandler = null;
+            transition.seekErrorHandler = null;
+            transition.seekCancel = null;
+            transition.seekPromise = null;
+            if (error) {
+              reject(error);
+            } else {
+              resolve();
+            }
+          }
+          transition.seekHandler = function () {
+            finishSeek(null);
+          };
+          transition.seekErrorHandler = function () {
+            finishSeek(new Error('Unable to seek transition video'));
+          };
+          transition.seekCancel = function () {
+            finishSeek(new Error('Seek cancelled'));
+          };
+          target.addEventListener('seeked', transition.seekHandler);
+          target.addEventListener('error', transition.seekErrorHandler);
+          if (target.currentTime > 0.001) {
+            try {
+              target.currentTime = 0;
+            } catch (error) {
+              finishSeek(error);
+            }
+          }
+        });
+        return transition.seekPromise;
+      }
+
+      function firstFramePromise(transition, attemptId) {
+        var target = transition.target;
+        return new Promise(function (resolve, reject) {
+          var settled = false;
+          function rejectLate() {
+            if (!settled) {
+              settled = true;
+              transition.frameReject = null;
+              reject(new Error('Late first frame; retry from start'));
+            }
+          }
+          transition.frameReject = function () {
+            if (!settled) {
+              settled = true;
+              transition.frameReject = null;
+              reject(new Error('Attempt cancelled'));
+            }
+          };
+          function acceptFrame(mediaTime) {
+            if (settled || !isCurrent(transition) || transition.attemptId !== attemptId || transition.suspended) {
+              return;
+            }
+            if (mediaTime <= 0.5 && hasDecodedData(target)) {
+              settled = true;
+              transition.frameReject = null;
+              resolve();
+              return;
+            }
+            if (target.currentTime > 0.5) {
+              rejectLate();
+              return;
+            }
+            requestNextFrame();
+          }
+          function requestNextFrame() {
+            if (settled || !isCurrent(transition) || transition.attemptId !== attemptId || transition.suspended) {
+              return;
+            }
+            if (typeof target.requestVideoFrameCallback === 'function') {
+              transition.frameCallbackId = target.requestVideoFrameCallback(function (now, metadata) {
+                transition.frameCallbackId = null;
+                acceptFrame(metadata.mediaTime);
+              });
+            }
+          }
+          if (typeof target.requestVideoFrameCallback === 'function') {
+            requestNextFrame();
+          } else {
+            transition.playingHandler = function () {
+              target.removeEventListener('playing', transition.playingHandler);
+              transition.playingHandler = null;
+              if (!hasDecodedData(target)) {
+                reject(new Error('Transition video is not ready'));
+                return;
+              }
+              transition.rafOne = window.requestAnimationFrame(function () {
+                transition.rafOne = 0;
+                transition.rafTwo = window.requestAnimationFrame(function () {
+                  transition.rafTwo = 0;
+                  if (!isCurrent(transition) || transition.attemptId !== attemptId || transition.suspended) {
+                    return;
+                  }
+                  if (target.currentTime <= 0.5 && hasDecodedData(target)) {
+                    settled = true;
+                    resolve();
+                  } else if (target.currentTime > 0.5) {
+                    rejectLate();
+                  }
+                });
+              });
+            };
+            target.addEventListener('playing', transition.playingHandler);
+          }
+        });
+      }
+
+      function attemptPlayback(transition) {
+        if (!isCurrent(transition) || document.hidden) {
+          return;
+        }
+        transition.suspended = false;
+        transition.attemptId += 1;
+        var attemptId = transition.attemptId;
+        clearFrameWork(transition);
+        if (transition.resumeAtCurrentTime && visibleVideo === transition.target && hasDecodedData(transition.target)) {
+          var resumePromise;
+          try {
+            resumePromise = transition.target.play();
+          } catch (resumeError) {
+            failTransition(transition, resumeError);
+            return;
+          }
+          Promise.resolve(resumePromise).then(function () {
+            if (isCurrent(transition) && transition.attemptId === attemptId && !document.hidden) {
+              transition.decoded = true;
+              revealTransition(transition);
+            }
+          }).catch(function (resumeError) {
+            if (isCurrent(transition) && transition.attemptId === attemptId) {
+              failTransition(transition, resumeError);
+            }
+          });
+          return;
+        }
+        var framePromise = firstFramePromise(transition, attemptId);
+        var playResult;
+        try {
+          playResult = transition.target.play();
+        } catch (error) {
+          playResult = Promise.reject(error);
+        }
+        var playPromise = playResult && typeof playResult.then === 'function' ? playResult : Promise.resolve();
+        Promise.all([playPromise, framePromise]).then(function () {
+          if (!isCurrent(transition) || transition.attemptId !== attemptId || transition.suspended || document.hidden) {
+            return;
+          }
+          clearDeadline(transition);
+          transition.decoded = true;
+          revealTransition(transition);
+        }).catch(function (error) {
+          if (!isCurrent(transition) || transition.attemptId !== attemptId || transition.suspended) {
+            return;
+          }
+          if (error && error.message === 'Late first frame; retry from start') {
+            restartLateAttempt(transition);
+            return;
+          }
+          failTransition(transition, error);
+        });
+      }
+
+      function restartLateAttempt(transition) {
+        if (!isCurrent(transition) || document.hidden) {
+          return;
+        }
+        transition.suspended = true;
+        clearFrameWork(transition);
+        transition.target.pause();
+        transition.seekHandler = null;
+        transition.seekErrorHandler = null;
+        transition.target.currentTime = 0;
+        beginSeek(transition).then(function () {
+          if (isCurrent(transition) && !document.hidden) {
+            transition.suspended = false;
+            attemptPlayback(transition);
+          }
+        }).catch(function (error) {
+          if (isCurrent(transition) && !(error && error.message === 'Seek cancelled')) {
+            failTransition(transition, error);
+          }
+        });
+      }
+
+      function revealTransition(transition) {
+        if (!isCurrent(transition) || transition.decoded === false) {
+          return;
+        }
+        var oldVideo = transition.origin;
+        makeVisible(transition.target, oldVideo);
+        transition.revealed = true;
+        transition.phase = 'playing';
+        state.playback = 'playing';
+        state.direction = transition.direction;
+        attachActiveMonitor(transition);
+        if (transition.direction === 'forward') {
+          announce('Changing to ' + branchLabel(transition.branch) + '.');
+        } else {
+          announce('Returning to the base scene.');
+        }
+      }
+
+      function branchLabel(branch) {
+        var pair = pairs[branch];
+        return pair ? pair.button.querySelector('.option-label').textContent : 'the selected state';
+      }
+
+      function checkPlaybackProgress(transition) {
+        var video = transition.target;
+        if (!isCurrent(transition) || visibleVideo !== video || transition.finished) {
+          return;
+        }
+        if (transition.direction === 'forward' && !transition.titleHidden) {
+          var titleAt = Math.min(video.duration * 0.12, 0.9);
+          if (isFinite(titleAt) && video.currentTime >= titleAt) {
+            stage.classList.add('title-hidden');
+            transition.titleHidden = true;
+          }
+        }
+        var duration = isFinite(video.duration) && video.duration > 0 ? video.duration : transition.expectedDuration;
+        if (video.currentTime >= duration - transition.hold) {
+          finishPlayback(transition);
+        }
+      }
+
+      function requestActiveFrame(transition) {
+        if (!isCurrent(transition) || transition.finished || transition.target !== visibleVideo || typeof transition.target.requestVideoFrameCallback !== 'function') {
+          return;
+        }
+        transition.monitorFrameCallbackId = transition.target.requestVideoFrameCallback(function () {
+          transition.monitorFrameCallbackId = null;
+          if (!isCurrent(transition) || transition.finished || transition.target !== visibleVideo) {
+            return;
+          }
+          checkPlaybackProgress(transition);
+          requestActiveFrame(transition);
+        });
+      }
+
+      function attachActiveMonitor(transition) {
+        var video = transition.target;
+        transition.timeUpdateHandler = function () {
+          if (isCurrent(transition) && visibleVideo === video) {
+            checkPlaybackProgress(transition);
+          }
+        };
+        transition.endedHandler = function () {
+          if (isCurrent(transition) && visibleVideo === video) {
+            finishPlayback(transition);
+          }
+        };
+        transition.errorHandler = function () {
+          if (isCurrent(transition) && visibleVideo === video) {
+            failTransition(transition, new Error('Transition media failed during playback'));
+          }
+        };
+        video.addEventListener('timeupdate', transition.timeUpdateHandler);
+        video.addEventListener('ended', transition.endedHandler);
+        video.addEventListener('error', transition.errorHandler);
+        requestActiveFrame(transition);
+      }
+
+      function detachActiveMonitor(transition) {
+        if (!transition || !transition.target) {
+          return;
+        }
+        if (transition.timeUpdateHandler) {
+          transition.target.removeEventListener('timeupdate', transition.timeUpdateHandler);
+          transition.timeUpdateHandler = null;
+        }
+        if (transition.endedHandler) {
+          transition.target.removeEventListener('ended', transition.endedHandler);
+          transition.endedHandler = null;
+        }
+        if (transition.errorHandler) {
+          transition.target.removeEventListener('error', transition.errorHandler);
+          transition.errorHandler = null;
+        }
+      }
+
+      function finishPlayback(transition) {
+        if (!isCurrent(transition) || transition.finished) {
+          return;
+        }
+        transition.finished = true;
+        detachActiveMonitor(transition);
+        clearDeadline(transition);
+        clearFrameWork(transition);
+        transition.target.pause();
+        if (transition.direction === 'forward') {
+          commitSelected(transition);
+        } else {
+          commitBase(transition);
+        }
+      }
+
+      function commitSelected(transition) {
+        if (!isCurrent(transition) || transition.committed) {
+          return;
+        }
+        transition.committed = true;
+        state.scene = transition.branch;
+        state.playback = 'ready';
+        selectedBranch = transition.branch;
+        selectedButton = transition.button;
+        selectedButton.classList.add('selected-cell');
+        selectedButton.classList.remove('is-not-selected');
+        selectedButton.setAttribute('aria-label', 'Reset to base scene');
+        selectedButton.querySelector('.option-label').setAttribute('aria-hidden', 'true');
+        selectedButton.querySelector('.reset-label').removeAttribute('aria-hidden');
+        controller.classList.add('selected');
+        controller.classList.remove('reversing', 'is-transitioning');
+        var i;
+        for (i = 0; i < controls.length; i += 1) {
+          var button = controls[i];
+          if (button !== selectedButton) {
+            button.disabled = true;
+            button.tabIndex = -1;
+            button.setAttribute('aria-hidden', 'true');
+            button.classList.add('is-not-selected');
+          }
+        }
+        selectedButton.disabled = false;
+        selectedButton.tabIndex = 0;
+        pending = null;
+        failedTransition = null;
+        playbackLocked = false;
+        state.playback = 'ready';
+        clearError();
+        updatePointerBounds();
+        if (originHadFocus) {
+          focusWithoutScroll(selectedButton);
+        }
+        announce(branchLabel(transition.branch) + ' selected. Activate Reset to return to the base scene.');
+      }
+
+      function commitBase(transition) {
+        if (!isCurrent(transition) || transition.committed) {
+          return;
+        }
+        transition.committed = true;
+        state.scene = 'base';
+        state.playback = 'ready';
+        state.direction = 'forward';
+        selectedBranch = null;
+        var button = selectedButton;
+        if (button) {
+          button.classList.remove('selected-cell', 'is-not-selected');
+          button.querySelector('.option-label').removeAttribute('aria-hidden');
+          button.querySelector('.reset-label').setAttribute('aria-hidden', 'true');
+          button.setAttribute('aria-label', 'Change ' + button.querySelector('.option-label').textContent.toLowerCase());
+          button.style.removeProperty('--travel-x');
+          button.style.removeProperty('--travel-y');
+        }
+        controller.classList.remove('collapsed', 'selected', 'reversing', 'is-transitioning');
+        controller.style.setProperty('--cap-left', '-5px');
+        controller.style.setProperty('--cap-width', 'calc(20% + 5px)');
+        var i;
+        for (i = 0; i < controls.length; i += 1) {
+          controls[i].classList.remove('is-not-selected');
+          controls[i].disabled = !pairReady(pairs[controls[i].getAttribute('data-branch')]);
+          controls[i].tabIndex = controls[i].disabled ? -1 : 0;
+          controls[i].removeAttribute('aria-hidden');
+        }
+        pending = null;
+        failedTransition = null;
+        playbackLocked = false;
+        clearError();
+        stage.classList.remove('title-hidden');
+        updatePointerBounds();
+        if (returnFocusAfterReset && button) {
+          focusWithoutScroll(button);
+        }
+        originHadFocus = false;
+        returnFocusAfterReset = false;
+        announce('Base scene restored. Choose a state to begin another transition.');
+      }
+
+      function resetControllerAfterForwardFailure() {
+        controller.classList.remove('collapsed', 'selected', 'reversing', 'is-transitioning');
+        var i;
+        for (i = 0; i < controls.length; i += 1) {
+          controls[i].classList.remove('selected-cell', 'is-not-selected');
+          controls[i].style.removeProperty('--travel-x');
+          controls[i].style.removeProperty('--travel-y');
+          controls[i].querySelector('.option-label').removeAttribute('aria-hidden');
+          controls[i].querySelector('.reset-label').setAttribute('aria-hidden', 'true');
+          controls[i].disabled = !pairReady(pairs[controls[i].getAttribute('data-branch')]);
+          controls[i].tabIndex = controls[i].disabled ? -1 : 0;
+          controls[i].setAttribute('aria-label', 'Change ' + controls[i].querySelector('.option-label').textContent.toLowerCase());
+        }
+        controller.style.setProperty('--cap-left', '-5px');
+        controller.style.setProperty('--cap-width', 'calc(20% + 5px)');
+        updatePointerBounds();
+      }
+
+      function failTransition(transition, error) {
+        if (!isCurrent(transition) || transition.failed) {
+          return;
+        }
+        transition.failed = true;
+        clearDeadline(transition);
+        clearFrameWork(transition);
+        detachActiveMonitor(transition);
+        transition.target.pause();
+        state.playback = 'error';
+        playbackLocked = false;
+        pending = null;
+        failedTransition = transition;
+        if (transition.direction === 'forward') {
+          if (!transition.revealed && transition.origin) {
+            makeVisible(transition.origin, transition.target === transition.origin ? null : transition.target);
+          }
+          resetControllerAfterForwardFailure();
+          if (originHadFocus) {
+            focusWithoutScroll(transition.button);
+          }
+          announce('The ' + branchLabel(transition.branch) + ' transition failed. Retry is available.');
+        } else {
+          controller.classList.remove('reversing');
+          controller.classList.add('collapsed', 'selected');
+          controller.classList.remove('is-transitioning');
+          var j;
+          for (j = 0; j < controls.length; j += 1) {
+            controls[j].disabled = controls[j] !== selectedButton;
+            controls[j].tabIndex = controls[j] === selectedButton ? 0 : -1;
+            if (controls[j] !== selectedButton) {
+              controls[j].setAttribute('aria-hidden', 'true');
+            }
+          }
+          selectedButton.removeAttribute('aria-hidden');
+          selectedButton.setAttribute('aria-label', 'Reset to base scene');
+          focusWithoutScroll(retryButton);
+          announce('Reset could not finish. Retry to return to the base scene.');
+        }
+        var message = transition.direction === 'reverse' ? 'Reset could not complete. Your current scene is preserved.' : 'This transition could not be completed. The current frame is preserved.';
+        if (error && error.message === 'Video frame timed out') {
+          message = 'The transition is taking too long to load. Your current frame is preserved.';
+        }
+        showError(message);
+        updateControlReadiness();
+      }
+
+      function acquirePlaybackLock(transition) {
+        playbackLocked = true;
+        state.playback = 'starting';
+        state.direction = transition.direction;
+        setAllControlsDisabled(true, transition.direction === 'forward' ? false : true);
+        clearError();
+      }
+
+      function startForward(button, branch, isRetry) {
+        if (playbackLocked || state.scene !== 'base' || !pairReady(pairs[branch])) {
+          return;
+        }
+        var oldFailure = isRetry ? failedTransition : null;
+        transitionToken += 1;
+        var pair = pairs[branch];
+        var target = pair.forward;
+        var origin = visibleVideo;
+        originHadFocus = document.activeElement === button;
+        var transition = {
+          token: transitionToken,
+          branch: branch,
+          button: button,
+          target: target,
+          origin: origin,
+          direction: 'forward',
+          hold: pair.holdForward,
+          expectedDuration: parseFloat(target.getAttribute('data-duration')),
+          timeoutRemaining: firstFrameTimeoutMs,
+          timeoutStartedAt: 0,
+          timeoutId: 0,
+          frameCallbackId: null,
+          monitorFrameCallbackId: null,
+          rafOne: 0,
+          rafTwo: 0,
+          playingHandler: null,
+          seekHandler: null,
+          seekErrorHandler: null,
+          attemptId: 0,
+          suspended: false,
+          decoded: false,
+          revealed: false,
+          titleHidden: false,
+          finished: false,
+          failed: false,
+          committed: false,
+          phase: 'first-frame',
+          resumeAtCurrentTime: !!(oldFailure && oldFailure.revealed && visibleVideo === target)
+        };
+        pending = transition;
+        failedTransition = null;
+        acquirePlaybackLock(transition);
+        setTravel(button);
+        button.classList.add('selected-cell');
+        var i;
+        for (i = 0; i < controls.length; i += 1) {
+          if (controls[i] !== button) {
+            controls[i].classList.add('is-not-selected');
+          }
+        }
+        controller.style.removeProperty('--cap-left');
+        controller.style.removeProperty('--cap-width');
+        controller.classList.add('is-transitioning', 'collapsed');
+        stage.classList.remove('title-hidden');
+        announce('Loading the ' + branchLabel(branch) + ' transition.');
+        startDeadline(transition);
+        if (document.hidden) {
+          transition.suspended = true;
+          return;
+        }
+        if (transition.resumeAtCurrentTime) {
+          attemptPlayback(transition);
+          return;
+        }
+        beginSeek(transition).then(function () {
+          if (isCurrent(transition) && !document.hidden) {
+            attemptPlayback(transition);
+          }
+        }).catch(function (error) {
+          if (isCurrent(transition) && !(error && error.message === 'Seek cancelled')) {
+            failTransition(transition, error);
+          }
+        });
+      }
+
+      function startReverse(isRetry) {
+        if (playbackLocked || !selectedBranch || !selectedButton || state.playback !== 'ready' && !isRetry) {
+          return;
+        }
+        var oldFailure = isRetry ? failedTransition : null;
+        transitionToken += 1;
+        var pair = pairs[selectedBranch];
+        var target = pair.reverse;
+        var origin = visibleVideo;
+        returnFocusAfterReset = document.activeElement === selectedButton || originHadFocus;
+        var transition = {
+          token: transitionToken,
+          branch: selectedBranch,
+          button: selectedButton,
+          target: target,
+          origin: origin,
+          direction: 'reverse',
+          hold: pair.holdReverse,
+          expectedDuration: parseFloat(target.getAttribute('data-duration')),
+          timeoutRemaining: firstFrameTimeoutMs,
+          timeoutStartedAt: 0,
+          timeoutId: 0,
+          frameCallbackId: null,
+          monitorFrameCallbackId: null,
+          rafOne: 0,
+          rafTwo: 0,
+          playingHandler: null,
+          seekHandler: null,
+          seekErrorHandler: null,
+          attemptId: 0,
+          suspended: false,
+          decoded: false,
+          revealed: false,
+          titleHidden: true,
+          finished: false,
+          failed: false,
+          committed: false,
+          phase: 'first-frame',
+          resumeAtCurrentTime: !!(oldFailure && oldFailure.revealed && visibleVideo === target)
+        };
+        pending = transition;
+        failedTransition = null;
+        acquirePlaybackLock(transition);
+        clearError();
+        setAllControlsDisabled(true, true);
+        controller.classList.add('reversing', 'is-transitioning');
+        controller.style.setProperty('--cap-left', '-5px');
+        controller.style.setProperty('--cap-width', 'calc(20% + 5px)');
+        controller.classList.remove('collapsed');
+        var i;
+        for (i = 0; i < controls.length; i += 1) {
+          if (controls[i] !== selectedButton) {
+            controls[i].classList.add('is-not-selected');
+          }
+        }
+        announce('Returning to the base scene.');
+        startDeadline(transition);
+        if (document.hidden) {
+          transition.suspended = true;
+          return;
+        }
+        if (transition.resumeAtCurrentTime) {
+          attemptPlayback(transition);
+          return;
+        }
+        beginSeek(transition).then(function () {
+          if (isCurrent(transition) && !document.hidden) {
+            attemptPlayback(transition);
+          }
+        }).catch(function (error) {
+          if (isCurrent(transition) && !(error && error.message === 'Seek cancelled')) {
+            failTransition(transition, error);
+          }
+        });
+      }
+
+      function resumeVisibleTransition(transition) {
+        if (!isCurrent(transition) || document.hidden) {
+          return;
+        }
+        transition.suspended = false;
+        var playResult;
+        try {
+          playResult = transition.target.play();
+        } catch (error) {
+          failTransition(transition, error);
+          return;
+        }
+        Promise.resolve(playResult).then(function () {
+          if (isCurrent(transition) && !document.hidden && visibleVideo === transition.target) {
+            requestActiveFrame(transition);
+          }
+        }).catch(function (error) {
+          if (isCurrent(transition) && !(error && error.message === 'Seek cancelled')) {
+            failTransition(transition, error);
+          }
+        });
+      }
+
+      function onVisibilityChange() {
+        if (!pending) {
+          return;
+        }
+        var transition = pending;
+        if (document.hidden) {
+          pauseDeadline(transition);
+          transition.suspended = true;
+          transition.attemptId += 1;
+          clearFrameWork(transition);
+          transition.target.pause();
+          if (!transition.revealed) {
+            try {
+              transition.target.currentTime = 0;
+            } catch (error) {
+              /* Leave the prior valid frame visible if the browser refuses this seek. */
+            }
+          }
+        } else {
+          startDeadline(transition);
+          if (transition.revealed && visibleVideo === transition.target) {
+            resumeVisibleTransition(transition);
+          } else {
+            transition.suspended = false;
+            beginSeek(transition).then(function () {
+              if (isCurrent(transition) && !document.hidden) {
+                attemptPlayback(transition);
+              }
+            }).catch(function (error) {
+              if (isCurrent(transition)) {
+                failTransition(transition, error);
+              }
+            });
+          }
+        }
+      }
+
+      function retryFailedTransition() {
+        if (!failedTransition || playbackLocked) {
+          return;
+        }
+        var transition = failedTransition;
+        clearError();
+        if (transition.direction === 'forward') {
+          startForward(transition.button, transition.branch, true);
+        } else {
+          startReverse(true);
+        }
+      }
+
+      function onControlClick(event) {
+        var button = event.currentTarget;
+        if (button.disabled || playbackLocked) {
+          return;
+        }
+        if (selectedBranch && button === selectedButton) {
+          if (state.playback === 'ready') {
+            startReverse(false);
+          }
+          return;
+        }
+        if (state.scene !== 'base') {
+          return;
+        }
+        startForward(button, button.getAttribute('data-branch'), false);
+      }
+
+      var i;
+      for (i = 0; i < controls.length; i += 1) {
+        controls[i].addEventListener('click', onControlClick);
+        controls[i].addEventListener('pointerenter', function (event) {
+          if (playbackLocked || selectedBranch || window.matchMedia('(max-width: 700px)').matches) {
+            return;
+          }
+          var index = parseInt(event.currentTarget.getAttribute('data-index'), 10);
+          setCapsuleIndex(index);
+          controller.classList.add('is-highlighted');
+        });
+        controls[i].addEventListener('focus', function (event) {
+          if (playbackLocked || selectedBranch || window.matchMedia('(max-width: 700px)').matches) {
+            return;
+          }
+          var index = parseInt(event.currentTarget.getAttribute('data-index'), 10);
+          setCapsuleIndex(index);
+          controller.classList.add('is-highlighted');
+        });
+      }
+
+      controller.addEventListener('pointermove', function (event) {
+        if (!pointerBounds || pointerBounds.width <= 0 || pointerBounds.height <= 0) {
+          return;
+        }
+        var x = ((event.clientX - pointerBounds.left) / pointerBounds.width) * 100;
+        var y = ((event.clientY - pointerBounds.top) / pointerBounds.height) * 100;
+        x = Math.max(0, Math.min(100, x));
+        y = Math.max(0, Math.min(100, y));
+        controller.style.setProperty('--glass-x', x + '%');
+        controller.style.setProperty('--glass-y', y + '%');
+      });
+
+      controller.addEventListener('pointerleave', function () {
+        if (selectedBranch || playbackLocked || window.matchMedia('(max-width: 700px)').matches) {
+          return;
+        }
+        var focusedIndex = activeOptionIndex();
+        if (focusedIndex >= 1 && focusedIndex <= 4) {
+          setCapsuleIndex(focusedIndex);
+          controller.classList.add('is-highlighted');
+        } else {
+          setCapsuleIndex(0);
+          controller.classList.remove('is-highlighted');
+        }
+      });
+
+      controller.addEventListener('focusout', function () {
+        window.setTimeout(function () {
+          if (selectedBranch || playbackLocked || window.matchMedia('(max-width: 700px)').matches) {
+            return;
+          }
+          var focusedIndex = activeOptionIndex();
+          if (focusedIndex >= 1 && focusedIndex <= 4) {
+            setCapsuleIndex(focusedIndex);
+            controller.classList.add('is-highlighted');
+          } else {
+            setCapsuleIndex(0);
+            controller.classList.remove('is-highlighted');
+          }
+        }, 0);
+      });
+
+      retryButton.addEventListener('click', retryFailedTransition);
+      document.addEventListener('visibilitychange', onVisibilityChange);
+      window.addEventListener('resize', function () {
+        updatePointerBounds();
+        if (selectedButton && controller.classList.contains('collapsed')) {
+          setTravel(selectedButton);
+        }
+      });
+
+      for (i = 0; i < videoElements.length; i += 1) {
+        videoElements[i].addEventListener('loadeddata', readyStateChanged);
+        videoElements[i].addEventListener('error', readyStateChanged);
+      }
+      readyStateChanged();
+      updatePointerBounds();
+    }());
+  </script>
+</body>
+</html>

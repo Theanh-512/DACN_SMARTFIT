@@ -15,25 +15,25 @@ export class HomeFeatureGridComponent {
     {
       title: 'Thử Đồ Ảo IDM-VTON',
       subtitle: 'Mô hình khuếch tán tiên tiến giữ nguyên nếp vải và form dáng trang phục chân thực trên ảnh cơ thể bạn.',
-      icon: '✨',
+      icon: '01',
       badge: 'Virtual Try-On'
     },
     {
       title: 'Tìm Kiếm SigLIP + FAISS',
       subtitle: 'Trích xuất vector embedding đa phương thức và tìm kiếm tương đồng tức thì trong hàng chục ngàn sản phẩm.',
-      icon: '📷',
+      icon: '02',
       badge: 'Visual Search'
     },
     {
       title: 'Backend ASP.NET Core 9',
       subtitle: 'Clean Architecture, Entity Framework Core và SQL Server đảm bảo tính toàn vẹn giao dịch và tồn kho.',
-      icon: '🏛️',
+      icon: '03',
       badge: 'Clean Architecture'
     },
     {
       title: 'Angular 20 & Hybrid SSR',
       subtitle: 'Kết hợp Prerender tĩnh cho SEO sản phẩm và Client Hydration cho tính năng thử đồ tương tác cao.',
-      icon: '⚡',
+      icon: '04',
       badge: 'Performance'
     }
   ];

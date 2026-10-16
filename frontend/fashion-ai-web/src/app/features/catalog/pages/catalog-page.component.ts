@@ -36,6 +36,17 @@ export class CatalogPageComponent implements OnInit {
   sortBy = signal<string>('newest');
   isMobileFilterOpen = signal<boolean>(false);
 
+  readonly currentCategoryName = computed(() => {
+    if (this.selectedCategory() !== 'all') {
+      const cat = this.categories().find(c => c.id === this.selectedCategory());
+      return cat ? cat.name.toUpperCase() : 'BỘ SƯU TẬP THỜI TRANG';
+    }
+    if (this.selectedGender() === 'women') return 'THỜI TRANG NỮ';
+    if (this.selectedGender() === 'men') return 'THỜI TRANG NAM';
+    if (this.selectedGender() === 'kids') return 'THỜI TRANG TRẺ EM';
+    return 'TẤT CẢ SẢN PHẨM';
+  });
+
   // Available Filter Options
   readonly availableSizes = ['XS', 'S', 'M', 'L', 'XL', '26', '27', '28', '30', '31'];
   readonly availableColors = [
