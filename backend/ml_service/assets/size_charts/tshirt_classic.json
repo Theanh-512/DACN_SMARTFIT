@@ -1,0 +1,44 @@
+{
+  "product_id": "prod_tshirt_classic",
+  "product_name": "Áo Thun Cổ Tròn Cotton Unisex",
+  "category": "cat-tshirts",
+  "unit": "cm",
+  "sizes": {
+    "S": {
+      "chest_cm": 94.0,
+      "waist_cm": 90.0,
+      "hem_cm": 92.0,
+      "length_cm": 66.0,
+      "shoulder_cm": 43.0,
+      "sleeve_cm": 19.5,
+      "neck_cm": 40.0
+    },
+    "M": {
+      "chest_cm": 100.0,
+      "waist_cm": 96.0,
+      "hem_cm": 98.0,
+      "length_cm": 69.0,
+      "shoulder_cm": 45.0,
+      "sleeve_cm": 21.0,
+      "neck_cm": 41.5
+    },
+    "L": {
+      "chest_cm": 106.0,
+      "waist_cm": 102.0,
+      "hem_cm": 104.0,
+      "length_cm": 72.0,
+      "shoulder_cm": 47.0,
+      "sleeve_cm": 22.5,
+      "neck_cm": 43.0
+    },
+    "XL": {
+      "chest_cm": 114.0,
+      "waist_cm": 110.0,
+      "hem_cm": 112.0,
+      "length_cm": 75.0,
+      "shoulder_cm": 50.0,
+      "sleeve_cm": 24.0,
+      "neck_cm": 44.5
+    }
+  }
+}

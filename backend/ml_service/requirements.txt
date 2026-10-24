@@ -1,0 +1,34 @@
+# ML Service Requirements (Python 3.10 / 3.11 Recommended)
+
+# Core Web Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.9.0
+python-multipart>=0.0.12
+httpx>=0.27.0
+python-dotenv>=1.0.1
+
+# Numerical & Computer Vision
+numpy>=1.24.0,<2.0.0
+scipy>=1.11.0
+scikit-learn>=1.4.0
+shapely>=2.0.0
+trimesh>=4.0.0
+Pillow>=10.2.0
+opencv-python-headless>=4.9.0
+joblib>=1.3.0
+
+# Deep Learning (PyTorch)
+# For CPU:
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+# For CUDA (GTX 1650 Ti / Turing):
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+torch>=2.2.0
+torchvision>=0.17.0
+
+# 3D Human Parametric Model
+smplx>=0.1.28
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
