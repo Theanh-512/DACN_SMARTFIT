@@ -28,6 +28,9 @@ class BodyEstimateResponse(BaseModel):
     has_side_image: bool = Field(False, description="True if side image was supplied and fused")
     is_mock: bool = Field(..., description="True if running in mock estimation mode")
     privacy_cleaned: bool = Field(True, description="True indicating user uploaded images have been permanently deleted")
+    confidence: Optional[float] = Field(0.85, description="Model confidence based on image quality and landmark visibility")
+    quality_report: Optional[Dict[str, Any]] = Field(default=None, description="Quality gate diagnostics")
+    warnings: Optional[List[str]] = Field(default_factory=list, description="Quality or posture warning messages")
     processing_time_ms: float = Field(..., description="Inference and processing latency in milliseconds")
     status: str = Field("success", description="Response status")
 

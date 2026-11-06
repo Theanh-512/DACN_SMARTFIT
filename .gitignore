@@ -24,11 +24,25 @@ appsettings.Development.json
 **/venv/
 *.pt
 *.pth
+*.ckpt
 *.onnx
 *.bin
 *.safetensors
 *.faiss
 *.index
+*.npz
+SMPL_python_v.1.1.0/
+backend/ml_service/assets/smpl/
+backend/ml_service/assets/smplx/
+backend/ml_service/assets/models/
+backend/ml_service/assets/temp/
+backend/ml_service/assets/cache/
+backend/ml_service/assets/models/camerahmr/
+backend/ml_service/assets/models/CameraHMR-New-master/
+backend/ml_service/assets/models/bedlam_cliff/
+backend/ml_service/vendor/
+data/
+backend/ml_service/data/
 
 # Environment & Secrets
 .env

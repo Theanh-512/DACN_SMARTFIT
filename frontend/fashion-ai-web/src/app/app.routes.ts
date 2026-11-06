@@ -49,6 +49,12 @@ export const routes: Routes = [
     title: 'Quản Trị Hệ Thống - FashionAI'
   },
   {
+    path: 'admin/garment-studio',
+    loadComponent: () => import('./features/admin/pages/admin-page.component').then(m => m.AdminPageComponent),
+    canActivate: [adminGuard],
+    title: 'AI Garment Studio - FashionAI'
+  },
+  {
     path: 'access-denied',
     loadComponent: () => import('./features/not-found/access-denied.component').then(m => m.AccessDeniedComponent),
     title: '403 - Quyền Truy Cập Bị Từ Chối - FashionAI'

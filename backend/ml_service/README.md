@@ -99,7 +99,7 @@ Dựa trên cấu hình phần cứng **GTX 1650 Ti 4GB VRAM** và môi trườn
 ## 6. Chạy Kiểm Thử Toàn Diện (Unit Tests)
 
 ```powershell
-# Chạy toàn bộ test suite (Phase 1 + Phase 2 + Phase 3 + Phase 4)
+# Chạy toàn bộ test suite (Phase 1 + Phase 2 + Phase 3 + Phase 4 + Phase 5)
 python -m pytest backend/ml_service/tests -v
 ```
 
@@ -107,4 +107,6 @@ Danh sách các bài kiểm thử:
 - `test_phase1.py`: Kiểm tra API health check, fallback an toàn khi thiếu file trọng số, baseline betas=0 và tính đơn điệu của beta[0].
 - `test_phase2.py`: Kiểm định ảnh đầu vào, xóa sạch ảnh tạm theo chính sách riêng tư, hợp nhất ảnh đa góc và chuẩn hóa chiều cao.
 - `test_phase3.py`: Kiểm định topology thật (6,890 đỉnh / 13,776 mặt cho SMPL), chiều cao baseline 1.6m - 1.8m, tính đơn điệu của hình thái cơ thể, R² trọng số slider mapping và xuất GLB morph targets.
+- `test_phase3_6.py`: Kiểm định skeleton 24 khớp SMPL, skin weight normalization, sparse J-regressor cập nhật động khi betas đổi, 6 regional morphs Gaussian falloff, preset dạng người, lớp đồ lót nền 2-3mm offset.
 - `test_phase4.py`: Kiểm định sinh trang phục tham số T-shirt, tính va chạm pushout không đâm xuyên da và gợi ý size.
+- `test_phase5.py`: **Phase 5 Fit Advisor** — số đo trực tiếp trên mesh áo (không từ bảng size), heatmap khoảng cách đỉnh áo tới thân, phân loại fit (tight/perfect/loose) theo vùng, gợi ý size đúng hướng, confidence không hardcode.

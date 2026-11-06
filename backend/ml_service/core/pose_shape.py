@@ -187,35 +187,17 @@ class MockBodyEstimator(BodyEstimator):
 
 class PretrainedBodyEstimator(BodyEstimator):
     """
-    Adapter wrapper for deep learning pretrained models (e.g., CameraHMR / SMPLer-X / CLIFF).
-    Supports GPU acceleration with graceful CPU fallback on OOM.
-    Falls back to MockBodyEstimator if pretrained model weights are not present.
+    Adapter wrapper for deep learning pretrained models (CameraHMR).
+    Delegates to CameraHMREstimator with GPU acceleration and automatic CPU/Mock fallback.
     """
 
     def __init__(self, model_checkpoint_path: Optional[str] = None):
-        self.device = DeviceManager.get_preferred_device()
-        self.checkpoint_path = model_checkpoint_path
-        self.model = None
-        self.mock_fallback = MockBodyEstimator()
+        from core.camerahmr_adapter import CameraHMREstimator
+        self.delegate = CameraHMREstimator(checkpoint_path=model_checkpoint_path)
 
-        self._try_load_model()
-
-    def _try_load_model(self):
-        if not self.checkpoint_path or not os.path.exists(self.checkpoint_path):
-            logger.info(
-                f"[PretrainedBodyEstimator] Checkpoint '{self.checkpoint_path}' not found. "
-                f"Using MockBodyEstimator pipeline."
-            )
-            return
-
-        try:
-            logger.info(f"Loading pretrained body estimator model on {self.device}...")
-            # Model loading hook for selected candidate
-            # E.g. self.model = load_pretrained_checkpoint(self.checkpoint_path, device=self.device)
-            pass
-        except Exception as e:
-            logger.warning(f"Failed to load pretrained estimator: {e}. Falling back to mock estimator.")
-            self.model = None
+    @property
+    def model(self):
+        return self.delegate.model
 
     def estimate_from_image(
         self,
@@ -223,28 +205,20 @@ class PretrainedBodyEstimator(BodyEstimator):
         height_cm: float,
         weight_kg: Optional[float] = None
     ) -> List[float]:
-        if self.model is None:
-            return self.mock_fallback.estimate_from_image(image_path, height_cm, weight_kg)
-
-        # Pretrained forward pass wrapped in DeviceManager OOM fallback
-        def _inference_step(dev=self.device):
-            # Pretrained inference implementation
-            return self.mock_fallback.estimate_from_image(image_path, height_cm, weight_kg)
-
-        return DeviceManager.run_with_oom_fallback(_inference_step, device=self.device)
+        return self.delegate.estimate_from_image(image_path, height_cm, weight_kg)
 
 
 class BodyEstimationPipeline:
     """
     Full End-to-End Estimation Pipeline:
-    1. Validate input images (format, resolution, portrait orientation)
+    1. Validate input images (format, resolution, portrait orientation, full body)
     2. Multi-view fusion (weighted combination of front and side images)
-    3. Height-scaling normalization (aligns 3D mesh stature with user's real input height)
+    3. Height-scaling normalization via constrained hyperplane projection
     4. Strict privacy compliance (guarantees temporary files are deleted immediately after processing)
     """
 
     def __init__(self, estimator: Optional[BodyEstimator] = None):
-        self.estimator = estimator or MockBodyEstimator()
+        self.estimator = estimator or PretrainedBodyEstimator()
 
     def process(
         self,
@@ -258,6 +232,7 @@ class BodyEstimationPipeline:
         Executes body estimation pipeline with privacy guarantee.
         """
         start_time = time.time()
+        from core.camerahmr_adapter import StatureNormalizer, ImageQualityGate
 
         if not privacy_agreed:
             raise ValueError("User must accept the privacy agreement before uploading and processing images.")
@@ -265,10 +240,16 @@ class BodyEstimationPipeline:
         if height_cm < 120.0 or height_cm > 230.0:
             raise ValueError(f"Height {height_cm} cm is outside realistic range (120 - 230 cm).")
 
-        # 1. Validate Front Image
+        # 1. Validate Front Image via ImageValidator and ImageQualityGate
         valid_front, msg_front = ImageValidator.validate_image(front_image_path)
         if not valid_front:
             raise ValueError(f"Front image validation failed: {msg_front}")
+
+        img_bgr = cv2.imread(front_image_path)
+        if img_bgr is not None:
+            q_report, _ = ImageQualityGate.evaluate(img_bgr)
+            if not q_report.is_valid:
+                raise ValueError(f"[{q_report.error_code}] {q_report.message}")
 
         # 2. Estimate from Front Image
         betas_front = self.estimator.estimate_from_image(front_image_path, height_cm, weight_kg)
@@ -278,36 +259,57 @@ class BodyEstimationPipeline:
         if side_image_path and os.path.exists(side_image_path):
             valid_side, msg_side = ImageValidator.validate_image(side_image_path)
             if valid_side:
-                betas_side = self.estimator.estimate_from_image(side_image_path, height_cm, weight_kg)
-                # Weighted fusion: Front (65%) + Side (35%)
-                fused_betas = [
-                    round(0.65 * bf + 0.35 * bs, 4)
-                    for bf, bs in zip(betas_front, betas_side)
-                ]
-                has_side = True
+                side_bgr = cv2.imread(side_image_path)
+                if side_bgr is not None:
+                    q_side, _ = ImageQualityGate.evaluate(side_bgr)
+                    if q_side.is_valid:
+                        betas_side = self.estimator.estimate_from_image(side_image_path, height_cm, weight_kg)
+                        # Weighted fusion: Front (65%) + Side (35%)
+                        fused_betas = [
+                            round(0.65 * bf + 0.35 * bs, 4)
+                            for bf, bs in zip(betas_front, betas_side)
+                        ]
+                        has_side = True
+                    else:
+                        logger.warning(f"Side image quality check: [{q_side.error_code}] {q_side.message}. Using front only.")
+                        fused_betas = betas_front
+                else:
+                    fused_betas = betas_front
             else:
                 logger.warning(f"Side image validation failed: {msg_side}. Using front image only.")
                 fused_betas = betas_front
         else:
             fused_betas = betas_front
 
-        # 4. Height Normalization
-        # Align stature coefficient (betas[1]) to input height_cm
-        # In SMPL-X, standard height is ~172cm; beta[1] adjusts stature linearly
-        h_diff = (height_cm - 172.0) / 10.0
-        fused_betas[1] = round(float(np.clip(h_diff * 1.4, -3.0, 3.0)), 4)
+        # 4. Height Normalization & Stature Discrepancy Warning
+        raw_height_cm = StatureNormalizer.H_0 + float(np.dot(StatureNormalizer.HEIGHT_GRADIENT, np.array(fused_betas[:10], dtype=np.float32)))
+        height_diff = abs(raw_height_cm - height_cm)
+
+        warnings = []
+        if height_diff > 10.0:
+            warnings.append(
+                f"CẢNH BÁO: Chiều cao ước lượng từ ảnh ({raw_height_cm:.1f} cm) lệch {height_diff:.1f} cm (>10 cm) "
+                f"so với chiều cao bạn nhập ({height_cm:.1f} cm). Ảnh chụp có thể bị góc nghiêng (tilt) hoặc khoảng cách chưa chuẩn. "
+                f"Khuyến nghị: Đặt máy ngang ngực, đứng thẳng và chụp lại để có kết quả đo tối ưu."
+            )
+
+        fused_betas = StatureNormalizer.normalize_betas_to_height(fused_betas, height_cm)
 
         elapsed_ms = round((time.time() - start_time) * 1000, 1)
 
         is_mock = isinstance(self.estimator, MockBodyEstimator) or (
-            isinstance(self.estimator, PretrainedBodyEstimator) and self.estimator.model is None
+            hasattr(self.estimator, "model") and self.estimator.model is None
+        ) or (
+            hasattr(self.estimator, "delegate") and self.estimator.delegate.model is None
         )
 
         return {
             "betas": fused_betas,
             "has_side_image": has_side,
             "height_cm": height_cm,
+            "raw_height_cm": round(raw_height_cm, 1),
             "weight_kg": weight_kg,
             "is_mock": is_mock,
+            "warnings": warnings,
             "processing_time_ms": elapsed_ms
         }

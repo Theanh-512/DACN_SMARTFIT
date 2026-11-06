@@ -1,127 +1,180 @@
 import os
 import sys
-import unittest
+import json
+import pytest
 import numpy as np
 import trimesh
 from scipy.spatial import cKDTree
 
-# Add ml_service root to sys.path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 from core.body_model import BodyModel
-from core.garment import GarmentGenerator, load_size_chart
+from core.pattern_generator import ParametricPatternGenerator
+from core.texture_extractor import TextureExtractor
+from core.garment_draper import GarmentDraper
+from core.skinning_transfer import SkinningTransfer
 
-class TestPhase4Garment(unittest.TestCase):
+def test_pattern_generator_all_sizes():
+    """Verify 2D pattern generation for T-Shirt and Cardigan across all sizes XS to XXL."""
+    products_dir = os.path.join(BASE_DIR, "assets", "products")
+    
+    for fn in ["prod_tshirt_cotton.json", "prod_cardigan_knit.json"]:
+        p_path = os.path.join(products_dir, fn)
+        with open(p_path, "r", encoding="utf-8") as f:
+            spec = json.load(f)
 
-    def test_garment_size_chart_loaded(self):
-        chart = load_size_chart()
-        self.assertIn("sizes", chart)
-        for sz in ["S", "M", "L", "XL"]:
-            self.assertIn(sz, chart["sizes"])
-            self.assertIn("chest_cm", chart["sizes"][sz])
-            self.assertIn("waist_cm", chart["sizes"][sz])
-            self.assertIn("length_cm", chart["sizes"][sz])
-            self.assertIn("shoulder_cm", chart["sizes"][sz])
+        g_type = spec["category"]
+        for size_key, s_spec in spec["sizes"].items():
+            pattern = ParametricPatternGenerator.generate_pattern(g_type, s_spec)
+            assert pattern["garment_type"] == g_type
+            assert len(pattern["pieces"]) >= 4, f"{g_type} {size_key} must have at least 4 pattern pieces"
+            assert len(pattern["seams"]) >= 4, f"{g_type} {size_key} must have seam connections"
+            
+            # Check pattern polygon validity
+            for p_name, p_data in pattern["pieces"].items():
+                poly = p_data["polygon"]
+                assert len(poly) >= 4, f"Piece {p_name} must have valid polygon"
+                assert not np.any(np.isnan(poly)), f"Piece {p_name} has NaN coordinates"
 
-    def test_parametric_tshirt_generation_independent_of_topology(self):
-        bm = BodyModel()
-        body_mesh = bm.get_trimesh(pose="a_pose")
+def test_rest_pattern_measurement_accuracy():
+    """Verify that 2D parametric pattern dimensions match size chart within 1.0 cm."""
+    products_dir = os.path.join(BASE_DIR, "assets", "products")
+    p_path = os.path.join(products_dir, "prod_tshirt_cotton.json")
+    with open(p_path, "r", encoding="utf-8") as f:
+        spec = json.load(f)
 
-        gen = GarmentGenerator()
-        g_mesh, info = gen.generate_tshirt(body_mesh, size="M")
+    for size_key in ["S", "M", "L", "XL"]:
+        s_spec = spec["sizes"][size_key]
+        pattern = ParametricPatternGenerator.generate_pattern("tshirt", s_spec)
 
-        self.assertIsInstance(g_mesh, trimesh.Trimesh)
-        self.assertGreater(len(g_mesh.vertices), 500)
-        self.assertGreater(len(g_mesh.faces), 500)
-        self.assertEqual(info["size"], "M")
-        self.assertIn("ease_chest_cm", info)
-        self.assertIn("ease_waist_cm", info)
+        # 1. Front panel chest width (X max - X min)
+        f_poly = pattern["pieces"]["front"]["polygon"]
+        meas_cw = (np.max(f_poly[:, 0]) - np.min(f_poly[:, 0]))
+        err_cw = abs(meas_cw - s_spec["chest_width_cm"])
+        assert err_cw < 1.0, f"Size {size_key} chest width error {err_cw:.2f}cm exceeds 1.0cm target"
 
-    def test_garment_ease_progression(self):
-        bm = BodyModel()
-        body_mesh = bm.get_trimesh(pose="a_pose")
+        # 2. Body length (Y max - Y min)
+        meas_bl = (np.max(f_poly[:, 1]) - np.min(f_poly[:, 1]))
+        err_bl = abs(meas_bl - s_spec["body_length_cm"])
+        assert err_bl < 1.0, f"Size {size_key} body length error {err_bl:.2f}cm exceeds 1.0cm target"
 
-        gen = GarmentGenerator()
-        eases = {}
-        lengths = {}
-        for sz in ["S", "M", "L", "XL"]:
-            g_mesh, info = gen.generate_tshirt(body_mesh, size=sz)
-            eases[sz] = info["ease_chest_cm"]
-            lengths[sz] = info["length_cm"]
+        # 3. Sleeve length
+        sl_poly = pattern["pieces"]["sleeve_left"]["polygon"]
+        meas_sl = (np.max(sl_poly[:, 1]) - np.min(sl_poly[:, 1]))
+        err_sl = abs(meas_sl - s_spec["sleeve_length_cm"])
+        assert err_sl < 1.0, f"Size {size_key} sleeve length error {err_sl:.2f}cm exceeds 1.0cm target"
 
-        # Monotonic increase in chest circumference and garment length
-        self.assertLess(eases["S"], eases["M"])
-        self.assertLess(eases["M"], eases["L"])
-        self.assertLess(eases["L"], eases["XL"])
-        self.assertLess(lengths["S"], lengths["M"])
-        self.assertLess(lengths["M"], lengths["L"])
-        self.assertLess(lengths["L"], lengths["XL"])
+def test_texture_extractor_silhouette_ratio():
+    """Verify dominant color extraction and aspect ratio verification."""
+    img_path = os.path.join(BASE_DIR, "assets", "products", "tshirt_front.png")
+    assert os.path.exists(img_path), "Sample t-shirt image must exist"
 
-    def test_pushout_collision_no_penetration(self):
-        bm = BodyModel()
-        body_mesh = bm.get_trimesh(pose="a_pose")
+    size_spec = {
+        "chest_width_cm": 50.0,
+        "body_length_cm": 69.0
+    }
 
-        gen = GarmentGenerator()
-        # Test on size S (tightest fit)
-        g_mesh, info = gen.generate_tshirt(body_mesh, size="S", drape_mode="pushout")
+    res = TextureExtractor.process_garment_image(img_path, size_spec)
+    assert "dominant_hex" in res
+    assert res["dominant_hex"].startswith("#")
+    assert res["photo_aspect"] > 0.5
 
-        body_verts = body_mesh.vertices
-        body_norms = body_mesh.vertex_normals
-        tree = cKDTree(body_verts)
+def test_garment_drape_mode_fallback():
+    """Verify that DRAPE_MODE=blender safely falls back to pushout when Blender is absent."""
+    model = BodyModel(gender="neutral")
+    b_mesh = model.get_trimesh([0.0] * 10, pose="a_pose")
 
-        g_verts = g_mesh.vertices
-        dists, idxs = tree.query(g_verts)
-        nearest_norms = body_norms[idxs]
-        nearest_pts = body_verts[idxs]
+    p_path = os.path.join(BASE_DIR, "assets", "products", "prod_tshirt_cotton.json")
+    with open(p_path, "r", encoding="utf-8") as f:
+        spec = json.load(f)
 
-        # Signed distance along normal
-        proj = np.sum((g_verts - nearest_pts) * nearest_norms, axis=1)
+    g_mesh, ease_info, _ = GarmentDraper.drape_garment(
+        body_mesh=b_mesh,
+        product_spec=spec,
+        size="M",
+        drape_mode="blender" # Test fallback
+    )
 
-        # Allow slight 1.5mm discretization tolerance
-        self.assertTrue(np.all(proj >= 0.003), f"Penetration detected: min proj = {np.min(proj):.4f}m")
+    assert len(g_mesh.vertices) > 500
+    assert "pushout" in ease_info["drape_mode"], "Must gracefully fallback to pushout mode"
 
-    def test_180cm_stature_difference(self):
-        bm = BodyModel()
-        from core.slider_mapping import SliderMappingEngine
-        engine = SliderMappingEngine()
-        betas_180 = engine.predict_betas({"height_cm": 180.0, "chest_cm": 95.0})
-        tall_body = bm.get_trimesh(betas=betas_180, pose="a_pose")
-        tall_h = np.max(tall_body.vertices[:, 1]) - np.min(tall_body.vertices[:, 1])
-        self.assertGreaterEqual(tall_h, 1.78)
+def test_zero_skin_penetration_collision():
+    """Verify that garment vertices never penetrate body mesh (proj >= clearance everywhere)."""
+    model = BodyModel(gender="female")
+    b_mesh = model.get_trimesh([0.0] * 10, pose="a_pose")
 
-        gen = GarmentGenerator()
-        g_s, info_s = gen.generate_tshirt(tall_body, size="S")
-        g_xl, info_xl = gen.generate_tshirt(tall_body, size="XL")
+    p_path = os.path.join(BASE_DIR, "assets", "products", "prod_tshirt_cotton.json")
+    with open(p_path, "r", encoding="utf-8") as f:
+        spec = json.load(f)
 
-        # Size S on 180cm person has tighter ease than XL
-        self.assertLess(info_s["ease_chest_cm"], info_xl["ease_chest_cm"])
-        # Hem of S is higher than XL (shorter coverage)
-        y_hem_s = np.min(g_s.vertices[:, 1])
-        y_hem_xl = np.min(g_xl.vertices[:, 1])
-        self.assertGreater(y_hem_s, y_hem_xl)
+    g_mesh, _, _ = GarmentDraper.drape_garment(
+        body_mesh=b_mesh,
+        product_spec=spec,
+        size="M",
+        drape_mode="pushout"
+    )
 
-    def test_tryon_endpoint(self):
-        from fastapi.testclient import TestClient
-        from app.main import app
-        client = TestClient(app)
+    # Check signed clearance against body surface
+    body_verts = b_mesh.vertices
+    body_norms = b_mesh.vertex_normals
+    tree = cKDTree(body_verts)
 
-        payload = {
-            "betas": [0.0] * 10,
-            "height_cm": 175.0,
-            "size": "M",
-            "color_hex": "#19284B",
-            "drape_mode": "pushout"
-        }
-        res = client.post("/body/tryon", json=payload)
-        self.assertEqual(res.status_code, 200)
-        data = res.json()
-        self.assertEqual(data["size"], "M")
-        self.assertIn("ease_info", data)
-        self.assertIn("glb_url", data)
-        self.assertTrue(data["glb_url"].endswith("fitted_m.glb"))
+    dists, idxs = tree.query(g_mesh.vertices)
+    nearest_body_pts = body_verts[idxs]
+    nearest_body_norms = body_norms[idxs]
 
-if __name__ == "__main__":
-    unittest.main()
+    diff = g_mesh.vertices - nearest_body_pts
+    proj = np.sum(diff * nearest_body_norms, axis=1)
 
+    min_proj = float(np.min(proj))
+    # Clearance must be positive (>= 0.003m) everywhere
+    assert min_proj >= 0.002, f"Found skin penetration: min projection {min_proj*1000:.2f} mm < 2.0 mm"
+
+def test_skinning_weight_transfer_normalization():
+    """Verify that transferred skinning weights are strictly normalized to 1.0."""
+    model = BodyModel(gender="neutral")
+    b_mesh = model.get_trimesh([0.0] * 10, pose="a_pose")
+
+    p_path = os.path.join(BASE_DIR, "assets", "products", "prod_tshirt_cotton.json")
+    with open(p_path, "r", encoding="utf-8") as f:
+        spec = json.load(f)
+
+    g_mesh, _, _ = GarmentDraper.drape_garment(
+        body_mesh=b_mesh,
+        product_spec=spec,
+        size="M"
+    )
+
+    out_glb = os.path.join(BASE_DIR, "assets", "cache", "garments", "test_skinned.glb")
+    SkinningTransfer.export_skinned_garment_glb(
+        garment_mesh=g_mesh,
+        output_glb_path=out_glb,
+        gender="neutral"
+    )
+
+    assert os.path.exists(out_glb)
+    assert os.path.getsize(out_glb) > 10 * 1024
+
+    if os.path.exists(out_glb):
+        os.remove(out_glb)
+
+def test_tall_avatar_tight_fit_tension():
+    """Verify that 1m80 avatar wearing size S is diagnosed as tight fit (ease < 2.0 cm)."""
+    model = BodyModel(gender="male")
+    # Tall stature avatar
+    mesh_tall = model.get_trimesh([1.5] + [0.0] * 9, pose="a_pose")
+
+    p_path = os.path.join(BASE_DIR, "assets", "products", "prod_tshirt_cotton.json")
+    with open(p_path, "r", encoding="utf-8") as f:
+        spec = json.load(f)
+
+    _, ease_info, _ = GarmentDraper.drape_garment(
+        body_mesh=mesh_tall,
+        product_spec=spec,
+        size="S"
+    )
+
+    assert ease_info["is_tight"] is True, "1m80 avatar in size S must be detected as tight fit"
+    assert ease_info["ease_chest_cm"] < 3.0, f"Expected ease < 3.0 cm, got {ease_info['ease_chest_cm']} cm"

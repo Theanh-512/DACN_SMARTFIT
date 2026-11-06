@@ -1,0 +1,65 @@
+{
+  "product_id": "prod_tshirt_cotton",
+  "name": "Áo Thun Cổ Tròn Cotton Unisex (Classic T-Shirt)",
+  "category": "tshirt",
+  "description": "Áo thun cotton thoáng mát phom suông unisex, cổ tròn bo gân, dệt kim 100% cotton chải kỹ.",
+  "image_front": "/assets/products/tshirt_front.png",
+  "color_hex": "#19284B",
+  "fabric": {
+    "material": "100% Cotton Single Jersey",
+    "stretch_pct": 5.0,
+    "thickness_mm": 1.5,
+    "weight_gsm": 220
+  },
+  "note": "Thông số kích thước đặt phẳng (cm) là số liệu giả định theo quy chuẩn ISO 8559 và TCVN cho áo thun unisex.",
+  "sizes": {
+    "XS": {
+      "chest_width_cm": 44.0,
+      "body_length_cm": 64.0,
+      "shoulder_width_cm": 41.0,
+      "sleeve_length_cm": 18.0,
+      "hem_width_cm": 43.0,
+      "neck_circ_cm": 38.5
+    },
+    "S": {
+      "chest_width_cm": 47.0,
+      "body_length_cm": 66.5,
+      "shoulder_width_cm": 43.0,
+      "sleeve_length_cm": 19.5,
+      "hem_width_cm": 46.0,
+      "neck_circ_cm": 40.0
+    },
+    "M": {
+      "chest_width_cm": 50.0,
+      "body_length_cm": 69.0,
+      "shoulder_width_cm": 45.0,
+      "sleeve_length_cm": 21.0,
+      "hem_width_cm": 49.0,
+      "neck_circ_cm": 41.5
+    },
+    "L": {
+      "chest_width_cm": 53.0,
+      "body_length_cm": 72.0,
+      "shoulder_width_cm": 47.0,
+      "sleeve_length_cm": 22.5,
+      "hem_width_cm": 52.0,
+      "neck_circ_cm": 43.0
+    },
+    "XL": {
+      "chest_width_cm": 57.0,
+      "body_length_cm": 75.0,
+      "shoulder_width_cm": 50.0,
+      "sleeve_length_cm": 24.0,
+      "hem_width_cm": 56.0,
+      "neck_circ_cm": 44.5
+    },
+    "XXL": {
+      "chest_width_cm": 61.0,
+      "body_length_cm": 78.0,
+      "shoulder_width_cm": 53.0,
+      "sleeve_length_cm": 25.5,
+      "hem_width_cm": 60.0,
+      "neck_circ_cm": 46.0
+    }
+  }
+}

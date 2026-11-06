@@ -3,6 +3,8 @@ import { isPlatformBrowser } from '@angular/common';
 import { Product, ProductVariant } from '../../features/catalog/models/product.model';
 import { MOCK_PRODUCTS, MOCK_CATEGORIES, Category } from '../data/mock-products';
 
+import { GarmentStudioService } from './garment-studio.service';
+
 export interface AdminOrder {
   id: string;
   orderCode: string;
@@ -31,6 +33,11 @@ export interface AdminOrder {
 export class ProductStateService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
+  private readonly garmentStudio = inject(GarmentStudioService);
+
+  constructor() {
+    this.loadPublished3dProducts();
+  }
 
   // Reactive State Signals
   readonly products = signal<Product[]>(MOCK_PRODUCTS);
@@ -199,5 +206,63 @@ export class ProductStateService {
   // --- Try-on increment ---
   incrementTryOn(): void {
     this.tryOnCount.update(c => c + 1);
+  }
+
+  // --- Persistent 3D Garment Catalog Integration ---
+
+  loadPublished3dProducts(): void {
+    if (!this.isBrowser) return;
+    this.garmentStudio.getPublishedCatalog().subscribe({
+      next: (published) => {
+        if (!published || published.length === 0) return;
+        const mappedProducts: Product[] = published.map(gp => this.mapGarmentProductToCatalogProduct(gp));
+        const existing = this.products();
+        const nonDuplicateExisting = existing.filter(p => !mappedProducts.some(mp => mp.id === p.id));
+        this.products.set([...mappedProducts, ...nonDuplicateExisting]);
+      },
+      error: (err) => console.warn('Could not load published 3D catalog:', err)
+    });
+  }
+
+  public mapGarmentProductToCatalogProduct(gp: any): Product {
+    const variants: ProductVariant[] = (gp.variants || []).map((v: any) => ({
+      id: v.variant_id || `${gp.product_id}-${v.size}`,
+      sku: `${gp.sku || gp.product_id}-${v.size}`,
+      size: v.size,
+      color: gp.primary_color_hex || 'Navy',
+      colorCode: '01',
+      colorHex: gp.primary_color_hex || '#19284B',
+      stockQuantity: 50,
+      priceModifier: 0,
+      garmentImageUrl: gp.image_front_url || '/assets/products/tshirt_front.png'
+    }));
+
+    return {
+      id: gp.product_id,
+      name: gp.name,
+      slug: gp.product_id.toLowerCase().replace(/_/g, '-'),
+      description: gp.description || `Sản phẩm 3D ${gp.name} chuẩn kích thước may mặc ISO 8559.`,
+      categoryId: gp.category === 'cardigan' ? 'cat-jackets' : 'cat-tshirts',
+      categoryName: gp.category.toUpperCase(),
+      basePrice: 399000,
+      thumbnailUrl: gp.image_front_url || '/assets/products/tshirt_front.png',
+      images: [gp.image_front_url || '/assets/products/tshirt_front.png'],
+      variants: variants.length > 0 ? variants : [
+        { id: `${gp.product_id}-M`, sku: `${gp.product_id}-M`, size: 'M', color: 'Navy', colorCode: '01', colorHex: '#19284B', stockQuantity: 50, priceModifier: 0, garmentImageUrl: gp.image_front_url }
+      ],
+      inStock: true,
+      featured: true,
+      rating: 4.9,
+      reviewCount: 42,
+      productCode: gp.sku || gp.product_id,
+      fitRecommendation: `Chuẩn số đo 3D (${gp.material || 'Vải cao cấp'})`,
+      styleHintImages: [gp.image_front_url || '/assets/products/tshirt_front.png'],
+      reviews: []
+    };
+  }
+
+  public addPublishedProduct(gp: any): void {
+    const p = this.mapGarmentProductToCatalogProduct(gp);
+    this.products.update(list => [p, ...list.filter(item => item.id !== p.id)]);
   }
 }

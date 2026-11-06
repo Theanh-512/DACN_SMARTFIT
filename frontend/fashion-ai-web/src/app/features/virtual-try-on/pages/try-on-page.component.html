@@ -45,7 +45,25 @@
     <!-- CỘT 1: TÙY CHỈNH HÌNH THỂ & DIỆN MẠO (BƯỚC 1 & 2) -->
     <div class="studio-card">
       <div class="step-badge">BƯỚC 1 & 2</div>
-      <h3 class="card-title">HÌNH THỂ & DIỆN MẠO</h3>
+      <div class="card-header-with-badge">
+        <h3 class="card-title">HÌNH THỂ & DIỆN MẠO</h3>
+        @if (isEstimatedMock()) {
+        <span class="badge-mock-tag" title="Hệ thống đang chạy chế độ Mock dự phòng">MOCK</span>
+        }
+      </div>
+
+      <!-- Nút Chụp Ảnh AI Camera (Prompt A2) -->
+      <div class="camera-trigger-box">
+        <button type="button" class="btn-camera-trigger" (click)="isCameraModalOpen.set(true)">
+          <span class="cam-icon">📸</span>
+          <span class="cam-text">CHỤP ẢNH TẠO VÓC DÁNG 3D (AI VISION)</span>
+        </button>
+        @if (estimateConfidence()) {
+        <div class="confidence-indicator">
+          <span>Điểm chất lượng ảnh đầu vào: {{ (estimateConfidence()! * 100) | number:'1.0-0' }} / 100</span>
+        </div>
+        }
+      </div>
       <p class="card-sub">Tùy biến hình thể chuẩn hóa hoặc cá nhân hóa gương mặt:</p>
 
       <!-- Giới tính: Nam / Nữ -->
@@ -466,6 +484,14 @@
       </div>
     </div>
   </div>
+  }
+
+  <!-- AI Camera Body Estimation Modal (Prompt A2) -->
+  @if (isCameraModalOpen()) {
+  <app-camera-capture
+    (close)="isCameraModalOpen.set(false)"
+    (estimated)="onBodyEstimated($event)"
+  ></app-camera-capture>
   }
 
 </div>

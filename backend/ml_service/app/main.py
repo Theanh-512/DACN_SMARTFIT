@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Ensure root package path is visible
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.routers import health, body
+from app.routers import health, body, garment, fit
 
 app = FastAPI(
     title="Fashion AI ML Service",
@@ -26,6 +26,8 @@ app.add_middleware(
 # Include Routers
 app.include_router(health.router)
 app.include_router(body.router)
+app.include_router(garment.router)
+app.include_router(fit.router)
 
 @app.get("/")
 def root():

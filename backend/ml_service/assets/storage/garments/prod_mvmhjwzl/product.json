@@ -1,0 +1,20 @@
+{
+  "product_id": "prod_mvmhjwzl",
+  "sku": "SKU-TSHIRT-001",
+  "name": "Áo Thun Cotton Oversized Premium",
+  "category": "tshirt",
+  "description": "Áo thun cotton cao cấp phom dáng vừa vặn chuẩn kích thước may mặc ISO 8559.",
+  "status": "failed",
+  "material": "100% Cotton Single Jersey",
+  "stretch_pct": 5.0,
+  "thickness_mm": 1.5,
+  "primary_color_hex": "#19284B",
+  "pattern_description": "Trơn màu tự nhiên (Solid PBR)",
+  "design_notes": "Dựng rập tham số theo công nghệ GarmentCode (Apache 2.0).",
+  "image_front_url": "/assets/garments/prod_mvmhjwzl/source/front.png",
+  "image_back_url": null,
+  "created_at": "2026-10-24T14:20:50.672465+00:00",
+  "updated_at": "2026-10-24T14:20:57.890291+00:00",
+  "variants": [],
+  "assets": []
+}

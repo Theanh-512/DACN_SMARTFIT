@@ -1,0 +1,199 @@
+{
+  "product_id": "test_studio_shirt",
+  "sku": "SKU-STUDIO-SHIRT-01",
+  "name": "Áo Sơ Mi Oxford Công Sở",
+  "category": "shirt",
+  "description": "Áo sơ mi dáng classic fit.",
+  "status": "published",
+  "material": "100% Cotton Oxford",
+  "stretch_pct": 4.0,
+  "thickness_mm": 1.4,
+  "primary_color_hex": "#1E3A8A",
+  "pattern_description": null,
+  "design_notes": null,
+  "image_front_url": "/assets/garments/test_studio_shirt/source/front.png",
+  "image_back_url": null,
+  "created_at": "2026-10-31T13:57:22.613385+00:00",
+  "updated_at": "2026-10-31T13:57:24.376067+00:00",
+  "variants": [
+    {
+      "variant_id": "var_test_studio_shirt_s",
+      "product_id": "test_studio_shirt",
+      "size": "S",
+      "measurements": {
+        "chest_width_cm": 48.0,
+        "body_length_cm": 67.0,
+        "shoulder_width_cm": 43.0,
+        "sleeve_length_cm": 57.0,
+        "hem_width_cm": 47.0,
+        "neck_circ_cm": 39.0
+      },
+      "stretch_pct": 4.0,
+      "thickness_mm": 1.4,
+      "generation_status": "ready",
+      "assets": [
+        {
+          "asset_id": "ast_test_studio_shirt_s_glb",
+          "product_id": "test_studio_shirt",
+          "variant_id": "var_test_studio_shirt_s",
+          "size": "S",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/test_studio_shirt/sizes/S/garment-v1.glb",
+          "public_url": "/assets/garments/test_studio_shirt/sizes/S/garment-v1.glb",
+          "checksum": "8a8ed53e0b9d14d6d6c13ef19019c885fd22c3c5ef3b6fd7e5a4de86b188bdfd",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-31T13:57:22.613385+00:00"
+        }
+      ],
+      "fitting_diagnostics": {
+        "mesh_measurements": {
+          "chest_width_cm": 59.2,
+          "body_length_cm": 69.7,
+          "shoulder_width_cm": 144.0,
+          "sleeve_length_cm": 55.1
+        },
+        "ease_chest_cm": 19.2,
+        "is_tight": false,
+        "zero_penetration_verified": true
+      }
+    },
+    {
+      "variant_id": "var_test_studio_shirt_m",
+      "product_id": "test_studio_shirt",
+      "size": "M",
+      "measurements": {
+        "chest_width_cm": 51.0,
+        "body_length_cm": 70.0,
+        "shoulder_width_cm": 45.0,
+        "sleeve_length_cm": 59.0,
+        "hem_width_cm": 50.0,
+        "neck_circ_cm": 40.5
+      },
+      "stretch_pct": 4.0,
+      "thickness_mm": 1.4,
+      "generation_status": "ready",
+      "assets": [
+        {
+          "asset_id": "ast_test_studio_shirt_m_glb",
+          "product_id": "test_studio_shirt",
+          "variant_id": "var_test_studio_shirt_m",
+          "size": "M",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/test_studio_shirt/sizes/M/garment-v1.glb",
+          "public_url": "/assets/garments/test_studio_shirt/sizes/M/garment-v1.glb",
+          "checksum": "32165c00365477cc394661cd2df38ca6491d0f471d1ecd931e34b86e4f1d3cc3",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-31T13:57:22.613385+00:00"
+        }
+      ],
+      "fitting_diagnostics": {
+        "mesh_measurements": {
+          "chest_width_cm": 57.8,
+          "body_length_cm": 70.6,
+          "shoulder_width_cm": 149.5,
+          "sleeve_length_cm": 58.0
+        },
+        "ease_chest_cm": 16.4,
+        "is_tight": false,
+        "zero_penetration_verified": true
+      }
+    },
+    {
+      "variant_id": "var_test_studio_shirt_l",
+      "product_id": "test_studio_shirt",
+      "size": "L",
+      "measurements": {
+        "chest_width_cm": 54.0,
+        "body_length_cm": 73.0,
+        "shoulder_width_cm": 47.0,
+        "sleeve_length_cm": 61.0,
+        "hem_width_cm": 53.0,
+        "neck_circ_cm": 42.0
+      },
+      "stretch_pct": 4.0,
+      "thickness_mm": 1.4,
+      "generation_status": "ready",
+      "assets": [
+        {
+          "asset_id": "ast_test_studio_shirt_l_glb",
+          "product_id": "test_studio_shirt",
+          "variant_id": "var_test_studio_shirt_l",
+          "size": "L",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/test_studio_shirt/sizes/L/garment-v1.glb",
+          "public_url": "/assets/garments/test_studio_shirt/sizes/L/garment-v1.glb",
+          "checksum": "333305dd9849e777b68270280df69c8a7e54f20592c327d777bb9f306b932b52",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-31T13:57:22.613385+00:00"
+        }
+      ],
+      "fitting_diagnostics": {
+        "mesh_measurements": {
+          "chest_width_cm": 59.1,
+          "body_length_cm": 73.5,
+          "shoulder_width_cm": 155.0,
+          "sleeve_length_cm": 61.0
+        },
+        "ease_chest_cm": 19.0,
+        "is_tight": false,
+        "zero_penetration_verified": true
+      }
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "ast_test_studio_shirt_s_glb",
+      "product_id": "test_studio_shirt",
+      "variant_id": "var_test_studio_shirt_s",
+      "size": "S",
+      "asset_type": "glb_skinned",
+      "asset_version": 1,
+      "storage_path": "garments/test_studio_shirt/sizes/S/garment-v1.glb",
+      "public_url": "/assets/garments/test_studio_shirt/sizes/S/garment-v1.glb",
+      "checksum": "8a8ed53e0b9d14d6d6c13ef19019c885fd22c3c5ef3b6fd7e5a4de86b188bdfd",
+      "generation_mode": "pushout",
+      "rigging_compatibility": "SMPL_24_JOINT_RIG",
+      "validation_status": "passed",
+      "created_at": "2026-10-31T13:57:22.613385+00:00"
+    },
+    {
+      "asset_id": "ast_test_studio_shirt_m_glb",
+      "product_id": "test_studio_shirt",
+      "variant_id": "var_test_studio_shirt_m",
+      "size": "M",
+      "asset_type": "glb_skinned",
+      "asset_version": 1,
+      "storage_path": "garments/test_studio_shirt/sizes/M/garment-v1.glb",
+      "public_url": "/assets/garments/test_studio_shirt/sizes/M/garment-v1.glb",
+      "checksum": "32165c00365477cc394661cd2df38ca6491d0f471d1ecd931e34b86e4f1d3cc3",
+      "generation_mode": "pushout",
+      "rigging_compatibility": "SMPL_24_JOINT_RIG",
+      "validation_status": "passed",
+      "created_at": "2026-10-31T13:57:22.613385+00:00"
+    },
+    {
+      "asset_id": "ast_test_studio_shirt_l_glb",
+      "product_id": "test_studio_shirt",
+      "variant_id": "var_test_studio_shirt_l",
+      "size": "L",
+      "asset_type": "glb_skinned",
+      "asset_version": 1,
+      "storage_path": "garments/test_studio_shirt/sizes/L/garment-v1.glb",
+      "public_url": "/assets/garments/test_studio_shirt/sizes/L/garment-v1.glb",
+      "checksum": "333305dd9849e777b68270280df69c8a7e54f20592c327d777bb9f306b932b52",
+      "generation_mode": "pushout",
+      "rigging_compatibility": "SMPL_24_JOINT_RIG",
+      "validation_status": "passed",
+      "created_at": "2026-10-31T13:57:22.613385+00:00"
+    }
+  ]
+}

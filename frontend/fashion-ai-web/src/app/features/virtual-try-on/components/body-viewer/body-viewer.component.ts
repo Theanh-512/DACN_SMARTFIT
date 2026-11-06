@@ -15,6 +15,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+export interface JointRotationMap {
+  [jointName: string]: { x: number; y: number; z: number };
+}
+
 @Component({
   selector: 'app-body-viewer',
   standalone: true,
@@ -27,8 +31,17 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('canvasContainer', { static: true })
   canvasContainer!: ElementRef<HTMLDivElement>;
 
-  @Input() glbUrl: string = '/assets/models/human_avatar_a_pose.glb';
+  // Model & Morph Targets
+  @Input() glbUrl: string = '/assets/models/rigged/human_avatar_rigged_neutral.glb';
   @Input() betas: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  @Input() regionalMorphs: Record<string, number> = {};
+
+  // Skeletal Rigging & Posing (Phase 3.6)
+  @Input() jointRotations: JointRotationMap = {};
+  @Input() isUnderwearVisible: boolean = true;
+  @Input() activePosePreset: string = 'a_pose';
+
+  // Appearance & Framing
   @Input() skinHex: string = '#E8C39E';
   @Input() cameraAngle: 'front' | 'quarter' | 'side' | 'back' = 'front';
   @Input() heightCm: number = 175;
@@ -36,10 +49,11 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
   @Input() garmentSize: string = 'M';
   @Input() garmentColorHex: string = '#19284B';
   @Input() garmentGlbUrl?: string;
+  @Input() showHeatmap: boolean = false;
 
   isLoading = signal<boolean>(true);
   errorMessage = signal<string | null>(null);
-  modelBadgeText = signal<string>('SMPL');
+  modelBadgeText = signal<string>('SMPL RIGGED');
   isMock = signal<boolean>(false);
 
   private scene!: THREE.Scene;
@@ -50,21 +64,56 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
   private resizeObserver: ResizeObserver | null = null;
 
   private modelHeight: number = 1.75;
-  private avatarMesh: THREE.Mesh | null = null;
+  private avatarMesh: THREE.SkinnedMesh | THREE.Mesh | null = null;
+  private underwearMesh: THREE.SkinnedMesh | null = null;
+  private skeleton: THREE.Skeleton | null = null;
+  private bonesMap: Map<string, THREE.Bone> = new Map();
   private avatarGroup: THREE.Group | null = null;
   private garmentGroup: THREE.Group | null = null;
   private skinMaterial!: THREE.MeshStandardMaterial;
+  private underwearMaterial!: THREE.MeshStandardMaterial;
   private garmentMaterial!: THREE.MeshStandardMaterial;
+
+  // Cached geometry data for fast CPU J-regressor updates
+  private riggedConfig: any = null;
+  private baseVertices: Float32Array | null = null;
+  private morphDeltas: Float32Array[] = [];
+
+  readonly targetNames = [
+    'beta_0_mass',
+    'beta_1_stature',
+    'beta_2_chest',
+    'beta_3_waist',
+    'beta_4_hip',
+    'beta_5_shoulder',
+    'beta_6_arm_mass',
+    'beta_7_torso_leg',
+    'beta_8_head_neck',
+    'beta_9_secondary',
+    'morph_abdomen',
+    'morph_chest',
+    'morph_biceps',
+    'morph_thighs',
+    'morph_buttocks',
+    'morph_shoulders'
+  ];
 
   ngOnInit(): void {
     this.initThree();
+    this.fetchRiggedConfig();
     this.loadGlbModel(this.glbUrl);
     this.setupResizeObserver();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['betas'] && !changes['betas'].firstChange) {
+    if (changes['betas'] || changes['regionalMorphs']) {
       this.applyMorphTargets();
+    }
+    if (changes['jointRotations'] || changes['activePosePreset']) {
+      this.applyJointRotations();
+    }
+    if (changes['isUnderwearVisible'] && this.underwearMesh) {
+      this.underwearMesh.visible = this.isUnderwearVisible;
     }
     if (changes['skinHex'] && !changes['skinHex'].firstChange) {
       this.applySkinColor();
@@ -75,12 +124,17 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
     if (changes['glbUrl'] && !changes['glbUrl'].firstChange) {
       this.loadGlbModel(this.glbUrl);
     }
-    if (changes['isDressed'] || changes['garmentSize'] || changes['garmentGlbUrl']) {
+    if (changes['isDressed'] || changes['garmentSize'] || changes['garmentGlbUrl'] || changes['showHeatmap']) {
       this.updateGarment();
     }
     if (changes['garmentColorHex']) {
       this.applyGarmentColor();
     }
+  }
+
+  public applyBetas(newBetas: number[]): void {
+    this.betas = newBetas;
+    this.applyMorphTargets();
   }
 
   ngOnDestroy(): void {
@@ -96,12 +150,32 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
     if (this.garmentGroup) {
       this.scene.remove(this.garmentGroup);
     }
+    if (this.skinMaterial) {
+      this.skinMaterial.dispose();
+    }
+    if (this.underwearMaterial) {
+      this.underwearMaterial.dispose();
+    }
     if (this.garmentMaterial) {
       this.garmentMaterial.dispose();
     }
     if (this.renderer) {
       this.renderer.dispose();
     }
+  }
+
+  private fetchRiggedConfig(): void {
+    fetch('/assets/data/smpl_rigged_config.json')
+      .then(res => res.json())
+      .then(data => {
+        this.riggedConfig = data;
+        if (this.skeleton && this.avatarMesh) {
+          this.updateSkeletonJointPositions();
+        }
+      })
+      .catch(err => {
+        console.warn('Could not load smpl_rigged_config.json, using fallback:', err);
+      });
   }
 
   private initThree(): void {
@@ -113,10 +187,10 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x16181d);
 
-    // 2. Camera: khoảng cách = (chiều cao / 2) / tan(fov / 2) * 1.2, target = (0, chiều cao / 2, 0)
+    // 2. Camera: framing distance according to ISO 8559 mannequin stature
     const initH = 1.75;
     const fovRad = (38 * Math.PI) / 180;
-    const initDist = (initH / 2) / Math.tan(fovRad / 2) * 1.2;
+    const initDist = (initH / 2) / Math.tan(fovRad / 2) * 1.25;
     const targetY = initH / 2;
 
     this.camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 50);
@@ -141,7 +215,7 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
     this.controls.target.set(0, targetY, 0);
     this.controls.minDistance = 0.8;
     this.controls.maxDistance = 5.0;
-    this.controls.maxPolarAngle = Math.PI / 2 + 0.05; // Do not go under ground
+    this.controls.maxPolarAngle = Math.PI / 2 + 0.05;
 
     // 5. Studio Lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
@@ -160,7 +234,7 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
     rimLight.position.set(0, 2.5, -2.5);
     this.scene.add(rimLight);
 
-    // Grounding disc chạm sàn ở Y = 0
+    // Grounding disc
     const groundGeo = new THREE.CircleGeometry(0.85, 32);
     const groundMat = new THREE.MeshBasicMaterial({
       color: 0x0d0e11,
@@ -172,14 +246,20 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
     groundDisc.position.y = 0.001;
     this.scene.add(groundDisc);
 
-    // 6. Default Skin Material
+    // 6. Materials
     this.skinMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color(this.skinHex),
-      roughness: 0.65,
-      metalness: 0.05
+      roughness: 0.62,
+      metalness: 0.02
     });
 
-    // 7. Parametric Garment Material
+    this.underwearMaterial = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(0xf0f0f2),
+      roughness: 0.85,
+      metalness: 0.02,
+      side: THREE.DoubleSide
+    });
+
     this.garmentMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color(this.garmentColorHex),
       roughness: 0.82,
@@ -187,7 +267,6 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
       side: THREE.DoubleSide
     });
 
-    // Start render loop
     this.animate();
   }
 
@@ -209,66 +288,72 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
     loader.load(
       url,
       (gltf) => {
-        // Remove old avatar group if exists
         if (this.avatarGroup) {
           this.scene.remove(this.avatarGroup);
         }
 
         this.avatarGroup = gltf.scene;
         this.avatarMesh = null;
+        this.underwearMesh = null;
+        this.skeleton = null;
+        this.bonesMap.clear();
 
-        // Find primary avatar mesh with morph targets
+        // Find primary SkinnedMesh, Underwear SkinnedMesh, and Skeleton
         this.avatarGroup.traverse((child) => {
-          if ((child as THREE.Mesh).isMesh) {
-            const mesh = child as THREE.Mesh;
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            if (mesh.morphTargetInfluences && mesh.morphTargetInfluences.length > 0) {
-              this.avatarMesh = mesh;
-            } else if (!this.avatarMesh) {
-              this.avatarMesh = mesh;
+          if ((child as THREE.SkinnedMesh).isSkinnedMesh) {
+            const sm = child as THREE.SkinnedMesh;
+            sm.castShadow = true;
+            sm.receiveShadow = true;
+
+            if (sm.name.toLowerCase().includes('underwear')) {
+              this.underwearMesh = sm;
+              this.underwearMesh.material = this.underwearMaterial;
+              this.underwearMesh.visible = this.isUnderwearVisible;
+            } else {
+              this.avatarMesh = sm;
+              this.skeleton = sm.skeleton;
             }
+          } else if ((child as THREE.Mesh).isMesh && !this.avatarMesh) {
+            this.avatarMesh = child as THREE.Mesh;
+          }
+
+          if ((child as THREE.Bone).isBone) {
+            this.bonesMap.set(child.name, child as THREE.Bone);
           }
         });
 
-        // 1. Tính toán Bounding Box3 của mô hình người
+        // Bounding Box3 calculation
         const box = new THREE.Box3().setFromObject(this.avatarGroup);
         const size = new THREE.Vector3();
         box.getSize(size);
         this.modelHeight = size.y;
 
-        // Đặt chân chạm sàn (min Y = 0) và căn giữa theo X, Z bằng Box3
+        // Ground feet at Y = 0 and center X, Z
         this.avatarGroup.position.x = - (box.min.x + box.max.x) / 2;
         this.avatarGroup.position.y = - box.min.y;
         this.avatarGroup.position.z = - (box.min.z + box.max.z) / 2;
 
-        const targetMesh = this.avatarMesh as THREE.Mesh | null;
+        const targetMesh = this.avatarMesh as (THREE.SkinnedMesh | THREE.Mesh | null);
         if (targetMesh) {
           if (targetMesh.geometry) {
             targetMesh.geometry.computeVertexNormals();
+            const posAttr = targetMesh.geometry.attributes['position'];
+            this.baseVertices = new Float32Array(posAttr.array);
+
+            const morphPos = targetMesh.geometry.morphAttributes['position'] || [];
+            this.morphDeltas = morphPos.map((attr: any) => new Float32Array(attr.array));
           }
-          if (targetMesh.material) {
-            const origMat = (Array.isArray(targetMesh.material) ? targetMesh.material[0] : targetMesh.material) as THREE.MeshStandardMaterial;
-            this.skinMaterial = origMat;
-            this.skinMaterial.color.setStyle(this.skinHex);
-            this.skinMaterial.roughness = 0.65;
-            this.skinMaterial.metalness = 0.05;
-            this.skinMaterial.needsUpdate = true;
-          }
-          this.applyMorphTargets();
+          targetMesh.material = this.skinMaterial;
+          this.skinMaterial.color.setStyle(this.skinHex);
         }
 
-        // Determine badge text: SMPL or SMPL-X
+        this.modelBadgeText.set(this.skeleton ? 'SMPL 24-JOINT RIG' : 'SMPL MORPH');
         this.isMock.set(false);
-        if (url.toLowerCase().includes('smplx')) {
-          this.modelBadgeText.set('SMPL-X');
-        } else {
-          this.modelBadgeText.set('SMPL');
-        }
+
+        this.applyMorphTargets();
+        this.applyJointRotations();
 
         this.scene.add(this.avatarGroup);
-
-        // 2. Camera mặc định nhìn chính diện, khung theo chiều cao người
         this.updateCameraFraming(this.cameraAngle);
 
         if (this.isDressed) {
@@ -279,9 +364,15 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
       undefined,
       (err) => {
         console.error('Error loading avatar GLB:', err);
-        this.errorMessage.set('Không thể tải mô hình 3D. Đang khởi tạo mô hình thay thế.');
-        this.createProceduralFallbackAvatar();
-        this.isLoading.set(false);
+        // Fallback to Phase 3.5 base avatar if rigged model cannot be fetched
+        if (url !== '/assets/models/human_avatar_a_pose.glb') {
+          console.log('Falling back to /assets/models/human_avatar_a_pose.glb');
+          this.loadGlbModel('/assets/models/human_avatar_a_pose.glb');
+        } else {
+          this.errorMessage.set('Không thể tải mô hình 3D. Đang khởi tạo mô hình thay thế.');
+          this.createProceduralFallbackAvatar();
+          this.isLoading.set(false);
+        }
       }
     );
   }
@@ -295,7 +386,6 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
     }
     this.avatarGroup = new THREE.Group();
 
-    // Procedural simple humanoid mesh
     const torsoGeo = new THREE.CylinderGeometry(0.18, 0.16, 0.65, 24);
     const torso = new THREE.Mesh(torsoGeo, this.skinMaterial);
     torso.position.y = 1.15;
@@ -309,11 +399,142 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
     this.scene.add(this.avatarGroup);
   }
 
-  private applyMorphTargets(): void {
-    if (!this.avatarMesh || !this.avatarMesh.morphTargetInfluences) return;
+  /**
+   * Applies all 16 morph targets (10 SMPL Betas + 6 Regional Morphs) to body and underwear meshes,
+   * then triggers dynamic skeleton joint repositioning.
+   */
+  public applyMorphTargets(): void {
+    const influences: number[] = new Array(16).fill(0);
 
-    for (let i = 0; i < Math.min(this.betas.length, this.avatarMesh.morphTargetInfluences.length); i++) {
-      this.avatarMesh.morphTargetInfluences[i] = this.betas[i];
+    // 10 Betas
+    for (let i = 0; i < Math.min(this.betas.length, 10); i++) {
+      influences[i] = this.betas[i];
+    }
+
+    // 6 Regional Morphs
+    influences[10] = this.regionalMorphs['morph_abdomen'] ?? 0;
+    influences[11] = this.regionalMorphs['morph_chest'] ?? 0;
+    influences[12] = this.regionalMorphs['morph_biceps'] ?? 0;
+    influences[13] = this.regionalMorphs['morph_thighs'] ?? 0;
+    influences[14] = this.regionalMorphs['morph_buttocks'] ?? 0;
+    influences[15] = this.regionalMorphs['morph_shoulders'] ?? 0;
+
+    // Apply to primary body mesh
+    if (this.avatarMesh && this.avatarMesh.morphTargetInfluences) {
+      for (let i = 0; i < Math.min(influences.length, this.avatarMesh.morphTargetInfluences.length); i++) {
+        this.avatarMesh.morphTargetInfluences[i] = influences[i];
+      }
+    }
+
+    // Apply to underwear mesh
+    if (this.underwearMesh && this.underwearMesh.morphTargetInfluences) {
+      for (let i = 0; i < Math.min(influences.length, this.underwearMesh.morphTargetInfluences.length); i++) {
+        this.underwearMesh.morphTargetInfluences[i] = influences[i];
+      }
+    }
+
+    // Update joint positions based on newly shaped vertices
+    this.updateSkeletonJointPositions();
+  }
+
+  /**
+   * Recalculates 24 joint locations via sparse J-regressor: J = sum(w_k * v_k)
+   * and updates bone translations and inverse bind matrices.
+   * Completely prevents skinning distortion when body shape/betas change!
+   */
+  public updateSkeletonJointPositions(): void {
+    if (!this.skeleton || !this.riggedConfig || !this.baseVertices) return;
+
+    const sparseJr = this.riggedConfig.sparse_j_regressor;
+    const parents = this.riggedConfig.parents;
+    if (!sparseJr || !parents) return;
+
+    const influences: number[] = this.avatarMesh?.morphTargetInfluences || [];
+    const numDeltas = this.morphDeltas.length;
+
+    // Calculate deformed joint locations (24 x 3)
+    const newJoints: THREE.Vector3[] = [];
+    for (let j = 0; j < 24; j++) {
+      const entries: Array<[number, number]> = sparseJr[j.toString()] || [];
+      const J = new THREE.Vector3(0, 0, 0);
+
+      for (let e = 0; e < entries.length; e++) {
+        const [vIdx, w] = entries[e];
+        const vOffset = vIdx * 3;
+
+        let x = this.baseVertices[vOffset];
+        let y = this.baseVertices[vOffset + 1];
+        let z = this.baseVertices[vOffset + 2];
+
+        // Add displacement deltas from active morph targets
+        for (let m = 0; m < numDeltas; m++) {
+          const inf = influences[m] || 0;
+          if (inf !== 0) {
+            const deltaArr = this.morphDeltas[m];
+            x += inf * deltaArr[vOffset];
+            y += inf * deltaArr[vOffset + 1];
+            z += inf * deltaArr[vOffset + 2];
+          }
+        }
+
+        J.x += w * x;
+        J.y += w * y;
+        J.z += w * z;
+      }
+      newJoints.push(J);
+    }
+
+    // Update bone rest positions and bone inverses
+    for (let i = 0; i < 24; i++) {
+      const bone = this.skeleton.bones[i];
+      if (!bone) continue;
+
+      const p = parents[i];
+      if (p < 0) {
+        bone.position.copy(newJoints[0]);
+      } else {
+        bone.position.subVectors(newJoints[i], newJoints[p]);
+      }
+
+      // Update inverse bind matrix
+      if (this.skeleton.boneInverses[i]) {
+        this.skeleton.boneInverses[i].makeTranslation(-newJoints[i].x, -newJoints[i].y, -newJoints[i].z);
+      }
+    }
+
+    // Reapply user joint rotations and update skeleton
+    this.applyJointRotations();
+    this.skeleton.update();
+  }
+
+  /**
+   * Applies 3-axis Euler rotations to skeleton bones with biological limits.
+   */
+  public applyJointRotations(): void {
+    if (!this.skeleton) return;
+
+    for (const bone of this.skeleton.bones) {
+      const rot = this.jointRotations[bone.name];
+      if (rot) {
+        bone.rotation.set(
+          THREE.MathUtils.degToRad(rot.x || 0),
+          THREE.MathUtils.degToRad(rot.y || 0),
+          THREE.MathUtils.degToRad(rot.z || 0)
+        );
+      } else {
+        // Fallback default A-pose if no explicit rotation is set
+        if (this.activePosePreset === 'a_pose') {
+          if (bone.name === 'left_shoulder') {
+            bone.rotation.set(0, 0, THREE.MathUtils.degToRad(-25));
+          } else if (bone.name === 'right_shoulder') {
+            bone.rotation.set(0, 0, THREE.MathUtils.degToRad(25));
+          } else {
+            bone.rotation.set(0, 0, 0);
+          }
+        } else if (this.activePosePreset === 't_pose') {
+          bone.rotation.set(0, 0, 0);
+        }
+      }
     }
   }
 
@@ -349,25 +570,61 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
       (gltf) => {
         if (this.garmentGroup) {
           this.scene.remove(this.garmentGroup);
+          this.garmentGroup.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+              const mesh = child as THREE.Mesh;
+              if (mesh.geometry) mesh.geometry.dispose();
+            }
+          });
         }
         this.garmentGroup = gltf.scene;
         if (this.avatarGroup) {
           this.garmentGroup.position.copy(this.avatarGroup.position);
         }
         this.garmentGroup.traverse((child) => {
+          if ((child as THREE.SkinnedMesh).isSkinnedMesh) {
+            const sm = child as THREE.SkinnedMesh;
+            if (this.skeleton) {
+              sm.bind(this.skeleton, sm.bindMatrix);
+            }
+          }
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
-            mesh.material = this.garmentMaterial;
+            if (url.includes('fitted_s_180') || this.showHeatmap) {
+              // High tension / fit pressure visualization (Crimson red)
+              mesh.material = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(0xd92d4b),
+                roughness: 0.65,
+                metalness: 0.08,
+                side: THREE.DoubleSide
+              });
+            } else {
+              mesh.material = this.garmentMaterial;
+            }
             mesh.castShadow = true;
             mesh.receiveShadow = true;
           }
         });
-        this.applyGarmentColor();
+        if (!url.includes('fitted_s_180') && !this.showHeatmap) {
+          this.applyGarmentColor();
+        }
         this.scene.add(this.garmentGroup);
       },
       undefined,
       (err) => {
-        console.warn('Garment GLB failed to load:', url, err);
+        console.warn('Garment GLB failed to load from primary path:', url, err);
+        // Fallback to legacy path if hierarchical path fails
+        if (url.includes('/sizes/')) {
+          const sz = (this.garmentSize || 'M').toLowerCase();
+          const fallback = `/assets/garments/fitted_${sz}.glb`;
+          console.log('Attempting fallback to:', fallback);
+          loader.load(fallback, (gltf) => {
+            if (this.garmentGroup) this.scene.remove(this.garmentGroup);
+            this.garmentGroup = gltf.scene;
+            if (this.avatarGroup) this.garmentGroup.position.copy(this.avatarGroup.position);
+            this.scene.add(this.garmentGroup);
+          });
+        }
       }
     );
   }
@@ -382,12 +639,9 @@ export class BodyViewerComponent implements OnInit, OnChanges, OnDestroy {
   public updateCameraFraming(angle: 'front' | 'quarter' | 'side' | 'back' = 'front'): void {
     if (!this.camera || !this.controls) return;
 
-    // Chiều cao mô hình thực tế từ Box3
     const H = this.modelHeight || 1.75;
     const fovRad = (this.camera.fov * Math.PI) / 180;
-    // Công thức: khoảng cách = (chiều cao / 2) / tan(fov / 2) nhân 1,2
-    const distance = (H / 2) / Math.tan(fovRad / 2) * 1.2;
-    // controls.target = (0, chiều cao / 2, 0)
+    const distance = (H / 2) / Math.tan(fovRad / 2) * 1.25;
     const targetY = H / 2;
 
     this.controls.target.set(0, targetY, 0);

@@ -130,7 +130,11 @@ class BodyMeasurements:
             hip_cm = round(chest_cm * 1.05, 1)
 
         # 4. Across Shoulder Breadth (Biacromial breadth at ~80.8% of stature)
-        if joints is not None and len(joints) >= 18:
+        if len(verts) == 6890:
+            # Standard SMPL topology: Left acromion (1438) to Right acromion (4916) + deltoid tissue margin
+            sh_dist_m = float(np.linalg.norm(verts[1438] - verts[4916]))
+            shoulder_cm = round((sh_dist_m + 0.027) * 100.0, 1)
+        elif joints is not None and len(joints) >= 18:
             # Distance between shoulder joint 16 and 17 + deltoid cap margins
             j_sh_dist = np.linalg.norm(joints[16] - joints[17])
             shoulder_cm = round((j_sh_dist + 0.08) * 100.0, 1)
@@ -138,8 +142,7 @@ class BodyMeasurements:
             y_shoulder = y_min + 0.808 * total_height_m
             shoulder_band = verts[np.abs(verts[:, 1] - y_shoulder) < 0.035]
             if len(shoulder_band) > 0:
-                # Filter lateral points within shoulder envelope
-                sh_pts = shoulder_band[np.abs(shoulder_band[:, 0]) <= 0.25 * scale_ref]
+                sh_pts = shoulder_band[(np.abs(shoulder_band[:, 0]) <= 0.285 * scale_ref) & (np.abs(shoulder_band[:, 2]) < 0.14)]
                 if len(sh_pts) > 0:
                     sh_width_m = np.max(sh_pts[:, 0]) - np.min(sh_pts[:, 0])
                     shoulder_cm = round(sh_width_m * 100.0, 1)
