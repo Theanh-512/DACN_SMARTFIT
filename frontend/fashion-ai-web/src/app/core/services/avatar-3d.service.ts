@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, of, switchMap } from 'rxjs';
+import { SizeRecommendationService, FitEvaluateRequest, FitEvaluateResponse } from './size-recommendation.service';
 
 export interface Iso8559Measurements {
   height_cm: number;
@@ -8,8 +9,9 @@ export interface Iso8559Measurements {
   waist_cm: number;
   hip_cm: number;
   shoulder_cm: number;
-  inside_leg_cm: number;
-  neck_cm: number;
+  arm_length_cm?: number;
+  torso_length_cm: number;
+  neck_cm?: number;
 }
 
 export interface ReconstructAvatarRequest {
@@ -116,9 +118,11 @@ export interface TryOn2DResponse {
 })
 export class Avatar3dService {
   private readonly http = inject(HttpClient);
+  private readonly fitAdvisor = inject(SizeRecommendationService);
   private readonly avatarApiUrl = 'http://localhost:8000/internal/v1/avatar';
-  private readonly sizingApiUrl = 'http://localhost:8000/api/v1/sizing';
+  private readonly sizingApiUrl = 'http://localhost:8001/fit';
   private readonly tryon2dApiUrl = 'http://localhost:8000/api/v1/tryon';
+  private readonly mlBase = 'http://localhost:8001';
 
   reconstructAvatar(req: ReconstructAvatarRequest): Observable<ReconstructAvatarResponse> {
     return this.http.post<ReconstructAvatarResponse>(`${this.avatarApiUrl}/reconstruct`, req).pipe(
@@ -143,7 +147,8 @@ export class Avatar3dService {
             waist_cm: estWaist,
             hip_cm: estHip,
             shoulder_cm: estShoulder,
-            inside_leg_cm: estLeg,
+            arm_length_cm: Math.round(0.35 * h),
+            torso_length_cm: Math.round(0.352 * h),
             neck_cm: estNeck
           },
           preset_key: req.preset_key || `${req.gender}_regular`,
@@ -186,7 +191,8 @@ export class Avatar3dService {
             waist_cm: 80,
             hip_cm: 98,
             shoulder_cm: 43.5,
-            inside_leg_cm: 77.5,
+            arm_length_cm: 60.0,
+            torso_length_cm: 61.5,
             neck_cm: 38
           },
           execution_time_ms: 120
@@ -208,24 +214,31 @@ export class Avatar3dService {
   }
 
   getExplainableSizeRecommendation(req: SizeRecommendationRequest): Observable<SizeRecommendationResponse> {
-    return this.http.post<SizeRecommendationResponse>(`${this.sizingApiUrl}/recommend`, req).pipe(
+    return this.http.post<SizeRecommendationResponse>(`${this.sizingApiUrl}/evaluate-quick`, req).pipe(
       catchError(() => {
         const chest = req.measurements.chest_cm || 96;
         const rec = chest < 92 ? 'S' : (chest < 98 ? 'M' : (chest < 105 ? 'L' : 'XL'));
+        // Không hardcode confidence 85% - tính từ số đo thực
+        const chestMatch = req.measurements.chest_cm ?? 96;
+        const sizeMap: Record<string, number> = { XS: 88, S: 94, M: 100, L: 106, XL: 114, XXL: 122 };
+        const garmentChest = sizeMap[rec] ?? 100;
+        const ease = garmentChest - chestMatch;
+        const confidence = Math.max(60, Math.min(92, 75 + (ease - 4) * 2));
         return of({
           recommended_size: rec,
           alternative_size: rec === 'M' ? 'L' : 'M',
-          confidence_score: 85.0,
+          confidence_score: Math.round(confidence),
           fit_preference: req.fit_preference,
-          explanation: `Dựa trên số đo vòng ngực ${chest}cm, hệ thống khuyến nghị Size ${rec} để đạt độ cử động tối ưu theo chuẩn LifeWear.`,
+          explanation: `Dựa trên số đo vòng ngực ${chestMatch}cm, hệ thống khuyến nghị Size ${rec}. ` +
+            `Độ cử động thực tế ${ease.toFixed(1)}cm so với chuẩn ISO.`,
           measurement_breakdown: [
             {
               measurement_name: 'Vòng ngực',
-              body_val: chest,
-              garment_val: 100.0,
-              actual_ease: 100.0 - chest,
-              target_ease: 6.0,
-              status: 'perfect'
+              body_val: chestMatch,
+              garment_val: garmentChest,
+              actual_ease: ease,
+              target_ease: 8.0,
+              status: ease >= 4 && ease < 16 ? 'perfect' : (ease < 4 ? 'tight' : 'slightly_loose')
             }
           ],
           warnings: []
@@ -234,7 +247,60 @@ export class Avatar3dService {
     );
   }
 
+  /**
+   * Phase 5: Đánh giá độ vừa thật từ mesh áo.
+   * Kết nối /fit/evaluate — không hardcode kết quả.
+   */
+  evaluateFit(req: FitEvaluateRequest): Observable<FitEvaluateResponse> {
+    return this.fitAdvisor.evaluateFit(req);
+  }
+
+  estimateBodyFromPhotos(
+    frontBlob: Blob,
+    sideBlob?: Blob,
+    heightCm: number = 175,
+    weightKg?: number,
+    privacyAgreed: boolean = true
+  ): Observable<BodyEstimateApiResponse> {
+    const formData = new FormData();
+    formData.append('image_front', frontBlob, 'front.jpg');
+    if (sideBlob) {
+      formData.append('image_side', sideBlob, 'side.jpg');
+    }
+    formData.append('height_cm', heightCm.toString());
+    if (weightKg) {
+      formData.append('weight_kg', weightKg.toString());
+    }
+    formData.append('privacy_agreed', privacyAgreed.toString());
+
+    return this.http.post<BodyEstimateApiResponse>(`${this.mlBase}/body/estimate`, formData);
+  }
+
   run2dTryon(formData: FormData): Observable<TryOn2DResponse> {
     return this.http.post<TryOn2DResponse>(`${this.tryon2dApiUrl}/upload-and-run`, formData);
   }
+}
+
+export interface BodyEstimateApiResponse {
+  betas: number[];
+  measurements: {
+    height_cm: number;
+    chest_cm: number;
+    waist_cm: number;
+    hip_cm: number;
+    shoulder_cm: number;
+    arm_length_cm?: number;
+    torso_length_cm?: number;
+    neck_cm?: number;
+  };
+  height_cm: number;
+  weight_kg?: number;
+  has_side_image: boolean;
+  is_mock: boolean;
+  privacy_cleaned: boolean;
+  confidence?: number;
+  quality_report?: Record<string, any>;
+  warnings?: string[];
+  processing_time_ms: number;
+  status: string;
 }

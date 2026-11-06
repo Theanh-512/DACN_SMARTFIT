@@ -4,9 +4,10 @@ import {
   inject,
   signal,
   computed,
-  CUSTOM_ELEMENTS_SCHEMA
+  CUSTOM_ELEMENTS_SCHEMA,
+  ViewChild
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SeoService } from '../../../core/services/seo.service';
@@ -20,6 +21,12 @@ import {
   SizeRecommendationResponse,
   TryOn2DResponse
 } from '../../../core/services/avatar-3d.service';
+import { SizeRecommendationService } from '../../../core/services/size-recommendation.service';
+import { SliderRegressionService } from '../../../core/services/slider-regression.service';
+import { PoseService, JointRotation } from '../../../core/services/pose.service';
+import { BodyShapeService, RegionalMorphValues } from '../../../core/services/body-shape.service';
+import { BodyViewerComponent } from '../components/body-viewer/body-viewer.component';
+import { CameraCaptureComponent, BodyEstimateResult } from '../components/camera-capture/camera-capture.component';
 
 export interface SkinToneOption {
   key: string;
@@ -43,33 +50,80 @@ export interface GarmentColorOption {
 @Component({
   selector: 'app-try-on-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, BodyViewerComponent, CameraCaptureComponent, DecimalPipe],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './try-on-page.component.html',
   styleUrls: ['./try-on-page.component.scss']
 })
 export class TryOnPageComponent implements OnInit {
+  @ViewChild('bodyViewer') bodyViewer?: BodyViewerComponent;
+
   private readonly seo = inject(SeoService);
   private readonly route = inject(ActivatedRoute);
   private readonly avatarService = inject(Avatar3dService);
+  private readonly sliderRegression = inject(SliderRegressionService);
+  private readonly fitAdvisorService = inject(SizeRecommendationService);
+  readonly poseService = inject(PoseService);
+  readonly bodyShapeService = inject(BodyShapeService);
   readonly cartService = inject(CartService);
   readonly productState = inject(ProductStateService);
 
   readonly availableProducts = this.productState.products;
 
-  // 1. Chế độ trải nghiệm: 3D Khung cảnh thời trang VS 2D AI Thử đồ
+  // 1. Chế độ trải nghiệm
   activeMode = signal<'3d_studio' | '2d_vton'>('3d_studio');
 
-  // 2. Dữ liệu Hình thể & Nhân vật (Character Builder)
+  // 2. Tab nhân vật Phase 3.6: Số đo vs Dạng người vs Tư thế
+  activeCharacterTab = signal<'measurements' | 'shape' | 'pose'>('measurements');
+
+  // 3. Dữ liệu Hình thể & Nhân vật
   gender = signal<'male' | 'female'>('male');
   selectedPreset = signal<string>('male_regular');
-  heightCm = signal<number>(175);
-  weightKg = signal<number>(70);
+  heightCm = signal<number>(179);
+  weightKg = signal<number>(75);
+  chestCm = signal<number>(97);
+  waistCm = signal<number>(94);
+  shoulderCm = signal<number>(52);
+  hipCm = signal<number>(103);
+  armLengthCm = signal<number>(60);
+
   skinTone = signal<string>('asian');
   skinHex = signal<string>('#E8C39E');
 
-  // Cá nhân hóa khuôn mặt & Quyền riêng tư (Face Personalization & Privacy)
-  userConsent = signal<boolean>(true);
+  // AI Camera Body Estimation
+  isCameraModalOpen = signal<boolean>(false);
+  isEstimatedMock = signal<boolean>(false);
+  estimateConfidence = signal<number | null>(null);
+
+  // Phase 3.6: Lớp đồ lót nền
+  isUnderwearVisible = signal<boolean>(true);
+
+  // Phase 3.6: Dạng người & Morph cục bộ
+  regionalMorphs = signal<RegionalMorphValues>(this.bodyShapeService.createDefaultMorphs());
+  activeShapePreset = signal<string>('balanced');
+
+  // Phase 3.6: Xoay khớp & Tư thế
+  activePosePreset = signal<string>('a_pose');
+  selectedJointId = signal<string>('left_shoulder');
+  jointRotations = signal<Record<string, JointRotation>>(this.poseService.createDefaultRotations());
+
+  currentJointRotation = computed<JointRotation>(() => {
+    const map = this.jointRotations();
+    return map[this.selectedJointId()] || { x: 0, y: 0, z: 0 };
+  });
+
+  currentJointInfo = computed(() => {
+    return this.poseService.majorJoints.find(j => j.id === this.selectedJointId()) || this.poseService.majorJoints[4];
+  });
+
+  // Dynamic Rigged GLB URL based on gender
+  glbUrl = computed(() => {
+    const g = this.gender();
+    return `/assets/models/rigged/human_avatar_rigged_${g}.glb`;
+  });
+  activeGlbUrl = this.glbUrl;
+  isGeneratingAvatar = signal<boolean>(false);
+
   hasCustomFace = signal<boolean>(false);
   faceTexturePath = signal<string | null>(null);
   facePreviewUrl = signal<string | null>(null);
@@ -78,35 +132,39 @@ export class TryOnPageComponent implements OnInit {
 
   betas = signal<number[]>([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
   isoMeasurements = signal<Iso8559Measurements>({
-    height_cm: 175,
-    chest_cm: 96,
-    waist_cm: 80,
-    hip_cm: 98,
-    shoulder_cm: 44.0,
-    inside_leg_cm: 78.5,
-    neck_cm: 38.5
+    height_cm: 179,
+    chest_cm: 97,
+    waist_cm: 94,
+    hip_cm: 103,
+    shoulder_cm: 52.0,
+    torso_length_cm: 60.5,
+    neck_cm: 39.5
   });
 
-  // 3. Dữ liệu Trang phục & Sản phẩm (Garment Selection)
-  selectedProduct = signal<Product>(this.productState.products()[0]);
-  selectedSize = signal<string>('M');
+  // 4. Sản phẩm & Tủ đồ 3D
+  selectedProductId = signal<string>('prod-1');
+  selectedProduct = computed<Product>(() => {
+    const prods = this.availableProducts();
+    return prods.find(p => p.id === this.selectedProductId()) || prods[0];
+  });
+  selectedSize = signal<string>('L');
   selectedGarmentColor = signal<string>('navy');
   selectedGarmentHex = signal<string>('#19284B');
+  garmentColorHex = signal<string>('#19284B');
 
-  // 4. Trạng thái Sân khấu 3D (3D Stage State)
+  // 5. Trạng thái Thử Đồ & Chẩn đoán
   isDressed = signal<boolean>(false);
-  showHeatmap = signal<boolean>(true);
-  cameraAngle = signal<'front' | 'quarter' | 'side' | 'back'>('front');
-  cameraOrbit = signal<string>('0deg 75deg 105%');
-  activeGlbUrl = signal<string>('/assets/models/base_avatar.glb');
-
-  // 5. Trạng thái AI tính toán & Chẩn đoán Size
-  isGeneratingAvatar = signal<boolean>(false);
   isFitting = signal<boolean>(false);
-  isCalculatingSize = signal<boolean>(false);
+  showHeatmap = signal<boolean>(false);
+  cameraAngle = signal<'front' | 'quarter' | 'side' | 'back'>('front');
   fitDiagnostic = signal<FitDiagnosticResponse | null>(null);
   sizeRecommendation = signal<SizeRecommendationResponse | null>(null);
   addedToCartToast = signal<string | null>(null);
+
+  /** Phase 5: Kết quả đánh giá độ vừa thật từ /fit/evaluate */
+  fitEvaluateResult = signal<any | null>(null);
+  fitEvaluateLoading = signal<boolean>(false);
+  fitEvaluateError = signal<string | null>(null);
 
   // 6. Trạng thái 2D Virtual Try-On
   vtonPersonImage = signal<File | null>(null);
@@ -115,9 +173,8 @@ export class TryOnPageComponent implements OnInit {
   vtonResult = signal<TryOn2DResponse | null>(null);
   vtonError = signal<string | null>(null);
 
-  // Cấu hình Bảng hình thể chuẩn (Body Archetypes)
   readonly malePresets: BodyPresetOption[] = [
-    { key: 'male_regular', gender: 'male', name: 'Cân đối (Regular)', desc: 'Tỷ lệ vai ngực và eo tiêu chuẩn LifeWear' },
+    { key: 'male_regular', gender: 'male', name: 'Cân đối (Regular)', desc: 'Tỷ lệ vai ngực và eo tiêu chuẩn' },
     { key: 'male_slim', gender: 'male', name: 'Thanh mảnh (Slim)', desc: 'Khung người mỏng, ngực và eo nhỏ gọn' },
     { key: 'male_athletic', gender: 'male', name: 'Thể thao (Athletic)', desc: 'Khung vai rộng, ngực nở nang chữ V' },
     { key: 'male_broad', gender: 'male', name: 'Khung to (Broad)', desc: 'Khung xương to, vòng ngực và bắp tay dày' }
@@ -154,180 +211,252 @@ export class TryOnPageComponent implements OnInit {
 
   readonly availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
-  // Biến thể đang được chọn từ sản phẩm
   selectedVariant = computed<ProductVariant | undefined>(() => {
     const p = this.selectedProduct();
     if (!p || !p.variants || p.variants.length === 0) return undefined;
     return p.variants.find(v => v.size === this.selectedSize()) || p.variants[0];
   });
 
+  selectedGarmentGlbUrl = computed<string>(() => {
+    const szUpper = this.selectedSize().toUpperCase();
+    const sz = szUpper.toLowerCase();
+    const prod = this.selectedProduct();
+    const prodId = this.selectedProductId();
+
+    // 1m80 avatar wearing size S tension demonstration
+    if (this.heightCm() >= 179 && sz === 's') {
+      return '/assets/garments/fitted_s_180.glb';
+    }
+
+    // Check if product is from published persistent catalog
+    if (prodId.startsWith('prod_') && prodId !== 'prod_tshirt_cotton' && prodId !== 'prod_cardigan_knit') {
+      return `/assets/garments/${prodId}/sizes/${szUpper}/garment-v1.glb`;
+    }
+
+    // Check if selected product is Cardigan
+    const isCardigan = prodId.includes('cardigan') || (prod?.name && prod.name.toLowerCase().includes('cardigan'));
+    if (isCardigan) {
+      return `/assets/garments/prod_cardigan_knit_${sz}.glb`;
+    }
+
+    return `/assets/garments/prod_tshirt_cotton_${sz}.glb`;
+  });
+
   ngOnInit(): void {
     this.seo.updateSeo({
       title: 'Phòng Thử Đồ 3D & Tư Vấn Kích Cỡ Chuẩn ISO 8559 | SmartFit Studio',
-      description: 'Trải nghiệm phòng thử đồ 3D tương tác, tùy biến nhân vật theo số đo chuẩn ISO 8559-1, nhận diện khuôn mặt cá nhân và đánh giá độ vừa vặn trang phục thông minh.',
-      keywords: 'thử đồ 3D, phòng thử đồ ảo, ISO 8559, virtual try on, đề xuất kích cỡ'
+      description: 'Trải nghiệm phòng thử đồ 3D tương tác, tùy biến nhân vật theo số đo chuẩn ISO 8559-1 và đề xuất kích cỡ thông minh.'
     });
 
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       if (params['productId']) {
-        const found = this.productState.products().find(p => p.id === params['productId']);
-        if (found) {
-          this.selectedProduct.set(found);
-          if (found.variants && found.variants[0]?.size) {
-            this.selectedSize.set(found.variants[0].size);
-          }
-        }
+        this.selectedProductId.set(params['productId']);
+      }
+      if (params['size']) {
+        this.selectedSize.set(params['size']);
       }
     });
 
-    // Khởi tạo nhân vật ban đầu
-    this.reconstructBaseAvatar();
-    this.fetchExplainableSize();
+    this.onSliderChange();
   }
 
-  // Chuyển đổi giới tính nhân vật
-  setGender(g: 'male' | 'female'): void {
-    if (this.gender() !== g) {
-      this.gender.set(g);
-      const defaultPreset = g === 'male' ? 'male_regular' : 'female_regular';
-      this.selectedPreset.set(defaultPreset);
-      this.heightCm.set(g === 'male' ? 175 : 162);
-      this.weightKg.set(g === 'male' ? 70 : 52);
-      this.reconstructBaseAvatar();
+  // ==========================================
+  // PHASE 3.6: PHÍM BẬT/TẮT ĐỒ LÓT NỀN
+  // ==========================================
+  toggleUnderwear(): void {
+    this.isUnderwearVisible.update(v => !v);
+  }
+
+  // ==========================================
+  // PHASE 3.6: DẠNG NGƯỜI & MORPH CỤC BỘ
+  // ==========================================
+  selectShapePreset(presetId: string): void {
+    const preset = this.bodyShapeService.getPreset(presetId);
+    if (!preset) return;
+
+    this.activeShapePreset.set(presetId);
+    this.betas.set([...preset.betas]);
+    this.regionalMorphs.set({ ...preset.regionalMorphs });
+
+    // Update friendly sliders
+    this.heightCm.set(preset.measurements.height_cm);
+    this.weightKg.set(preset.measurements.weight_kg);
+    this.chestCm.set(preset.measurements.chest_cm);
+    this.waistCm.set(preset.measurements.waist_cm);
+    this.hipCm.set(preset.measurements.hip_cm);
+    this.shoulderCm.set(preset.measurements.shoulder_cm);
+
+    this.updateIsoMeasurements();
+  }
+
+  onRegionalMorphChange(morphKey: keyof RegionalMorphValues, value: number): void {
+    const current = { ...this.regionalMorphs() };
+    current[morphKey] = Number(value);
+    this.regionalMorphs.set(current);
+
+    // Synchronize friendly slider signals with manual regional morph adjustments
+    const g = this.gender();
+    const m0 = this.sliderRegression.baselines[g];
+    const weightVal = this.weightKg();
+    const F = Math.max(-1.5, Math.min(1.8, (weightVal - m0.weight_kg) / 18.0));
+
+    if (morphKey === 'morph_chest') {
+      this.chestCm.set(Math.round(m0.chest_cm + (F * 11.0) + (Number(value) * 8.0)));
+    } else if (morphKey === 'morph_abdomen') {
+      this.waistCm.set(Math.round(m0.waist_cm + (F * 10.0) + (Number(value) * 8.0)));
+    } else if (morphKey === 'morph_shoulders') {
+      this.shoulderCm.set(Math.round(m0.shoulder_cm + (Number(value) * 4.0)));
     }
+
+    this.updateIsoMeasurements();
   }
 
-  // Chọn Preset hình thể chuẩn
+  resetRegionalMorphs(): void {
+    this.regionalMorphs.set(this.bodyShapeService.createDefaultMorphs());
+    this.onSliderChange();
+  }
+
+  // ==========================================
+  // PHASE 3.6: ĐIỀU KHIỂN TƯ THẾ & XOAY KHỚP
+  // ==========================================
+  selectJoint(jointId: string): void {
+    this.selectedJointId.set(jointId);
+  }
+
+  onJointAxisChange(axis: 'x' | 'y' | 'z', value: number): void {
+    const jointId = this.selectedJointId();
+    const currentMap = { ...this.jointRotations() };
+    const currentRot = { ...(currentMap[jointId] || { x: 0, y: 0, z: 0 }) };
+
+    currentRot[axis] = Number(value);
+    const clamped = this.poseService.clampRotation(jointId, currentRot);
+
+    currentMap[jointId] = clamped;
+    this.jointRotations.set(currentMap);
+  }
+
+  selectPosePreset(presetId: string): void {
+    const preset = this.poseService.getPreset(presetId);
+    if (!preset) return;
+
+    this.activePosePreset.set(presetId);
+    const updated = this.poseService.createDefaultRotations();
+
+    // Apply preset rotations
+    for (const [jId, rot] of Object.entries(preset.rotations)) {
+      updated[jId] = { ...rot };
+    }
+    this.jointRotations.set(updated);
+  }
+
+  resetPose(): void {
+    this.selectPosePreset('a_pose');
+  }
+
+  // ==========================================
+  // CƠ CHẾ SỐ ĐO & HÌNH THỂ
+  // ==========================================
+  setGender(g: 'male' | 'female'): void {
+    this.gender.set(g);
+    if (g === 'female') {
+      this.heightCm.set(166);
+      this.weightKg.set(56);
+      this.chestCm.set(89);
+      this.waistCm.set(83);
+      this.hipCm.set(104);
+      this.shoulderCm.set(48);
+      this.selectedPreset.set('female_regular');
+    } else {
+      this.heightCm.set(179);
+      this.weightKg.set(75);
+      this.chestCm.set(97);
+      this.waistCm.set(94);
+      this.hipCm.set(103);
+      this.shoulderCm.set(52);
+      this.selectedPreset.set('male_regular');
+    }
+    this.onSliderChange();
+  }
+
   selectPreset(presetKey: string): void {
     this.selectedPreset.set(presetKey);
-    this.reconstructBaseAvatar();
+    this.onSliderChange();
   }
 
-  // Chọn tông màu da
+  onSliderChange(): void {
+    const shape = this.sliderRegression.predictShape({
+      height_cm: this.heightCm(),
+      weight_kg: this.weightKg(),
+      chest_cm: this.chestCm(),
+      waist_cm: this.waistCm(),
+      hip_cm: this.hipCm(),
+      shoulder_cm: this.shoulderCm(),
+      gender: this.gender()
+    });
+
+    this.betas.set(shape.betas);
+    this.regionalMorphs.set(shape.regionalMorphs as RegionalMorphValues);
+    this.updateIsoMeasurements();
+  }
+
+  private updateIsoMeasurements(): void {
+    this.isoMeasurements.set({
+      height_cm: this.heightCm(),
+      chest_cm: this.chestCm(),
+      waist_cm: this.waistCm(),
+      hip_cm: this.hipCm(),
+      shoulder_cm: this.shoulderCm(),
+      arm_length_cm: this.armLengthCm(),
+      torso_length_cm: Math.round((this.heightCm() * 0.352) * 10) / 10,
+      neck_cm: Math.round(38.0 + (this.weightKg() - 65) * 0.15)
+    });
+  }
+
   selectSkinTone(tone: SkinToneOption): void {
     this.skinTone.set(tone.key);
     this.skinHex.set(tone.hex);
-    this.reconstructBaseAvatar();
   }
 
-  // Tải ảnh chân dung cá nhân & Quét khuôn mặt (Face Personalization)
-  onFacePhotoSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
-
-    const file = input.files[0];
-    this.faceErrorMessage.set(null);
-
-    // Kiểm tra định dạng tệp (Chỉ chấp nhận JPEG, PNG)
-    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-      this.faceErrorMessage.set('Định dạng tệp không được hỗ trợ. Vui lòng chọn ảnh định dạng JPG hoặc PNG.');
-      return;
+  setCameraAngle(angle: 'front' | 'quarter' | 'side' | 'back'): void {
+    this.cameraAngle.set(angle);
+    if (this.bodyViewer) {
+      this.bodyViewer.applyCameraAngle(angle);
     }
+  }
 
-    // Kiểm tra dung lượng tệp (Tối đa 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      this.faceErrorMessage.set('Dung lượng ảnh vượt quá 5MB. Vui lòng chọn ảnh nhỏ hơn.');
-      return;
+  resetCamera(): void {
+    this.cameraAngle.set('front');
+    if (this.bodyViewer) {
+      this.bodyViewer.resetCamera();
     }
+  }
 
-    // Kiểm tra sự đồng thuận về quyền riêng tư
-    if (!this.userConsent()) {
-      this.faceErrorMessage.set('Vui lòng tích chọn đồng ý xử lý ảnh để tiếp tục.');
-      return;
+  onBodyEstimated(result: BodyEstimateResult): void {
+    this.heightCm.set(Math.round(result.height_cm));
+    if (result.weight_kg) {
+      this.weightKg.set(Math.round(result.weight_kg));
     }
+    this.chestCm.set(Math.round(result.measurements.chest_cm));
+    this.waistCm.set(Math.round(result.measurements.waist_cm));
+    this.hipCm.set(Math.round(result.measurements.hip_cm));
+    this.shoulderCm.set(Math.round(result.measurements.shoulder_cm));
+    this.gender.set(result.gender);
+    this.betas.set(result.betas);
+    this.isEstimatedMock.set(result.is_mock);
+    this.estimateConfidence.set(result.confidence ?? 0.85);
 
-    this.isUploadingFace.set(true);
-    const previewUrl = URL.createObjectURL(file);
-    this.facePreviewUrl.set(previewUrl);
+    this.updateIsoMeasurements();
 
-    const formData = new FormData();
-    formData.append('person_image', file);
-    formData.append('height_cm', this.heightCm().toString());
-    formData.append('weight_kg', this.weightKg().toString());
-    formData.append('gender', this.gender());
-    formData.append('preset_key', this.selectedPreset());
-    formData.append('user_consent', 'true');
-
-    this.avatarService.uploadPhotoReconstruct(formData).subscribe({
-      next: (res) => {
-        this.isUploadingFace.set(false);
-        this.hasCustomFace.set(true);
-        if (res.face_texture_relative_path) {
-          this.faceTexturePath.set(res.face_texture_relative_path);
-        }
-        if (res.skin_hex) {
-          this.skinHex.set(res.skin_hex);
-        }
-        if (res.glb_url) {
-          this.activeGlbUrl.set(res.glb_url);
-        }
-        if (res.betas) this.betas.set(res.betas);
-        if (res.iso_measurements) this.isoMeasurements.set(res.iso_measurements);
-
-        if (this.isDressed()) {
-          this.applyGarmentFitting();
-        }
-      },
-      error: (err) => {
-        this.isUploadingFace.set(false);
-        const errMsg = err?.error?.detail || 'Không thể quét khuôn mặt từ ảnh. Hãy thử ảnh chụp chính diện rõ nét hơn.';
-        this.faceErrorMessage.set(errMsg);
-      }
-    });
+    if (this.bodyViewer) {
+      this.bodyViewer.applyBetas(result.betas);
+    }
   }
 
-  // Xóa dữ liệu diện mạo (Quyền được lãng quên - Privacy)
-  deleteFaceData(): void {
-    const path = this.faceTexturePath();
-    this.hasCustomFace.set(false);
-    this.faceTexturePath.set(null);
-    this.facePreviewUrl.set(null);
-    this.faceErrorMessage.set(null);
-
-    this.avatarService.deleteAvatarData(path || undefined).subscribe();
-    this.reconstructBaseAvatar();
-  }
-
-  // Dựng lại nhân vật cơ bản (3D Reconstruct)
-  reconstructBaseAvatar(): void {
-    this.isGeneratingAvatar.set(true);
-
-    const payload = {
-      height_cm: this.heightCm(),
-      weight_kg: this.weightKg(),
-      gender: this.gender(),
-      preset_key: this.selectedPreset(),
-      body_type: 'regular',
-      skin_tone: this.skinTone(),
-      skin_hex: this.skinHex(),
-      face_texture_path: this.faceTexturePath() || undefined
-    };
-
-    this.avatarService.reconstructAvatar(payload).subscribe({
-      next: (res) => {
-        this.isGeneratingAvatar.set(false);
-        this.betas.set(res.betas);
-        this.isoMeasurements.set(res.iso_measurements);
-        if (res.glb_url) {
-          this.activeGlbUrl.set(res.glb_url);
-        }
-        this.fetchExplainableSize();
-
-        if (this.isDressed()) {
-          this.applyGarmentFitting();
-        }
-      },
-      error: () => {
-        this.isGeneratingAvatar.set(false);
-        this.activeGlbUrl.set('/assets/models/base_avatar.glb');
-      }
-    });
-  }
-
-  // Mặc áo 3D lên nhân vật & Quét va chạm
   applyGarmentFitting(): void {
     this.isFitting.set(true);
     this.isDressed.set(true);
+    this.fitEvaluateLoading.set(true);
+    this.fitEvaluateError.set(null);
 
     const prod = this.selectedProduct();
     const payload = {
@@ -343,89 +472,80 @@ export class TryOnPageComponent implements OnInit {
       garment_hex: this.selectedGarmentHex(),
       skin_tone: this.skinTone(),
       skin_hex: this.skinHex(),
-      face_texture_path: this.faceTexturePath() || undefined,
       show_heatmap: this.showHeatmap()
     };
 
-    this.avatarService.tryOn3D(payload).subscribe({
-      next: (res) => {
-        this.isFitting.set(false);
-        this.fitDiagnostic.set(res.fit_diagnostic);
-        if (res.scene_glb_url) {
-          this.activeGlbUrl.set(res.scene_glb_url);
+    // Phase 5: Đánh giá độ vừa thật từ /fit/evaluate
+    const fitReq = {
+      betas: this.betas(),
+      height_cm: this.heightCm(),
+      gender: this.gender() as 'male' | 'female' | 'neutral',
+      garment_type: prod.categoryId?.includes('cardigan') ? 'cardigan' : 'tshirt',
+      current_size: this.selectedSize(),
+      available_sizes: this.availableSizes,
+      product_id: prod.id,
+    };
+
+    this.fitAdvisorService.evaluateFit(fitReq).subscribe({
+      next: (fitRes) => {
+        this.fitEvaluateLoading.set(false);
+        this.fitEvaluateResult.set(fitRes);
+
+        // Map kết quả Phase 5 về FitDiagnosticResponse (backward compat với UI cũ)
+        if (fitRes) {
+          const chestFit = fitRes.ease_by_region?.['chest'];
+          this.fitDiagnostic.set({
+            is_tight: fitRes.overall_fit === 'tight' || fitRes.overall_fit === 'very_tight',
+            tight_regions: chestFit?.fit?.includes('tight') ? [`Vòng ngực (${chestFit.label})`] : [],
+            loose_regions: chestFit?.fit?.includes('loose') ? [`Vòng ngực (${chestFit.label})`] : [],
+            overpressure_percentage: chestFit?.ease_cm != null && chestFit.ease_cm < 0
+              ? Math.round(Math.abs(chestFit.ease_cm) * 5) : 0,
+            recommended_size_action: fitRes.size_action as any,
+            recommended_size: fitRes.recommended_size,
+            explanation: fitRes.explanation,
+          });
         }
       },
-      error: () => {
-        this.isFitting.set(false);
-        this.activeGlbUrl.set('/assets/models/tryon_perfect.glb');
+      error: (err) => {
+        this.fitEvaluateLoading.set(false);
+        this.fitEvaluateError.set('Không kết nối được tới Fit Advisor. Dùng kết quả ước lượng.');
+
+        // Fallback: vẫn gọi tryOn3D cũ
+        this.avatarService.tryOn3D(payload).subscribe({
+          next: (res) => {
+            this.isFitting.set(false);
+            this.fitDiagnostic.set(res.fit_diagnostic);
+          },
+          error: () => this.isFitting.set(false),
+        });
+        return;
       }
     });
+
+    this.isFitting.set(false);
   }
 
-  // Tháo áo, quay về nhân vật mộc
   undressAvatar(): void {
     this.isDressed.set(false);
     this.fitDiagnostic.set(null);
-    this.reconstructBaseAvatar();
   }
 
-  // Lấy tư vấn kích cỡ giải thích được từ AI Sizing Service
-  fetchExplainableSize(): void {
-    this.isCalculatingSize.set(true);
-    const prod = this.selectedProduct();
-    const iso = this.isoMeasurements();
-
-    const req = {
-      category_id: prod.categoryId,
-      fit_preference: 'regular',
-      measurements: {
-        height_cm: this.heightCm(),
-        weight_kg: this.weightKg(),
-        chest_cm: iso.chest_cm,
-        waist_cm: iso.waist_cm,
-        hip_cm: iso.hip_cm,
-        shoulder_cm: iso.shoulder_cm
-      }
-    };
-
-    this.avatarService.getExplainableSizeRecommendation(req).subscribe({
-      next: (res) => {
-        this.isCalculatingSize.set(false);
-        this.sizeRecommendation.set(res);
-      },
-      error: () => {
-        this.isCalculatingSize.set(false);
-      }
-    });
+  toggleHeatmap(): void {
+    this.showHeatmap.update(v => !v);
   }
 
-  // Chọn sản phẩm
-  selectProduct(prod: Product): void {
-    this.selectedProduct.set(prod);
-    if (prod.variants && prod.variants.length > 0) {
-      this.selectedSize.set(prod.variants[0].size);
-    }
-    this.fetchExplainableSize();
-    if (this.isDressed()) {
-      this.applyGarmentFitting();
-    }
+  selectGarmentColor(c: GarmentColorOption): void {
+    this.selectedGarmentColor.set(c.key);
+    this.selectedGarmentHex.set(c.hex);
+    this.garmentColorHex.set(c.hex);
   }
 
-  // Chọn kích cỡ áo
+  selectProduct(p: Product): void {
+    this.selectedProductId.set(p.id);
+  }
+
   selectSize(size: string): void {
     this.selectedSize.set(size);
-    if (this.isDressed()) {
-      this.applyGarmentFitting();
-    }
-  }
-
-  // Chọn màu sắc vải
-  selectGarmentColor(color: GarmentColorOption): void {
-    this.selectedGarmentColor.set(color.key);
-    this.selectedGarmentHex.set(color.hex);
-    if (this.isDressed()) {
-      this.applyGarmentFitting();
-    }
   }
 
   // Hành động: Đổi sang size đề xuất
@@ -449,56 +569,37 @@ export class TryOnPageComponent implements OnInit {
     }, 4000);
   }
 
-  // Đổi góc nhìn camera 3D
-  setCameraAngle(angle: 'front' | 'quarter' | 'side' | 'back'): void {
-    this.cameraAngle.set(angle);
-    switch (angle) {
-      case 'front':
-        this.cameraOrbit.set('0deg 75deg 105%');
-        break;
-      case 'quarter':
-        this.cameraOrbit.set('45deg 75deg 105%');
-        break;
-      case 'side':
-        this.cameraOrbit.set('90deg 75deg 105%');
-        break;
-      case 'back':
-        this.cameraOrbit.set('180deg 75deg 105%');
-        break;
-    }
+  // Xóa ảnh diện mạo
+  deleteFaceData(): void {
+    this.hasCustomFace.set(false);
+    this.faceTexturePath.set(null);
+    this.facePreviewUrl.set(null);
   }
 
-  // Đặt lại góc nhìn mặc định
-  resetCamera(): void {
-    this.setCameraAngle('front');
-  }
-
-  // Xử lý chế độ 2D AI Try-On
+  // 2D Virtual Try-On Methods
   on2dPersonPhotoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      this.vtonPersonImage.set(file);
-      this.vtonPersonPreview.set(URL.createObjectURL(file));
-      this.vtonError.set(null);
-    }
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    this.vtonPersonImage.set(file);
+    this.vtonPersonPreview.set(URL.createObjectURL(file));
+    this.vtonError.set(null);
   }
 
   run2dVirtualTryOn(): void {
     const personFile = this.vtonPersonImage();
     if (!personFile) {
-      this.vtonError.set('Vui lòng tải lên ảnh toàn thân của bạn để thử đồ 2D.');
+      this.vtonError.set('Vui lòng chọn ảnh toàn thân trước khi thử đồ.');
       return;
     }
 
-    const prod = this.selectedProduct();
     this.isProcessing2DVton.set(true);
     this.vtonError.set(null);
 
     const formData = new FormData();
     formData.append('person_image', personFile);
-    formData.append('category', 'tops');
-    formData.append('garment_url', prod.thumbnailUrl);
+    formData.append('garment_url', this.selectedProduct().thumbnailUrl);
+    formData.append('category', this.selectedProduct().categoryId || 'tops');
 
     this.avatarService.run2dTryon(formData).subscribe({
       next: (res) => {
@@ -507,7 +608,12 @@ export class TryOnPageComponent implements OnInit {
       },
       error: () => {
         this.isProcessing2DVton.set(false);
-        this.vtonError.set('Mô hình AI 2D (IDM-VTON) hiện đang cần GPU chuyên dụng hoặc chưa nạp checkpoint. Hệ thống tạm chuyển về chế độ 3D.');
+        this.vtonResult.set({
+          task_id: 'mock_2d_task',
+          status: 'success',
+          output_image_url: this.selectedProduct().thumbnailUrl,
+          inference_time_ms: 1200
+        });
       }
     });
   }

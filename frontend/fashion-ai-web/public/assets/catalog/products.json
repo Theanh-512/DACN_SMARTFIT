@@ -1,0 +1,712 @@
+{
+  "products": [
+    {
+      "product_id": "prod_cardigan_knit",
+      "sku": "SKU-PROD_CARDIGAN_KNIT",
+      "name": "Áo Cardigan Vải Gân Cổ V Dệt Kim (Rib-Knit Cardigan)",
+      "category": "cardigan",
+      "description": "Áo cardigan len dệt kim cổ chữ V thanh lịch, cài cúc phía trước, phom suông nhẹ ôm dáng, tay dài bo gấu.",
+      "status": "published",
+      "material": "Len Dệt Kim Rib-Knit Poly-Viscose",
+      "stretch_pct": 18.0,
+      "thickness_mm": 3.0,
+      "primary_color_hex": "#2C3E50",
+      "pattern_description": null,
+      "design_notes": "Thông số kích thước đặt phẳng (cm) là số liệu giả định theo quy chuẩn ISO 8559 cho áo cardigan tay dài cổ chữ V.",
+      "image_front_url": "/assets/products/cardigan_front.png",
+      "image_back_url": null,
+      "created_at": "2026-10-24T14:01:42.240264+00:00",
+      "updated_at": "2026-10-24T14:01:42.240264+00:00",
+      "variants": [
+        {
+          "variant_id": "var_prod_cardigan_knit_xs",
+          "product_id": "prod_cardigan_knit",
+          "size": "XS",
+          "measurements": {
+            "chest_width_cm": 46.0,
+            "body_length_cm": 58.0,
+            "shoulder_width_cm": 39.0,
+            "sleeve_length_cm": 54.0,
+            "hem_width_cm": 42.0,
+            "neck_circ_cm": 42.0
+          },
+          "stretch_pct": 18.0,
+          "thickness_mm": 3.0,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_cardigan_knit_xs_glb",
+              "product_id": "prod_cardigan_knit",
+              "variant_id": "var_prod_cardigan_knit_xs",
+              "size": "XS",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_cardigan_knit/sizes/XS/garment-v1.glb",
+              "public_url": "/assets/garments/prod_cardigan_knit_xs.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240264+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        },
+        {
+          "variant_id": "var_prod_cardigan_knit_s",
+          "product_id": "prod_cardigan_knit",
+          "size": "S",
+          "measurements": {
+            "chest_width_cm": 49.0,
+            "body_length_cm": 60.5,
+            "shoulder_width_cm": 41.0,
+            "sleeve_length_cm": 56.0,
+            "hem_width_cm": 45.0,
+            "neck_circ_cm": 43.5
+          },
+          "stretch_pct": 18.0,
+          "thickness_mm": 3.0,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_cardigan_knit_s_glb",
+              "product_id": "prod_cardigan_knit",
+              "variant_id": "var_prod_cardigan_knit_s",
+              "size": "S",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_cardigan_knit/sizes/S/garment-v1.glb",
+              "public_url": "/assets/garments/prod_cardigan_knit_s.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240264+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        },
+        {
+          "variant_id": "var_prod_cardigan_knit_m",
+          "product_id": "prod_cardigan_knit",
+          "size": "M",
+          "measurements": {
+            "chest_width_cm": 52.0,
+            "body_length_cm": 63.0,
+            "shoulder_width_cm": 43.0,
+            "sleeve_length_cm": 58.0,
+            "hem_width_cm": 48.0,
+            "neck_circ_cm": 45.0
+          },
+          "stretch_pct": 18.0,
+          "thickness_mm": 3.0,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_cardigan_knit_m_glb",
+              "product_id": "prod_cardigan_knit",
+              "variant_id": "var_prod_cardigan_knit_m",
+              "size": "M",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_cardigan_knit/sizes/M/garment-v1.glb",
+              "public_url": "/assets/garments/prod_cardigan_knit_m.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240264+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        },
+        {
+          "variant_id": "var_prod_cardigan_knit_l",
+          "product_id": "prod_cardigan_knit",
+          "size": "L",
+          "measurements": {
+            "chest_width_cm": 55.0,
+            "body_length_cm": 66.0,
+            "shoulder_width_cm": 45.0,
+            "sleeve_length_cm": 60.0,
+            "hem_width_cm": 51.0,
+            "neck_circ_cm": 46.5
+          },
+          "stretch_pct": 18.0,
+          "thickness_mm": 3.0,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_cardigan_knit_l_glb",
+              "product_id": "prod_cardigan_knit",
+              "variant_id": "var_prod_cardigan_knit_l",
+              "size": "L",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_cardigan_knit/sizes/L/garment-v1.glb",
+              "public_url": "/assets/garments/prod_cardigan_knit_l.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240264+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        },
+        {
+          "variant_id": "var_prod_cardigan_knit_xl",
+          "product_id": "prod_cardigan_knit",
+          "size": "XL",
+          "measurements": {
+            "chest_width_cm": 59.0,
+            "body_length_cm": 69.0,
+            "shoulder_width_cm": 48.0,
+            "sleeve_length_cm": 62.0,
+            "hem_width_cm": 55.0,
+            "neck_circ_cm": 48.0
+          },
+          "stretch_pct": 18.0,
+          "thickness_mm": 3.0,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_cardigan_knit_xl_glb",
+              "product_id": "prod_cardigan_knit",
+              "variant_id": "var_prod_cardigan_knit_xl",
+              "size": "XL",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_cardigan_knit/sizes/XL/garment-v1.glb",
+              "public_url": "/assets/garments/prod_cardigan_knit_xl.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240264+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        },
+        {
+          "variant_id": "var_prod_cardigan_knit_xxl",
+          "product_id": "prod_cardigan_knit",
+          "size": "XXL",
+          "measurements": {
+            "chest_width_cm": 63.0,
+            "body_length_cm": 72.0,
+            "shoulder_width_cm": 51.0,
+            "sleeve_length_cm": 64.0,
+            "hem_width_cm": 59.0,
+            "neck_circ_cm": 49.5
+          },
+          "stretch_pct": 18.0,
+          "thickness_mm": 3.0,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_cardigan_knit_xxl_glb",
+              "product_id": "prod_cardigan_knit",
+              "variant_id": "var_prod_cardigan_knit_xxl",
+              "size": "XXL",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_cardigan_knit/sizes/XXL/garment-v1.glb",
+              "public_url": "/assets/garments/prod_cardigan_knit_xxl.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240264+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        }
+      ],
+      "assets": [
+        {
+          "asset_id": "ast_prod_cardigan_knit_xs_glb",
+          "product_id": "prod_cardigan_knit",
+          "variant_id": "var_prod_cardigan_knit_xs",
+          "size": "XS",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_cardigan_knit/sizes/XS/garment-v1.glb",
+          "public_url": "/assets/garments/prod_cardigan_knit_xs.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240264+00:00"
+        },
+        {
+          "asset_id": "ast_prod_cardigan_knit_s_glb",
+          "product_id": "prod_cardigan_knit",
+          "variant_id": "var_prod_cardigan_knit_s",
+          "size": "S",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_cardigan_knit/sizes/S/garment-v1.glb",
+          "public_url": "/assets/garments/prod_cardigan_knit_s.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240264+00:00"
+        },
+        {
+          "asset_id": "ast_prod_cardigan_knit_m_glb",
+          "product_id": "prod_cardigan_knit",
+          "variant_id": "var_prod_cardigan_knit_m",
+          "size": "M",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_cardigan_knit/sizes/M/garment-v1.glb",
+          "public_url": "/assets/garments/prod_cardigan_knit_m.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240264+00:00"
+        },
+        {
+          "asset_id": "ast_prod_cardigan_knit_l_glb",
+          "product_id": "prod_cardigan_knit",
+          "variant_id": "var_prod_cardigan_knit_l",
+          "size": "L",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_cardigan_knit/sizes/L/garment-v1.glb",
+          "public_url": "/assets/garments/prod_cardigan_knit_l.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240264+00:00"
+        },
+        {
+          "asset_id": "ast_prod_cardigan_knit_xl_glb",
+          "product_id": "prod_cardigan_knit",
+          "variant_id": "var_prod_cardigan_knit_xl",
+          "size": "XL",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_cardigan_knit/sizes/XL/garment-v1.glb",
+          "public_url": "/assets/garments/prod_cardigan_knit_xl.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240264+00:00"
+        },
+        {
+          "asset_id": "ast_prod_cardigan_knit_xxl_glb",
+          "product_id": "prod_cardigan_knit",
+          "variant_id": "var_prod_cardigan_knit_xxl",
+          "size": "XXL",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_cardigan_knit/sizes/XXL/garment-v1.glb",
+          "public_url": "/assets/garments/prod_cardigan_knit_xxl.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240264+00:00"
+        }
+      ]
+    },
+    {
+      "product_id": "prod_tshirt_cotton",
+      "sku": "SKU-PROD_TSHIRT_COTTON",
+      "name": "Áo Thun Cổ Tròn Cotton Unisex (Classic T-Shirt)",
+      "category": "tshirt",
+      "description": "Áo thun cotton thoáng mát phom suông unisex, cổ tròn bo gân, dệt kim 100% cotton chải kỹ.",
+      "status": "published",
+      "material": "100% Cotton Single Jersey",
+      "stretch_pct": 5.0,
+      "thickness_mm": 1.5,
+      "primary_color_hex": "#19284B",
+      "pattern_description": null,
+      "design_notes": "Thông số kích thước đặt phẳng (cm) là số liệu giả định theo quy chuẩn ISO 8559 và TCVN cho áo thun unisex.",
+      "image_front_url": "/assets/products/tshirt_front.png",
+      "image_back_url": null,
+      "created_at": "2026-10-24T14:01:42.240728+00:00",
+      "updated_at": "2026-10-24T14:01:42.240728+00:00",
+      "variants": [
+        {
+          "variant_id": "var_prod_tshirt_cotton_xs",
+          "product_id": "prod_tshirt_cotton",
+          "size": "XS",
+          "measurements": {
+            "chest_width_cm": 44.0,
+            "body_length_cm": 64.0,
+            "shoulder_width_cm": 41.0,
+            "sleeve_length_cm": 18.0,
+            "hem_width_cm": 43.0,
+            "neck_circ_cm": 38.5
+          },
+          "stretch_pct": 5.0,
+          "thickness_mm": 1.5,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_tshirt_cotton_xs_glb",
+              "product_id": "prod_tshirt_cotton",
+              "variant_id": "var_prod_tshirt_cotton_xs",
+              "size": "XS",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_tshirt_cotton/sizes/XS/garment-v1.glb",
+              "public_url": "/assets/garments/prod_tshirt_cotton_xs.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240728+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        },
+        {
+          "variant_id": "var_prod_tshirt_cotton_s",
+          "product_id": "prod_tshirt_cotton",
+          "size": "S",
+          "measurements": {
+            "chest_width_cm": 47.0,
+            "body_length_cm": 66.5,
+            "shoulder_width_cm": 43.0,
+            "sleeve_length_cm": 19.5,
+            "hem_width_cm": 46.0,
+            "neck_circ_cm": 40.0
+          },
+          "stretch_pct": 5.0,
+          "thickness_mm": 1.5,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_tshirt_cotton_s_glb",
+              "product_id": "prod_tshirt_cotton",
+              "variant_id": "var_prod_tshirt_cotton_s",
+              "size": "S",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_tshirt_cotton/sizes/S/garment-v1.glb",
+              "public_url": "/assets/garments/prod_tshirt_cotton_s.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240728+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        },
+        {
+          "variant_id": "var_prod_tshirt_cotton_m",
+          "product_id": "prod_tshirt_cotton",
+          "size": "M",
+          "measurements": {
+            "chest_width_cm": 50.0,
+            "body_length_cm": 69.0,
+            "shoulder_width_cm": 45.0,
+            "sleeve_length_cm": 21.0,
+            "hem_width_cm": 49.0,
+            "neck_circ_cm": 41.5
+          },
+          "stretch_pct": 5.0,
+          "thickness_mm": 1.5,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_tshirt_cotton_m_glb",
+              "product_id": "prod_tshirt_cotton",
+              "variant_id": "var_prod_tshirt_cotton_m",
+              "size": "M",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_tshirt_cotton/sizes/M/garment-v1.glb",
+              "public_url": "/assets/garments/prod_tshirt_cotton_m.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240728+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        },
+        {
+          "variant_id": "var_prod_tshirt_cotton_l",
+          "product_id": "prod_tshirt_cotton",
+          "size": "L",
+          "measurements": {
+            "chest_width_cm": 53.0,
+            "body_length_cm": 72.0,
+            "shoulder_width_cm": 47.0,
+            "sleeve_length_cm": 22.5,
+            "hem_width_cm": 52.0,
+            "neck_circ_cm": 43.0
+          },
+          "stretch_pct": 5.0,
+          "thickness_mm": 1.5,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_tshirt_cotton_l_glb",
+              "product_id": "prod_tshirt_cotton",
+              "variant_id": "var_prod_tshirt_cotton_l",
+              "size": "L",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_tshirt_cotton/sizes/L/garment-v1.glb",
+              "public_url": "/assets/garments/prod_tshirt_cotton_l.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240728+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        },
+        {
+          "variant_id": "var_prod_tshirt_cotton_xl",
+          "product_id": "prod_tshirt_cotton",
+          "size": "XL",
+          "measurements": {
+            "chest_width_cm": 57.0,
+            "body_length_cm": 75.0,
+            "shoulder_width_cm": 50.0,
+            "sleeve_length_cm": 24.0,
+            "hem_width_cm": 56.0,
+            "neck_circ_cm": 44.5
+          },
+          "stretch_pct": 5.0,
+          "thickness_mm": 1.5,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_tshirt_cotton_xl_glb",
+              "product_id": "prod_tshirt_cotton",
+              "variant_id": "var_prod_tshirt_cotton_xl",
+              "size": "XL",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_tshirt_cotton/sizes/XL/garment-v1.glb",
+              "public_url": "/assets/garments/prod_tshirt_cotton_xl.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240728+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        },
+        {
+          "variant_id": "var_prod_tshirt_cotton_xxl",
+          "product_id": "prod_tshirt_cotton",
+          "size": "XXL",
+          "measurements": {
+            "chest_width_cm": 61.0,
+            "body_length_cm": 78.0,
+            "shoulder_width_cm": 53.0,
+            "sleeve_length_cm": 25.5,
+            "hem_width_cm": 60.0,
+            "neck_circ_cm": 46.0
+          },
+          "stretch_pct": 5.0,
+          "thickness_mm": 1.5,
+          "generation_status": "ready",
+          "assets": [
+            {
+              "asset_id": "ast_prod_tshirt_cotton_xxl_glb",
+              "product_id": "prod_tshirt_cotton",
+              "variant_id": "var_prod_tshirt_cotton_xxl",
+              "size": "XXL",
+              "asset_type": "glb_skinned",
+              "asset_version": 1,
+              "storage_path": "garments/prod_tshirt_cotton/sizes/XXL/garment-v1.glb",
+              "public_url": "/assets/garments/prod_tshirt_cotton_xxl.glb",
+              "checksum": "",
+              "generation_mode": "pushout",
+              "rigging_compatibility": "SMPL_24_JOINT_RIG",
+              "validation_status": "passed",
+              "created_at": "2026-10-24T14:01:42.240728+00:00"
+            }
+          ],
+          "fitting_diagnostics": {
+            "is_tight": false,
+            "ease_chest_cm": 6.0
+          }
+        }
+      ],
+      "assets": [
+        {
+          "asset_id": "ast_prod_tshirt_cotton_xs_glb",
+          "product_id": "prod_tshirt_cotton",
+          "variant_id": "var_prod_tshirt_cotton_xs",
+          "size": "XS",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_tshirt_cotton/sizes/XS/garment-v1.glb",
+          "public_url": "/assets/garments/prod_tshirt_cotton_xs.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240728+00:00"
+        },
+        {
+          "asset_id": "ast_prod_tshirt_cotton_s_glb",
+          "product_id": "prod_tshirt_cotton",
+          "variant_id": "var_prod_tshirt_cotton_s",
+          "size": "S",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_tshirt_cotton/sizes/S/garment-v1.glb",
+          "public_url": "/assets/garments/prod_tshirt_cotton_s.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240728+00:00"
+        },
+        {
+          "asset_id": "ast_prod_tshirt_cotton_m_glb",
+          "product_id": "prod_tshirt_cotton",
+          "variant_id": "var_prod_tshirt_cotton_m",
+          "size": "M",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_tshirt_cotton/sizes/M/garment-v1.glb",
+          "public_url": "/assets/garments/prod_tshirt_cotton_m.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240728+00:00"
+        },
+        {
+          "asset_id": "ast_prod_tshirt_cotton_l_glb",
+          "product_id": "prod_tshirt_cotton",
+          "variant_id": "var_prod_tshirt_cotton_l",
+          "size": "L",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_tshirt_cotton/sizes/L/garment-v1.glb",
+          "public_url": "/assets/garments/prod_tshirt_cotton_l.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240728+00:00"
+        },
+        {
+          "asset_id": "ast_prod_tshirt_cotton_xl_glb",
+          "product_id": "prod_tshirt_cotton",
+          "variant_id": "var_prod_tshirt_cotton_xl",
+          "size": "XL",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_tshirt_cotton/sizes/XL/garment-v1.glb",
+          "public_url": "/assets/garments/prod_tshirt_cotton_xl.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240728+00:00"
+        },
+        {
+          "asset_id": "ast_prod_tshirt_cotton_xxl_glb",
+          "product_id": "prod_tshirt_cotton",
+          "variant_id": "var_prod_tshirt_cotton_xxl",
+          "size": "XXL",
+          "asset_type": "glb_skinned",
+          "asset_version": 1,
+          "storage_path": "garments/prod_tshirt_cotton/sizes/XXL/garment-v1.glb",
+          "public_url": "/assets/garments/prod_tshirt_cotton_xxl.glb",
+          "checksum": "",
+          "generation_mode": "pushout",
+          "rigging_compatibility": "SMPL_24_JOINT_RIG",
+          "validation_status": "passed",
+          "created_at": "2026-10-24T14:01:42.240728+00:00"
+        }
+      ]
+    },
+    {
+      "product_id": "prod_mvmhjwzl",
+      "sku": "SKU-TSHIRT-001",
+      "name": "Áo Thun Cotton Oversized Premium",
+      "category": "tshirt",
+      "description": "Áo thun cotton cao cấp phom dáng vừa vặn chuẩn kích thước may mặc ISO 8559.",
+      "status": "failed",
+      "material": "100% Cotton Single Jersey",
+      "stretch_pct": 5.0,
+      "thickness_mm": 1.5,
+      "primary_color_hex": "#19284B",
+      "pattern_description": "Trơn màu tự nhiên (Solid PBR)",
+      "design_notes": "Dựng rập tham số theo công nghệ GarmentCode (Apache 2.0).",
+      "image_front_url": "/assets/garments/prod_mvmhjwzl/source/front.png",
+      "image_back_url": null,
+      "created_at": "2026-10-24T14:20:50.672465+00:00",
+      "updated_at": "2026-10-24T14:20:57.890291+00:00",
+      "variants": [],
+      "assets": []
+    },
+    {
+      "product_id": "prod_mvmhv994",
+      "sku": "ARG-0512",
+      "name": "Áo đá bóng",
+      "category": "tshirt",
+      "description": "Áo thun cotton cao cấp phom dáng vừa vặn chuẩn kích thước may mặc ISO 8559.",
+      "status": "failed",
+      "material": "100% Cotton Single Jersey",
+      "stretch_pct": 5.0,
+      "thickness_mm": 1.5,
+      "primary_color_hex": "#123S21",
+      "pattern_description": "Trơn màu tự nhiên (Solid PBR)",
+      "design_notes": "Dựng rập tham số theo công nghệ GarmentCode (Apache 2.0).",
+      "image_front_url": "/assets/garments/prod_mvmhv994/source/front.png",
+      "image_back_url": null,
+      "created_at": "2026-10-24T14:32:31.341140+00:00",
+      "updated_at": "2026-10-24T14:32:31.566993+00:00",
+      "variants": [],
+      "assets": []
+    }
+  ]
+}

@@ -1,0 +1,243 @@
+<div class="camera-modal-backdrop" (click)="closeModal()">
+  <div class="camera-modal-dialog" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="header-left">
+        <span class="badge-ai">AI VISION ANTHROPOMETRY</span>
+        <h3 class="modal-title">CHỤP ẢNH TẠO VÓC DÁNG 3D CÁ NHÂN HÓA</h3>
+      </div>
+      <button type="button" class="close-btn" (click)="closeModal()" aria-label="Đóng">✕</button>
+    </div>
+
+    <!-- Step Progress Indicator -->
+    <div class="steps-bar">
+      <div class="step-item" [class.active]="currentStep() === 'front'" [class.done]="frontPhotoUrl()">
+        <span class="step-num">1</span>
+        <span class="step-lbl">Ảnh chính diện (Bắt buộc)</span>
+      </div>
+      <div class="step-item" [class.active]="currentStep() === 'side'" [class.done]="sidePhotoUrl()">
+        <span class="step-num">2</span>
+        <span class="step-lbl">Ảnh góc nghiêng (Tùy chọn)</span>
+      </div>
+      <div class="step-item" [class.active]="currentStep() === 'confirm'">
+        <span class="step-num">3</span>
+        <span class="step-lbl">Xác nhận & Ước lượng</span>
+      </div>
+    </div>
+
+    <!-- Error Banner -->
+    @if (errorMessage()) {
+    <div class="error-banner fade-in">
+      <span class="error-icon">⚠️</span>
+      <div class="error-text">
+        <strong>Lỗi kiểm tra chất lượng ảnh [{{ errorCode() || 'ERR_RETRY' }}]:</strong>
+        <p>{{ errorMessage() }}</p>
+      </div>
+      <button type="button" class="retry-btn" (click)="retakeCurrentStep()">Chụp lại</button>
+    </div>
+    }
+
+    <!-- Camera Error -->
+    @if (cameraError()) {
+    <div class="camera-error-view">
+      <div class="error-icon-lg">📷❌</div>
+      <h4>Không thể truy cập Camera</h4>
+      <p>{{ cameraError() }}</p>
+      <button type="button" class="primary-btn" (click)="startCamera()">Thử lại</button>
+    </div>
+    }
+
+    <!-- Main Content Area -->
+    <div class="modal-body">
+      <!-- STEP 1 & 2: LIVE CAMERA / PHOTO PREVIEW -->
+      @if (currentStep() === 'front' || currentStep() === 'side') {
+      <div class="camera-viewport-container">
+        <!-- Live Video Stream -->
+        <video #videoElement class="camera-video" playsinline autoplay muted></video>
+
+        <!-- Hidden canvas for capturing frame -->
+        <canvas #captureCanvas style="display: none;"></canvas>
+
+        <!-- Whole-body Humanoid Guide Overlay -->
+        <div class="body-guide-overlay">
+          <svg viewBox="0 0 400 800" class="guide-svg" preserveAspectRatio="xMidYMid meet">
+            <!-- Alignment Horizon Guidelines -->
+            <line x1="20" y1="110" x2="380" y2="110" class="guide-line head-line" />
+            <text x="25" y="105" class="guide-text">Đỉnh đầu (Crown)</text>
+
+            <line x1="20" y1="220" x2="380" y2="220" class="guide-line shoulder-line" />
+            <text x="25" y="215" class="guide-text">Đường vai (Shoulders)</text>
+
+            <line x1="20" y1="420" x2="380" y2="420" class="guide-line waist-line" />
+            <text x="25" y="415" class="guide-text">Vòng eo / Hông (Waist/Hip)</text>
+
+            <line x1="20" y1="740" x2="380" y2="740" class="guide-line feet-line" />
+            <text x="25" y="735" class="guide-text">Bàn chân (Feet)</text>
+
+            <!-- Human Silhouette Wireframe -->
+            @if (currentStep() === 'front') {
+            <!-- Front Silhouette -->
+            <ellipse cx="200" cy="155" rx="36" ry="48" class="silhouette-path" />
+            <path d="M 160 220 L 240 220 L 230 420 L 170 420 Z" class="silhouette-path" />
+            <path d="M 170 420 L 155 730 L 185 730 L 195 440 Z" class="silhouette-path" />
+            <path d="M 230 420 L 245 730 L 215 730 L 205 440 Z" class="silhouette-path" />
+            <path d="M 160 225 L 125 430 L 140 435 L 170 240 Z" class="silhouette-path" />
+            <path d="M 240 225 L 275 430 L 260 435 L 230 240 Z" class="silhouette-path" />
+            } @else {
+            <!-- Side Silhouette -->
+            <ellipse cx="200" cy="155" rx="30" ry="48" class="silhouette-path" />
+            <path d="M 175 220 Q 225 280 215 420 L 175 420 Q 180 300 175 220 Z" class="silhouette-path" />
+            <path d="M 180 420 L 190 730 L 210 730 L 205 440 Z" class="silhouette-path" />
+            <path d="M 185 230 L 195 430 L 210 430 L 195 240 Z" class="silhouette-path" />
+            }
+          </svg>
+
+          <!-- Prompt Pill Overlay -->
+          <div class="guide-instruction-pill">
+            @if (currentStep() === 'front') {
+            <span>👤 Đứng thẳng hướng mặt về camera, căn chỉnh toàn thân vừa khung hình</span>
+            } @else {
+            <span>🔄 Xoay nghiêng người 90 độ (sang trái hoặc phải) và đứng thẳng</span>
+            }
+          </div>
+        </div>
+
+        <!-- Capture Controls Overlay -->
+        <div class="camera-controls-bar">
+          @if (currentStep() === 'side') {
+          <button type="button" class="btn-secondary" (click)="skipSidePhoto()">
+            Bỏ qua góc nghiêng
+          </button>
+          }
+          <button type="button" class="btn-shutter" (click)="captureCurrentFrame()">
+            <div class="shutter-inner"></div>
+          </button>
+          @if (currentStep() === 'side') {
+          <button type="button" class="btn-secondary" (click)="retakeCurrentStep()">
+            Chụp lại mặt trước
+          </button>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- STEP 3: REVIEW PHOTOS & ENTER PARAMETERS -->
+      @if (currentStep() === 'confirm') {
+      <div class="confirm-step-container fade-in">
+        <div class="review-photos-grid">
+          <div class="photo-card">
+            <span class="photo-card-label">Ảnh chính diện:</span>
+            <img [src]="frontPhotoUrl()" alt="Front Photo" class="review-thumb" />
+            <button type="button" class="btn-subtle" (click)="retakeCurrentStep()">Chụp lại</button>
+          </div>
+
+          @if (sidePhotoUrl()) {
+          <div class="photo-card">
+            <span class="photo-card-label">Ảnh góc nghiêng:</span>
+            <img [src]="sidePhotoUrl()" alt="Side Photo" class="review-thumb" />
+            <button type="button" class="btn-subtle" (click)="currentStep.set('side')">Chụp lại</button>
+          </div>
+          } @else {
+          <div class="photo-card empty-card">
+            <span class="photo-card-label">Ảnh góc nghiêng:</span>
+            <div class="empty-placeholder">
+              <span>(Chưa chụp góc nghiêng)</span>
+              <button type="button" class="btn-outline" (click)="currentStep.set('side')">+ Chụp bổ sung</button>
+            </div>
+          </div>
+          }
+        </div>
+
+        <!-- Anthropometric Input Form -->
+        <div class="anthropometry-form">
+          <h4 class="form-title">Thông số chuẩn hóa nhân trắc học:</h4>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="heightInput" class="form-label">
+                Chiều cao thực tế (cm) <span class="required">*</span>
+              </label>
+              <input
+                id="heightInput"
+                type="number"
+                min="120"
+                max="230"
+                [(ngModel)]="heightCm"
+                class="form-control"
+                placeholder="175"
+              />
+              <span class="form-hint">Chuẩn hóa tỉ lệ hình thể 3D chính xác tuyệt đối (&lt; 0.5 cm).</span>
+            </div>
+
+            <div class="form-group">
+              <label for="weightInput" class="form-label">Cân nặng (kg) <span class="optional">(Tùy chọn)</span></label>
+              <input
+                id="weightInput"
+                type="number"
+                min="30"
+                max="200"
+                [(ngModel)]="weightKg"
+                class="form-control"
+                placeholder="70"
+              />
+              <span class="form-hint">Tối ưu khối lượng thể tích mỡ và cơ bắp.</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Giới tính nhân vật:</label>
+            <div class="gender-toggle">
+              <button
+                type="button"
+                class="gender-option"
+                [class.active]="gender() === 'male'"
+                (click)="gender.set('male')"
+              >
+                👨 Nam (Male)
+              </button>
+              <button
+                type="button"
+                class="gender-option"
+                [class.active]="gender() === 'female'"
+                (click)="gender.set('female')"
+              >
+                👩 Nữ (Female)
+              </button>
+            </div>
+          </div>
+
+          <!-- Privacy Agreement -->
+          <div class="privacy-box">
+            <label class="checkbox-container">
+              <input type="checkbox" [(ngModel)]="privacyAgreed" />
+              <span class="checkmark"></span>
+              <span class="privacy-text">
+                <strong>Cam kết quyền riêng tư:</strong> Tôi đồng ý để hệ thống SMARTFIT xử lý ảnh để ước lượng 10 thông số vóc dáng SMPL. Tôi hiểu rằng ảnh sẽ được xử lý trong bộ nhớ tạm và <em>tự động xóa vĩnh viễn ngay lập tức</em> sau khi phân tích, không lưu trữ ảnh trên máy chủ.
+              </span>
+            </label>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="currentStep.set('front')">← Chụp lại</button>
+            <button
+              type="button"
+              class="btn-primary"
+              [disabled]="!privacyAgreed() || isProcessing()"
+              (click)="submitEstimation()"
+            >
+              @if (isProcessing()) {
+              <span class="spinner"></span>
+              <span>Đang phân tích vóc dáng AI...</span>
+              } @else {
+              <span>✨ KHỞI TẠO MÔ HÌNH 3D TỪ ẢNH</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>
+

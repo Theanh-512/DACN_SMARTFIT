@@ -1,0 +1,25 @@
+<div class="body-viewer-wrapper">
+  <!-- Model Badge -->
+  <div class="model-badge" [class.mock]="isMock()" [class.smpl]="!isMock()" id="model-badge">
+    <span class="badge-dot"></span>
+    <span class="badge-text">{{ modelBadgeText() }}</span>
+  </div>
+
+  <!-- Three.js Canvas Container -->
+  <div #canvasContainer class="canvas-container"></div>
+
+  <!-- Loading Overlay -->
+  @if (isLoading()) {
+  <div class="loading-overlay">
+    <div class="spinner"></div>
+    <span class="loading-text">Đang nạp mô hình 3D tham số Morph Targets...</span>
+  </div>
+  }
+
+  <!-- Error Banner -->
+  @if (errorMessage()) {
+  <div class="error-banner">
+    <span>{{ errorMessage() }}</span>
+  </div>
+  }
+</div>
