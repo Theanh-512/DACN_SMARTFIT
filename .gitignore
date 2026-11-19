@@ -32,6 +32,8 @@ appsettings.Development.json
 *.index
 *.npz
 SMPL_python_v.1.1.0/
+MODELS_PACKAGE_FOR_PARTNER/
+SMARTFIT_MODELS_PACKAGE/
 backend/ml_service/assets/smpl/
 backend/ml_service/assets/smplx/
 backend/ml_service/assets/models/
